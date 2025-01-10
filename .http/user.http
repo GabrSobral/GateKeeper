@@ -1,0 +1,9 @@
+@baseUrl = http://localhost:8080 
+@token = 
+
+### Get By E-mail
+GET {{baseUrl}}/v1/users/by-email/gabriel.sobral1367@gmail.com
+Authorization: Bearer {{token}}
+
+### Get By ID
+GET {{baseUrl}}/v1/users/by-id/019417f6-9a26-7015-af0b-9d74ac199dbb

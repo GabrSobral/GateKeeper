@@ -1,0 +1,55 @@
+@userEmail = gabriel.sobral1367@gmail.com
+@baseUrl = http://localhost:8080 
+
+### Health Check
+GET {{baseUrl}}/health
+
+### Sign In v1
+POST {{baseUrl}}/v1/auth/sign-in
+
+{
+    "email": "{{userEmail}}",
+    "password": "12345"
+}
+
+### Sign Up v1
+POST {{baseUrl}}/v1/auth/sign-up
+
+{
+    "first_name": "Test",
+    "last_name": "Test Last",
+    "email": "{{userEmail}}",
+    "password": "123"
+}
+
+### Confirm E-mail v1
+POST {{baseUrl}}/v1/auth/confirm-email
+
+{
+    "email": "{{userEmail}}",
+    "token": "985632"
+}
+
+### Resend E-mail Confirmation v1
+POST {{baseUrl}}/v1/auth/confirm-email/resend
+
+{
+    "email": "{{userEmail}}"
+}
+
+### Reset Password
+POST {{baseUrl}}/v1/auth/reset-password
+
+{
+    "new_password": "12345",
+    "password_reset_token": "iComQ&fU+LbrW?PNE^bhY^$BsSlVZT8KKL6Vp0#8kMQY(C?IT#aMzXyBj1R?8Z44tED4ibD@JnBd4!cl!z#pTxU@FQzw2k6xsbxjAEKltz5wPQ#n%59RUmVbn5e5^PUw",
+    "password_reset_id": "0194425b-c3e2-76b0-9e9f-bbdfd2833955"
+}
+
+### forgot Password
+POST {{baseUrl}}/v1/auth/forgot-password
+
+{
+    "email": "{{userEmail}}"
+}
+
