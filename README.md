@@ -3,7 +3,7 @@
 
 ## Introduction
 
-THe GateKeeper is a lightweight and secure microservice for user authentication and session management. It handles user registration, password management, token-based authentication, and session lifecycle. Designed for scalability and cloud-native systems, it offers flexibility, reliability, and easy integration with role-based access control (RBAC).
+The GateKeeper is a lightweight and secure microservice for user authentication and session management. It handles user registration, password management, token-based authentication, and session lifecycle. Designed for scalability and cloud-native systems, it offers flexibility, reliability, and easy integration with role-based access control (RBAC).
 
 ## Password Hashing
 
