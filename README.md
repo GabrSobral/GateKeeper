@@ -1,8 +1,5 @@
 
-<div style="display: flex; align-items: center; gap: 1rem; justify-content: center;">
-    <img src=".github/gate-keeper-logo.svg" alt="GateKeeper Logo">
-    <img src=".github/gate-keeper-text-logo.svg" alt="GateKeeper">
-</div>
+<img src=".github/gate-keeper-logo.svg" alt="GateKeeper Logo">
 
 ## Introduction
 
