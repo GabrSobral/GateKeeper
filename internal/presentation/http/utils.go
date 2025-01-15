@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/go-playground/validator/v10"
-	"github.com/guard-service/internal/domain/errors"
 )
 
 func SendJson(w http.ResponseWriter, data any, status int) {

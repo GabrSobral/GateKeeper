@@ -3,7 +3,7 @@ package repository_interfaces
 import (
 	"context"
 
-	"github.com/guard-service/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/entities"
 )
 
 type IExternalLoginRepository interface {

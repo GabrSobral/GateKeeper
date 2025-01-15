@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	signup "github.com/guard-service/internal/application/services/authentication/sign-up-credential"
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/domain/errors"
-	inmemory_repositories "github.com/guard-service/internal/infra/database/repositories/in-memory"
-	mailservice "github.com/guard-service/internal/infra/mail-service"
+	signup "github.com/gate-keeper/internal/application/services/authentication/sign-up-credential"
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
+	inmemory_repositories "github.com/gate-keeper/internal/infra/database/repositories/in-memory"
+	mailservice "github.com/gate-keeper/internal/infra/mail-service"
 )
 
 func setupTest() (*inmemory_repositories.InMemoryUserRepository, *inmemory_repositories.InMemoryUserProfileRepository, *inmemory_repositories.InMemoryRefreshTokenRepository, *signup.SignUpService) {

@@ -3,9 +3,12 @@ package getuserbyemail
 import (
 	"context"
 
+	"github.com/gate-keeper/internal/domain/errors"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
-	"github.com/guard-service/internal/domain/errors"
-	repository_interfaces "github.com/guard-service/internal/infra/database/repositories/interfaces"
 )
 
 type Request struct {
@@ -20,6 +23,13 @@ type Response struct {
 	Address         *string   `json:"address"`
 	PhotoURL        *string   `json:"photo_url"`
 	IsEmailVerified bool      `json:"is_email_verified"`
+}
+
+func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
+	return &GetUserByEmail{
+		UserRepository:        repository_handlers.UserRepository{Store: q},
+		UserProfileRepository: repository_handlers.UserProfileRepository{Store: q},
+	}
 }
 
 type GetUserByEmail struct {

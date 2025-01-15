@@ -5,10 +5,13 @@ import (
 	"strings"
 	"time"
 
+	application_utils "github.com/gate-keeper/internal/application/utils"
+	"github.com/gate-keeper/internal/domain/errors"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
-	application_utils "github.com/guard-service/internal/application/utils"
-	"github.com/guard-service/internal/domain/errors"
-	repository_interfaces "github.com/guard-service/internal/infra/database/repositories/interfaces"
 )
 
 type ResetPasswordService struct {
@@ -21,6 +24,14 @@ type Request struct {
 	PasswordResetToken string    `json:"password_reset_token" validate:"required"`
 	PasswordResetId    uuid.UUID `json:"password_reset_id" validate:"required"`
 	NewPassword        string    `json:"new_password" validate:"required"`
+}
+
+func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
+	return &ResetPasswordService{
+		UserRepository:          repository_handlers.UserRepository{Store: q},
+		RefreshTokenRepository:  repository_handlers.RefreshTokenRepository{Store: q},
+		PasswordResetRepository: repository_handlers.PasswordResetRepository{Store: q},
+	}
 }
 
 func (fp *ResetPasswordService) Handler(ctx context.Context, request Request) error {

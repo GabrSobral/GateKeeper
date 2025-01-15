@@ -3,7 +3,7 @@ package inmemory_repositories
 import (
 	"context"
 
-	"github.com/guard-service/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/entities"
 )
 
 type InMemoryExternalLoginRepository struct {

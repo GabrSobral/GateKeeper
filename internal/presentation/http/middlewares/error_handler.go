@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/guard-service/internal/domain/errors"
 )
 
 type ErrorResponse struct {

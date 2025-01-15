@@ -6,8 +6,8 @@ FOREIGN KEY (user_id)
 REFERENCES "user" (id)
 ON DELETE CASCADE;
 
-ALTER TABLE email_confirmations
-ADD CONSTRAINT fk_user_email_confirmations
+ALTER TABLE email_confirmation
+ADD CONSTRAINT fk_user_email_confirmation
 FOREIGN KEY (user_id)
 REFERENCES "user" (id)
 ON DELETE CASCADE;
@@ -35,8 +35,8 @@ ON DELETE CASCADE;
 ALTER TABLE user_profile
 DROP CONSTRAINT fk_user_profile_user;
 
-ALTER TABLE email_confirmations
-DROP CONSTRAINT fk_user_email_confirmations;
+ALTER TABLE email_confirmation
+DROP CONSTRAINT fk_user_email_confirmation;
 
 ALTER TABLE refresh_token
 DROP CONSTRAINT fk_user_refresh_token;

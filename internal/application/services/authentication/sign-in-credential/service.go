@@ -5,11 +5,14 @@ import (
 	"log/slog"
 	"time"
 
+	application_utils "github.com/gate-keeper/internal/application/utils"
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
-	application_utils "github.com/guard-service/internal/application/utils"
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/domain/errors"
-	repository_interfaces "github.com/guard-service/internal/infra/database/repositories/interfaces"
 )
 
 type Request struct {
@@ -38,6 +41,14 @@ type SignInService struct {
 	RefreshTokenRepository repository_interfaces.IRefreshTokenRepository
 }
 
+func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
+	return &SignInService{
+		UserRepository:         repository_handlers.UserRepository{Store: q},
+		UserProfileRepository:  repository_handlers.UserProfileRepository{Store: q},
+		RefreshTokenRepository: repository_handlers.RefreshTokenRepository{Store: q},
+	}
+}
+
 func (ss *SignInService) Handler(ctx context.Context, request Request) (*Response, error) {
 	slog.InfoContext(ctx, "Trying to sign in user with email: %s", request.Email, nil)
 
@@ -59,7 +70,11 @@ func (ss *SignInService) Handler(ctx context.Context, request Request) (*Respons
 		return nil, &errors.ErrEmailNotConfirmed
 	}
 
-	isPasswordCorrect, err := application_utils.ComparePassword(user.PasswordHash, request.Password)
+	if user.PasswordHash == nil {
+		return nil, &errors.ErrUserSignUpWithSocial
+	}
+
+	isPasswordCorrect, err := application_utils.ComparePassword(*user.PasswordHash, request.Password)
 
 	if err != nil {
 		return nil, err

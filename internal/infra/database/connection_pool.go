@@ -4,11 +4,10 @@ import (
 	"context"
 	"fmt"
 
-	pgstore "github.com/guard-service/internal/infra/database/sqlc"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func NewConnectionPool() (*pgstore.Queries, error) {
+func NewConnectionPool() (*pgxpool.Pool, error) {
 	ctx := context.Background()
 
 	pool, err := pgxpool.New(ctx, fmt.Sprintf("user=%s password=%s host=%s port=%s dbname=%s",
@@ -24,7 +23,5 @@ func NewConnectionPool() (*pgstore.Queries, error) {
 		return nil, err
 	}
 
-	store := pgstore.New(pool)
-
-	return store, nil
+	return pool, nil
 }

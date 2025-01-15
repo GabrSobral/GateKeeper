@@ -3,8 +3,8 @@ package inmemory_repositories
 import (
 	"context"
 
+	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/google/uuid"
-	"github.com/guard-service/internal/domain/entities"
 )
 
 type InMemoryEmailConfirmationRepository struct {

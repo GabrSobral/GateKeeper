@@ -1,13 +1,14 @@
 -- Write your migrate up statements here
 
-CREATE TABLE IF NOT EXISTS email_confirmations (
+CREATE TABLE IF NOT EXISTS email_confirmation (
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL,
     email VARCHAR(255) NOT NULL,
-    provider VARCHAR(255) NOT NULL,
-    provider_key VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    token VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL,
+    cool_down TIMESTAMP NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    is_used BOOLEAN NOT NULL
 );
 
 ---- create above / drop below ----

@@ -1,4 +1,4 @@
-module github.com/guard-service
+module github.com/gate-keeper
 
 go 1.23.0
 

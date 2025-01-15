@@ -3,23 +3,30 @@ package controllers
 import (
 	"net/http"
 
+	getuserbyemail "github.com/gate-keeper/internal/application/services/user/get-user-by-email"
+	getuserbyid "github.com/gate-keeper/internal/application/services/user/get-user-by-id"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	utils "github.com/gate-keeper/internal/presentation/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
-	getuserbyemail "github.com/guard-service/internal/application/services/user/get-user-by-email"
-	getuserbyid "github.com/guard-service/internal/application/services/user/get-user-by-id"
-	utils "github.com/guard-service/internal/presentation/http"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type UserController struct {
-	GetUserByEmailService *getuserbyemail.GetUserByEmail
-	GetUserByIDService    *getuserbyid.GetUserByID
+	DbPool *pgxpool.Pool
 }
 
 func (c *UserController) GetUserByEmailController(writter http.ResponseWriter, request *http.Request) {
 	userEmailString := chi.URLParam(request, "email")
 	getUserByEmailRequest := getuserbyemail.Request{Email: userEmailString}
 
-	response, err := c.GetUserByEmailService.Handler(request.Context(), getUserByEmailRequest)
+	params := repositories.ParamsRs[getuserbyemail.Request, *getuserbyemail.Response, getuserbyemail.GetUserByEmail]{
+		DbPool:  c.DbPool,
+		New:     getuserbyemail.New,
+		Request: getUserByEmailRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
 
 	if err != nil {
 		panic(err)
@@ -30,7 +37,6 @@ func (c *UserController) GetUserByEmailController(writter http.ResponseWriter, r
 
 func (c *UserController) GetUserByIDController(writter http.ResponseWriter, request *http.Request) {
 	userIDString := chi.URLParam(request, "userID")
-
 	userIdUUID, err := uuid.Parse(userIDString)
 
 	if err != nil {
@@ -39,7 +45,13 @@ func (c *UserController) GetUserByIDController(writter http.ResponseWriter, requ
 
 	getUserByIDRequest := getuserbyid.Request{UserID: userIdUUID}
 
-	response, err := c.GetUserByIDService.Handler(request.Context(), getUserByIDRequest)
+	params := repositories.ParamsRs[getuserbyid.Request, *getuserbyid.Response, getuserbyid.GetUserByID]{
+		DbPool:  c.DbPool,
+		New:     getuserbyid.New,
+		Request: getUserByIDRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
 
 	if err != nil {
 		panic(err)

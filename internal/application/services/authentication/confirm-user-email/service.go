@@ -4,11 +4,14 @@ import (
 	"context"
 	"time"
 
-	signin "github.com/guard-service/internal/application/services/authentication/sign-in-credential"
-	application_utils "github.com/guard-service/internal/application/utils"
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/domain/errors"
-	repository_interfaces "github.com/guard-service/internal/infra/database/repositories/interfaces"
+	signin "github.com/gate-keeper/internal/application/services/authentication/sign-in-credential"
+	application_utils "github.com/gate-keeper/internal/application/utils"
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 )
 
 type Request struct {
@@ -21,6 +24,15 @@ type ConfirmUserEmail struct {
 	UserProfileRepository       repository_interfaces.IUserProfileRepository
 	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
 	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
+}
+
+func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *signin.Response] {
+	return &ConfirmUserEmail{
+		UserRepository:              repository_handlers.UserRepository{Store: q},
+		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
+		RefreshTokenRepository:      repository_handlers.RefreshTokenRepository{Store: q},
+		EmailConfirmationRepository: repository_handlers.EmailConfirmationRepository{Store: q},
+	}
 }
 
 func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*signin.Response, error) {

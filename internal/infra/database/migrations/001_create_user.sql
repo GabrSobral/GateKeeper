@@ -3,13 +3,13 @@
 CREATE TABLE IF NOT EXISTS "user" (
     id UUID PRIMARY KEY,
     email VARCHAR(255) NOT NULL UNIQUE,
-    password_hash VARCHAR(255),
+    password_hash VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP,
+    updated_at TIMESTAMP NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_email_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
     two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    two_factor_secret VARCHAR(255)
+    two_factor_secret VARCHAR(255) NULL
 );
 
 ---- create above / drop below ----

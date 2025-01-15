@@ -5,61 +5,63 @@
 package pgstore
 
 import (
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type EmailConfirmation struct {
-	ID          uuid.UUID        `db:"id" json:"id"`
-	UserID      uuid.UUID        `db:"user_id" json:"user_id"`
-	Email       string           `db:"email" json:"email"`
-	Provider    string           `db:"provider" json:"provider"`
-	ProviderKey string           `db:"provider_key" json:"provider_key"`
-	CreatedAt   pgtype.Timestamp `db:"created_at" json:"created_at"`
-	UpdatedAt   pgtype.Timestamp `db:"updated_at" json:"updated_at"`
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Email     string           `db:"email"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	CoolDown  pgtype.Timestamp `db:"cool_down"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+	IsUsed    bool             `db:"is_used"`
 }
 
 type ExternalLogin struct {
-	UserID      uuid.UUID `db:"user_id" json:"user_id"`
-	Email       string    `db:"email" json:"email"`
-	Provider    string    `db:"provider" json:"provider"`
-	ProviderKey string    `db:"provider_key" json:"provider_key"`
+	UserID      uuid.UUID `db:"user_id"`
+	Email       string    `db:"email"`
+	Provider    string    `db:"provider"`
+	ProviderKey string    `db:"provider_key"`
 }
 
 type PasswordResetToken struct {
-	ID        uuid.UUID        `db:"id" json:"id"`
-	UserID    uuid.UUID        `db:"user_id" json:"user_id"`
-	Token     string           `db:"token" json:"token"`
-	CreatedAt pgtype.Timestamp `db:"created_at" json:"created_at"`
-	ExpiresAt pgtype.Timestamp `db:"expires_at" json:"expires_at"`
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
 }
 
 type RefreshToken struct {
-	ID                 uuid.UUID        `db:"id" json:"id"`
-	UserID             uuid.UUID        `db:"user_id" json:"user_id"`
-	AvailableRefreshes int32            `db:"available_refreshes" json:"available_refreshes"`
-	ExpiresAt          pgtype.Timestamp `db:"expires_at" json:"expires_at"`
-	CreatedAt          pgtype.Timestamp `db:"created_at" json:"created_at"`
+	ID                 uuid.UUID        `db:"id"`
+	UserID             uuid.UUID        `db:"user_id"`
+	AvailableRefreshes int32            `db:"available_refreshes"`
+	ExpiresAt          pgtype.Timestamp `db:"expires_at"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
 }
 
 type User struct {
-	ID               uuid.UUID        `db:"id" json:"id"`
-	Email            string           `db:"email" json:"email"`
-	PasswordHash     pgtype.Text      `db:"password_hash" json:"password_hash"`
-	CreatedAt        pgtype.Timestamp `db:"created_at" json:"created_at"`
-	UpdatedAt        pgtype.Timestamp `db:"updated_at" json:"updated_at"`
-	IsActive         bool             `db:"is_active" json:"is_active"`
-	IsEmailConfirmed bool             `db:"is_email_confirmed" json:"is_email_confirmed"`
-	TwoFactorEnabled bool             `db:"two_factor_enabled" json:"two_factor_enabled"`
-	TwoFactorSecret  pgtype.Text      `db:"two_factor_secret" json:"two_factor_secret"`
+	ID               uuid.UUID        `db:"id"`
+	Email            string           `db:"email"`
+	PasswordHash     *string          `db:"password_hash"`
+	CreatedAt        pgtype.Timestamp `db:"created_at"`
+	UpdatedAt        *time.Time       `db:"updated_at"`
+	IsActive         bool             `db:"is_active"`
+	IsEmailConfirmed bool             `db:"is_email_confirmed"`
+	TwoFactorEnabled bool             `db:"two_factor_enabled"`
+	TwoFactorSecret  *string          `db:"two_factor_secret"`
 }
 
 type UserProfile struct {
-	ID          uuid.UUID   `db:"id" json:"id"`
-	UserID      uuid.UUID   `db:"user_id" json:"user_id"`
-	FirstName   string      `db:"first_name" json:"first_name"`
-	LastName    string      `db:"last_name" json:"last_name"`
-	PhoneNumber pgtype.Text `db:"phone_number" json:"phone_number"`
-	Address     pgtype.Text `db:"address" json:"address"`
-	PhotoUrl    pgtype.Text `db:"photo_url" json:"photo_url"`
+	UserID      uuid.UUID `db:"user_id"`
+	FirstName   string    `db:"first_name"`
+	LastName    string    `db:"last_name"`
+	PhoneNumber *string   `db:"phone_number"`
+	Address     *string   `db:"address"`
+	PhotoUrl    *string   `db:"photo_url"`
 }

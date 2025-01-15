@@ -4,41 +4,26 @@ import (
 	"log/slog"
 	"net/http"
 
+	_ "github.com/gate-keeper/cmd/server/docs"
+	"github.com/gate-keeper/internal/infra/database"
+	"github.com/gate-keeper/internal/presentation/http/controllers"
+	http_middlewares "github.com/gate-keeper/internal/presentation/http/middlewares"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
-	_ "github.com/guard-service/cmd/server/docs"
-	confirmuseremail "github.com/guard-service/internal/application/services/authentication/confirm-user-email"
-	externalloginprovider "github.com/guard-service/internal/application/services/authentication/external-login-provider"
-	forgotpassword "github.com/guard-service/internal/application/services/authentication/forgot-password"
-	resendemailconfirmation "github.com/guard-service/internal/application/services/authentication/resend-email-confirmation"
-	resetpassword "github.com/guard-service/internal/application/services/authentication/reset-password"
-	signin "github.com/guard-service/internal/application/services/authentication/sign-in-credential"
-	signup "github.com/guard-service/internal/application/services/authentication/sign-up-credential"
-	getuserbyemail "github.com/guard-service/internal/application/services/user/get-user-by-email"
-	getuserbyid "github.com/guard-service/internal/application/services/user/get-user-by-id"
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/infra/database"
-	repository_handlers "github.com/guard-service/internal/infra/database/repositories/handlers"
-	inmemory_repositories "github.com/guard-service/internal/infra/database/repositories/in-memory"
-	mailservice "github.com/guard-service/internal/infra/mail-service"
-	"github.com/guard-service/internal/presentation/http/controllers"
-	http_middlewares "github.com/guard-service/internal/presentation/http/middlewares"
 	"github.com/joho/godotenv"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
-//	@title			Guard Service API
+//	@title			GateKeeper API
 //	@version		1
-//	@description	This is the Guard Service API documentation.
-
+//	@description	This is the GateKeeper API documentation.
 //	@license.name	Apache 2.0
 //	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
-
 //	@contact.name	API Support
 //	@contact.url	http://www.swagger.io/support
 //	@contact.email	support@swagger.io
-
+//
 // @host		localhost:8080
 // @BasePath	/v1
 func main() {
@@ -46,76 +31,16 @@ func main() {
 		panic(err)
 	}
 
-	store, err := database.NewConnectionPool()
+	pool, err := database.NewConnectionPool()
 
 	if err != nil {
 		panic(err)
 	}
 
-	userRepository := repository_handlers.UserRepository{Store: store}
+	defer pool.Close()
 
-	// inMemoryUserRepository := inmemory_repositories.InMemoryUserRepository{Users: make(map[string]*entities.User)}
-	inMemoryUserProfileRepository := inmemory_repositories.InMemoryUserProfileRepository{Users: make(map[string]*entities.UserProfile)}
-	inMemoryRefreshTokenRepository := inmemory_repositories.InMemoryRefreshTokenRepository{RefreshTokens: make(map[string]*entities.RefreshToken)}
-	inMemoryEmailConfirmationRepository := inmemory_repositories.InMemoryEmailConfirmationRepository{Emails: make(map[string]*entities.EmailConfirmation)}
-	inMemoryExternalLoginRepository := inmemory_repositories.InMemoryExternalLoginRepository{Logins: make(map[string]*entities.ExternalLogin)}
-	inMemoryPasswordResetRepository := inmemory_repositories.InMemoryPasswordResetRepository{PasswordTokens: make(map[string]*entities.PasswordResetToken)}
-
-	mailservice := mailservice.MailService{}
-
-	authController := controllers.AuthController{
-		SignInCredentialService: &signin.SignInService{
-			UserRepository:         userRepository,
-			UserProfileRepository:  inMemoryUserProfileRepository,
-			RefreshTokenRepository: inMemoryRefreshTokenRepository,
-		},
-		SignUpCredentialService: &signup.SignUpService{
-			UserRepository:              userRepository,
-			UserProfileRepository:       inMemoryUserProfileRepository,
-			RefreshTokenRepository:      inMemoryRefreshTokenRepository,
-			EmailConfirmationRepository: inMemoryEmailConfirmationRepository,
-			MailService:                 &mailservice,
-		},
-		ConfirmUserEmailService: &confirmuseremail.ConfirmUserEmail{
-			UserRepository:              userRepository,
-			EmailConfirmationRepository: inMemoryEmailConfirmationRepository,
-			UserProfileRepository:       inMemoryUserProfileRepository,
-			RefreshTokenRepository:      inMemoryRefreshTokenRepository,
-		},
-		ResendEmailConfirmationService: &resendemailconfirmation.ResendEmailConfirmation{
-			UserRepository:              userRepository,
-			UserProfileRepository:       inMemoryUserProfileRepository,
-			EmailConfirmationRepository: inMemoryEmailConfirmationRepository,
-			MailService:                 &mailservice,
-		},
-		ExternalLoginService: &externalloginprovider.ExternalLoginProvider{
-			UserRepository:          userRepository,
-			UserProfileRepository:   inMemoryUserProfileRepository,
-			ExternalLoginRepository: inMemoryExternalLoginRepository,
-		},
-		ResetPasswordService: &resetpassword.ResetPasswordService{
-			UserRepository:          userRepository,
-			RefreshTokenRepository:  inMemoryRefreshTokenRepository,
-			PasswordResetRepository: inMemoryPasswordResetRepository,
-		},
-		ForgotPasswordService: &forgotpassword.ForgotPasswordService{
-			UserRepository:          userRepository,
-			PasswordResetRepository: inMemoryPasswordResetRepository,
-			UserProfileRepository:   inMemoryUserProfileRepository,
-			MailService:             &mailservice,
-		},
-	}
-
-	userController := controllers.UserController{
-		GetUserByEmailService: &getuserbyemail.GetUserByEmail{
-			UserRepository:        userRepository,
-			UserProfileRepository: inMemoryUserProfileRepository,
-		},
-		GetUserByIDService: &getuserbyid.GetUserByID{
-			UserRepository:        userRepository,
-			UserProfileRepository: inMemoryUserProfileRepository,
-		},
-	}
+	authController := controllers.AuthController{DbPool: pool}
+	userController := controllers.UserController{DbPool: pool}
 
 	r := chi.NewRouter()
 

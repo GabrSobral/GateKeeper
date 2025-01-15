@@ -5,12 +5,12 @@ import (
 	"testing"
 	"time"
 
+	signin "github.com/gate-keeper/internal/application/services/authentication/sign-in-credential"
+	application_utils "github.com/gate-keeper/internal/application/utils"
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
+	inmemory_repositories "github.com/gate-keeper/internal/infra/database/repositories/in-memory"
 	"github.com/google/uuid"
-	signin "github.com/guard-service/internal/application/services/authentication/sign-in-credential"
-	application_utils "github.com/guard-service/internal/application/utils"
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/domain/errors"
-	inmemory_repositories "github.com/guard-service/internal/infra/database/repositories/in-memory"
 )
 
 func setupTest() (*inmemory_repositories.InMemoryUserRepository, *inmemory_repositories.InMemoryUserProfileRepository, *inmemory_repositories.InMemoryRefreshTokenRepository, *signin.SignInService) {

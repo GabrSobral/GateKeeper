@@ -3,10 +3,13 @@ package forgotpassword
 import (
 	"context"
 
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/domain/errors"
-	repository_interfaces "github.com/guard-service/internal/infra/database/repositories/interfaces"
-	mailservice "github.com/guard-service/internal/infra/mail-service"
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
+	mailservice "github.com/gate-keeper/internal/infra/mail-service"
 )
 
 type ForgotPasswordService struct {
@@ -18,6 +21,15 @@ type ForgotPasswordService struct {
 
 type Request struct {
 	Email string `json:"email" validate:"required,email"`
+}
+
+func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
+	return &ForgotPasswordService{
+		UserRepository:          repository_handlers.UserRepository{Store: q},
+		UserProfileRepository:   repository_handlers.UserProfileRepository{Store: q},
+		PasswordResetRepository: repository_handlers.PasswordResetRepository{Store: q},
+		MailService:             &mailservice.MailService{},
+	}
 }
 
 func (fp *ForgotPasswordService) Handler(ctx context.Context, request Request) error {

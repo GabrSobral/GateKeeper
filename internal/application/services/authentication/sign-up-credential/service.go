@@ -4,11 +4,14 @@ import (
 	"context"
 	"time"
 
-	application_utils "github.com/guard-service/internal/application/utils"
-	"github.com/guard-service/internal/domain/entities"
-	"github.com/guard-service/internal/domain/errors"
-	repository_interfaces "github.com/guard-service/internal/infra/database/repositories/interfaces"
-	mailservice "github.com/guard-service/internal/infra/mail-service"
+	application_utils "github.com/gate-keeper/internal/application/utils"
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
+	mailservice "github.com/gate-keeper/internal/infra/mail-service"
 )
 
 type Request struct {
@@ -24,6 +27,16 @@ type SignUpService struct {
 	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
 	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
 	MailService                 mailservice.IMailService
+}
+
+func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
+	return &SignUpService{
+		UserRepository:              repository_handlers.UserRepository{Store: q},
+		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
+		RefreshTokenRepository:      repository_handlers.RefreshTokenRepository{Store: q},
+		EmailConfirmationRepository: repository_handlers.EmailConfirmationRepository{Store: q},
+		MailService:                 &mailservice.MailService{},
+	}
 }
 
 func (ss *SignUpService) Handler(ctx context.Context, request Request) error {

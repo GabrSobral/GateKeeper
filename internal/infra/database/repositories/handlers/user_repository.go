@@ -4,11 +4,10 @@ import (
 	"context"
 	"time"
 
+	"github.com/gate-keeper/internal/domain/entities"
+	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
-	"github.com/guard-service/internal/domain/entities"
-	pgstore "github.com/guard-service/internal/infra/database/sqlc"
 	"github.com/jackc/pgx/v5/pgtype"
-	lop "github.com/samber/lo"
 )
 
 type UserRepository struct {
@@ -16,17 +15,16 @@ type UserRepository struct {
 }
 
 func (r UserRepository) AddUser(ctx context.Context, newUser *entities.User) error {
-
 	err := r.Store.AddUser(ctx, pgstore.AddUserParams{
 		ID:               newUser.ID,
 		Email:            newUser.Email,
-		PasswordHash:     pgtype.Text{String: *newUser.PasswordHash, Valid: true},
+		PasswordHash:     newUser.PasswordHash,
 		CreatedAt:        pgtype.Timestamp{Time: newUser.CreatedAt, Valid: true},
-		UpdatedAt:        pgtype.Timestamp{Time: *newUser.UpdatedAt, Valid: true},
+		UpdatedAt:        newUser.UpdatedAt,
 		IsActive:         newUser.IsActive,
 		IsEmailConfirmed: newUser.IsEmailConfirmed,
 		TwoFactorEnabled: newUser.TwoFactorEnabled,
-		TwoFactorSecret:  pgtype.Text{String: *newUser.TwoFactorSecret, Valid: true},
+		TwoFactorSecret:  newUser.TwoFactorSecret,
 	})
 
 	return err
@@ -46,13 +44,13 @@ func (r UserRepository) GetUserByEmail(ctx context.Context, email string) (*enti
 	return &entities.User{
 		ID:               user.ID,
 		Email:            user.Email,
-		PasswordHash:     lop.Ternary(user.PasswordHash.Valid, &user.PasswordHash.String, nil),
+		PasswordHash:     user.PasswordHash,
 		CreatedAt:        user.CreatedAt.Time,
-		UpdatedAt:        lop.Ternary(user.UpdatedAt.Valid, &user.UpdatedAt.Time, nil),
+		UpdatedAt:        user.UpdatedAt,
 		IsActive:         user.IsActive,
 		IsEmailConfirmed: user.IsEmailConfirmed,
 		TwoFactorEnabled: user.TwoFactorEnabled,
-		TwoFactorSecret:  lop.Ternary(user.TwoFactorSecret.Valid, &user.TwoFactorSecret.String, nil),
+		TwoFactorSecret:  user.TwoFactorSecret,
 	}, nil
 }
 
@@ -66,13 +64,13 @@ func (r UserRepository) GetUserByID(ctx context.Context, id uuid.UUID) (*entitie
 	return &entities.User{
 		ID:               user.ID,
 		Email:            user.Email,
-		PasswordHash:     lop.Ternary(user.PasswordHash.Valid, &user.PasswordHash.String, nil),
+		PasswordHash:     user.PasswordHash,
 		CreatedAt:        user.CreatedAt.Time,
-		UpdatedAt:        lop.Ternary(user.UpdatedAt.Valid, &user.UpdatedAt.Time, nil),
+		UpdatedAt:        user.UpdatedAt,
 		IsActive:         user.IsActive,
 		IsEmailConfirmed: user.IsEmailConfirmed,
 		TwoFactorEnabled: user.TwoFactorEnabled,
-		TwoFactorSecret:  lop.Ternary(user.TwoFactorSecret.Valid, &user.TwoFactorSecret.String, nil),
+		TwoFactorSecret:  user.TwoFactorSecret,
 	}, nil
 }
 
@@ -97,15 +95,17 @@ func (r UserRepository) IsUserExistsByID(ctx context.Context, id uuid.UUID) (boo
 }
 
 func (r UserRepository) UpdateUser(ctx context.Context, user *entities.User) (*entities.User, error) {
+	now := time.Now().UTC()
+
 	err := r.Store.UpdateUser(ctx, pgstore.UpdateUserParams{
 		ID:               user.ID,
 		Email:            user.Email,
-		PasswordHash:     lop.Ternary(user.PasswordHash != nil, pgtype.Text{String: *user.PasswordHash, Valid: true}, pgtype.Text{}),
-		UpdatedAt:        pgtype.Timestamp{Time: time.Now().UTC(), Valid: true},
+		PasswordHash:     user.PasswordHash,
+		UpdatedAt:        &now,
 		IsActive:         user.IsActive,
 		IsEmailConfirmed: user.IsEmailConfirmed,
 		TwoFactorEnabled: user.TwoFactorEnabled,
-		TwoFactorSecret:  pgtype.Text{String: *user.TwoFactorSecret, Valid: true},
+		TwoFactorSecret:  user.TwoFactorSecret,
 	})
 
 	return user, err

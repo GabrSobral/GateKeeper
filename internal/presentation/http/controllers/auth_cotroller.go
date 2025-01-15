@@ -3,25 +3,21 @@ package controllers
 import (
 	"net/http"
 
-	utils "github.com/guard-service/internal/presentation/http"
+	"github.com/gate-keeper/internal/infra/database/repositories"
+	utils "github.com/gate-keeper/internal/presentation/http"
+	"github.com/jackc/pgx/v5/pgxpool"
 
-	confirmuseremail "github.com/guard-service/internal/application/services/authentication/confirm-user-email"
-	externalloginprovider "github.com/guard-service/internal/application/services/authentication/external-login-provider"
-	forgotpassword "github.com/guard-service/internal/application/services/authentication/forgot-password"
-	resendemailconfirmation "github.com/guard-service/internal/application/services/authentication/resend-email-confirmation"
-	resetpassword "github.com/guard-service/internal/application/services/authentication/reset-password"
-	signin "github.com/guard-service/internal/application/services/authentication/sign-in-credential"
-	signup "github.com/guard-service/internal/application/services/authentication/sign-up-credential"
+	confirmuseremail "github.com/gate-keeper/internal/application/services/authentication/confirm-user-email"
+	externalloginprovider "github.com/gate-keeper/internal/application/services/authentication/external-login-provider"
+	forgotpassword "github.com/gate-keeper/internal/application/services/authentication/forgot-password"
+	resendemailconfirmation "github.com/gate-keeper/internal/application/services/authentication/resend-email-confirmation"
+	resetpassword "github.com/gate-keeper/internal/application/services/authentication/reset-password"
+	signin "github.com/gate-keeper/internal/application/services/authentication/sign-in-credential"
+	signup "github.com/gate-keeper/internal/application/services/authentication/sign-up-credential"
 )
 
 type AuthController struct {
-	SignInCredentialService        *signin.SignInService
-	SignUpCredentialService        *signup.SignUpService
-	ConfirmUserEmailService        *confirmuseremail.ConfirmUserEmail
-	ResendEmailConfirmationService *resendemailconfirmation.ResendEmailConfirmation
-	ExternalLoginService           *externalloginprovider.ExternalLoginProvider
-	ResetPasswordService           *resetpassword.ResetPasswordService
-	ForgotPasswordService          *forgotpassword.ForgotPasswordService
+	DbPool *pgxpool.Pool
 }
 
 // Sign In with credentials controller
@@ -32,7 +28,13 @@ func (ac *AuthController) SignInAuthController(writter http.ResponseWriter, requ
 		panic(err)
 	}
 
-	response, err := ac.SignInCredentialService.Handler(request.Context(), signInRequest)
+	params := repositories.ParamsRs[signin.Request, *signin.Response, signin.SignInService]{
+		DbPool:  ac.DbPool,
+		New:     signin.New,
+		Request: signInRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
 
 	if err != nil {
 		panic(err)
@@ -49,7 +51,13 @@ func (ac *AuthController) SignUpAuthController(writter http.ResponseWriter, requ
 		panic(err)
 	}
 
-	if err := ac.SignUpCredentialService.Handler(request.Context(), signUpRequest); err != nil {
+	params := repositories.Params[signup.Request, signup.SignUpService]{
+		DbPool:  ac.DbPool,
+		New:     signup.New,
+		Request: signUpRequest,
+	}
+
+	if err := repositories.WithTransaction(request.Context(), params); err != nil {
 		panic(err)
 	}
 
@@ -64,7 +72,13 @@ func (ac *AuthController) ConfirmEmailAuthController(writter http.ResponseWriter
 		panic(err)
 	}
 
-	response, err := ac.ConfirmUserEmailService.Handler(request.Context(), confirmEmailRequest)
+	params := repositories.ParamsRs[confirmuseremail.Request, *signin.Response, confirmuseremail.ConfirmUserEmail]{
+		DbPool:  ac.DbPool,
+		New:     confirmuseremail.New,
+		Request: confirmEmailRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
 
 	if err != nil {
 		panic(err)
@@ -81,7 +95,13 @@ func (ac *AuthController) ResendEmailConfirmationAuthController(writter http.Res
 		panic(err)
 	}
 
-	if err := ac.ResendEmailConfirmationService.Handler(request.Context(), resendEmailConfirmationRequest); err != nil {
+	params := repositories.Params[resendemailconfirmation.Request, resendemailconfirmation.ResendEmailConfirmation]{
+		DbPool:  ac.DbPool,
+		New:     resendemailconfirmation.New,
+		Request: resendEmailConfirmationRequest,
+	}
+
+	if err := repositories.WithTransaction(request.Context(), params); err != nil {
 		panic(err)
 	}
 
@@ -96,7 +116,15 @@ func (ac *AuthController) ExternalLoginAuthController(writter http.ResponseWrite
 		panic(err)
 	}
 
-	response, err := ac.ExternalLoginService.Handler(request.Context(), externalLoginRequest)
+	params := repositories.ParamsRs[externalloginprovider.Request, *externalloginprovider.Response, externalloginprovider.ExternalLoginProvider]{
+		DbPool:  ac.DbPool,
+		New:     externalloginprovider.New,
+		Request: externalLoginRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	// response, err := ac.ExternalLoginService.Handler(request.Context(), externalLoginRequest)
 
 	if err != nil {
 		panic(err)
@@ -113,7 +141,13 @@ func (ac *AuthController) ResetPasswordAuthController(writter http.ResponseWrite
 		panic(err)
 	}
 
-	if err := ac.ResetPasswordService.Handler(request.Context(), resetPasswordRequest); err != nil {
+	params := repositories.Params[resetpassword.Request, resetpassword.ResetPasswordService]{
+		DbPool:  ac.DbPool,
+		New:     resetpassword.New,
+		Request: resetPasswordRequest,
+	}
+
+	if err := repositories.WithTransaction(request.Context(), params); err != nil {
 		panic(err)
 	}
 
@@ -128,7 +162,13 @@ func (ac *AuthController) ForgotPasswordAuthController(writter http.ResponseWrit
 		panic(err)
 	}
 
-	if err := ac.ForgotPasswordService.Handler(request.Context(), forgotPasswordRequest); err != nil {
+	params := repositories.Params[forgotpassword.Request, forgotpassword.ForgotPasswordService]{
+		DbPool:  ac.DbPool,
+		New:     forgotpassword.New,
+		Request: forgotPasswordRequest,
+	}
+
+	if err := repositories.WithTransaction(request.Context(), params); err != nil {
 		panic(err)
 	}
 

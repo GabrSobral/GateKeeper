@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/google/uuid"
-	"github.com/guard-service/internal/domain/entities"
 )
 
 type InMemoryUserProfileRepository struct {

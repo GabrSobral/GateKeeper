@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	externalloginprovider "github.com/guard-service/internal/application/services/authentication/external-login-provider"
-	"github.com/guard-service/internal/domain/entities"
-	inmemory_repositories "github.com/guard-service/internal/infra/database/repositories/in-memory"
+	externalloginprovider "github.com/gate-keeper/internal/application/services/authentication/external-login-provider"
+	"github.com/gate-keeper/internal/domain/entities"
+	inmemory_repositories "github.com/gate-keeper/internal/infra/database/repositories/in-memory"
 )
 
 func TestExternalLoginService(t *testing.T) {

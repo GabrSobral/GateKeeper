@@ -7,10 +7,127 @@ package pgstore
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const addEmailConfirmation = `-- name: AddEmailConfirmation :exec
+
+INSERT INTO email_confirmation (
+    id,
+    user_id,
+    email,
+    token,
+    created_at,
+    cool_down,
+    expires_at,
+    is_used
+) VALUES (
+    $1, -- id
+    $2, -- user_id
+    $3, -- email
+    $4, -- token
+    $5, -- created_at
+    $6, -- cool_down
+    $7, -- expires_at
+    $8 -- is_used
+)
+`
+
+type AddEmailConfirmationParams struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Email     string           `db:"email"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	CoolDown  pgtype.Timestamp `db:"cool_down"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+	IsUsed    bool             `db:"is_used"`
+}
+
+func (q *Queries) AddEmailConfirmation(ctx context.Context, arg AddEmailConfirmationParams) error {
+	_, err := q.db.Exec(ctx, addEmailConfirmation,
+		arg.ID,
+		arg.UserID,
+		arg.Email,
+		arg.Token,
+		arg.CreatedAt,
+		arg.CoolDown,
+		arg.ExpiresAt,
+		arg.IsUsed,
+	)
+	return err
+}
+
+const addExternalLogin = `-- name: AddExternalLogin :exec
+
+INSERT INTO external_login (
+    user_id,
+    email,
+    provider,
+    provider_key
+) VALUES (
+    $1, -- user_id
+    $2, -- email
+    $3, -- provider
+    $4 -- provider_key
+)
+`
+
+type AddExternalLoginParams struct {
+	UserID      uuid.UUID `db:"user_id"`
+	Email       string    `db:"email"`
+	Provider    string    `db:"provider"`
+	ProviderKey string    `db:"provider_key"`
+}
+
+func (q *Queries) AddExternalLogin(ctx context.Context, arg AddExternalLoginParams) error {
+	_, err := q.db.Exec(ctx, addExternalLogin,
+		arg.UserID,
+		arg.Email,
+		arg.Provider,
+		arg.ProviderKey,
+	)
+	return err
+}
+
+const addRefreshToken = `-- name: AddRefreshToken :exec
+
+INSERT INTO refresh_token (
+    id,
+    user_id,
+    available_refreshes,
+    expires_at,
+    created_at
+) VALUES (
+    $1, -- id
+    $2, -- user_id
+    $3, -- available_refreshes
+    $4, -- expires_at
+    $5 -- created_at
+)
+`
+
+type AddRefreshTokenParams struct {
+	ID                 uuid.UUID        `db:"id"`
+	UserID             uuid.UUID        `db:"user_id"`
+	AvailableRefreshes int32            `db:"available_refreshes"`
+	ExpiresAt          pgtype.Timestamp `db:"expires_at"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+}
+
+func (q *Queries) AddRefreshToken(ctx context.Context, arg AddRefreshTokenParams) error {
+	_, err := q.db.Exec(ctx, addRefreshToken,
+		arg.ID,
+		arg.UserID,
+		arg.AvailableRefreshes,
+		arg.ExpiresAt,
+		arg.CreatedAt,
+	)
+	return err
+}
 
 const addUser = `-- name: AddUser :exec
 
@@ -38,15 +155,15 @@ INSERT INTO "user" (
 `
 
 type AddUserParams struct {
-	ID               uuid.UUID        `db:"id" json:"id"`
-	Email            string           `db:"email" json:"email"`
-	PasswordHash     pgtype.Text      `db:"password_hash" json:"password_hash"`
-	CreatedAt        pgtype.Timestamp `db:"created_at" json:"created_at"`
-	UpdatedAt        pgtype.Timestamp `db:"updated_at" json:"updated_at"`
-	IsActive         bool             `db:"is_active" json:"is_active"`
-	IsEmailConfirmed bool             `db:"is_email_confirmed" json:"is_email_confirmed"`
-	TwoFactorEnabled bool             `db:"two_factor_enabled" json:"two_factor_enabled"`
-	TwoFactorSecret  pgtype.Text      `db:"two_factor_secret" json:"two_factor_secret"`
+	ID               uuid.UUID        `db:"id"`
+	Email            string           `db:"email"`
+	PasswordHash     *string          `db:"password_hash"`
+	CreatedAt        pgtype.Timestamp `db:"created_at"`
+	UpdatedAt        *time.Time       `db:"updated_at"`
+	IsActive         bool             `db:"is_active"`
+	IsEmailConfirmed bool             `db:"is_email_confirmed"`
+	TwoFactorEnabled bool             `db:"two_factor_enabled"`
+	TwoFactorSecret  *string          `db:"two_factor_secret"`
 }
 
 func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
@@ -60,6 +177,150 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
 		arg.IsEmailConfirmed,
 		arg.TwoFactorEnabled,
 		arg.TwoFactorSecret,
+	)
+	return err
+}
+
+const addUserProfile = `-- name: AddUserProfile :exec
+
+INSERT INTO user_profile (
+    user_id,
+    first_name,
+    last_name,
+    phone_number,
+    "address",
+    photo_url
+) VALUES (
+    $1, -- user_id
+    $2, -- first_name
+    $3, -- last_name
+    $4, -- phone_number
+    $5, -- address
+    $6 -- photo_url
+)
+`
+
+type AddUserProfileParams struct {
+	UserID      uuid.UUID `db:"user_id"`
+	FirstName   string    `db:"first_name"`
+	LastName    string    `db:"last_name"`
+	PhoneNumber *string   `db:"phone_number"`
+	Address     *string   `db:"address"`
+	PhotoUrl    *string   `db:"photo_url"`
+}
+
+func (q *Queries) AddUserProfile(ctx context.Context, arg AddUserProfileParams) error {
+	_, err := q.db.Exec(ctx, addUserProfile,
+		arg.UserID,
+		arg.FirstName,
+		arg.LastName,
+		arg.PhoneNumber,
+		arg.Address,
+		arg.PhotoUrl,
+	)
+	return err
+}
+
+const createPasswordReset = `-- name: CreatePasswordReset :exec
+
+INSERT INTO password_reset_token (
+    id,
+    user_id,
+    token,
+    created_at,
+    expires_at
+) VALUES (
+    $1, -- id
+    $2, -- user_id
+    $3, -- token
+    $4, -- created_at
+    $5 -- expires_at
+)
+`
+
+type CreatePasswordResetParams struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+}
+
+func (q *Queries) CreatePasswordReset(ctx context.Context, arg CreatePasswordResetParams) error {
+	_, err := q.db.Exec(ctx, createPasswordReset,
+		arg.ID,
+		arg.UserID,
+		arg.Token,
+		arg.CreatedAt,
+		arg.ExpiresAt,
+	)
+	return err
+}
+
+const deleteEmailConfirmation = `-- name: DeleteEmailConfirmation :exec
+
+DELETE FROM email_confirmation WHERE id = $1
+`
+
+func (q *Queries) DeleteEmailConfirmation(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deleteEmailConfirmation, id)
+	return err
+}
+
+const deletePasswordResetFromUser = `-- name: DeletePasswordResetFromUser :exec
+
+DELETE FROM password_reset_token WHERE user_id = $1
+`
+
+func (q *Queries) DeletePasswordResetFromUser(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, deletePasswordResetFromUser, userID)
+	return err
+}
+
+const revokeRefreshTokenFromUser = `-- name: RevokeRefreshTokenFromUser :exec
+
+DELETE FROM refresh_token WHERE user_id = $1
+`
+
+func (q *Queries) RevokeRefreshTokenFromUser(ctx context.Context, userID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, revokeRefreshTokenFromUser, userID)
+	return err
+}
+
+const updateEmailConfirmation = `-- name: UpdateEmailConfirmation :exec
+
+UPDATE email_confirmation SET
+    user_id = $1,
+    email = $2,
+    token = $3,
+    created_at = $4,
+    cool_down = $5,
+    expires_at = $6,
+    is_used = $7
+WHERE id = $8
+`
+
+type UpdateEmailConfirmationParams struct {
+	UserID    uuid.UUID        `db:"user_id"`
+	Email     string           `db:"email"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	CoolDown  pgtype.Timestamp `db:"cool_down"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+	IsUsed    bool             `db:"is_used"`
+	ID        uuid.UUID        `db:"id"`
+}
+
+func (q *Queries) UpdateEmailConfirmation(ctx context.Context, arg UpdateEmailConfirmationParams) error {
+	_, err := q.db.Exec(ctx, updateEmailConfirmation,
+		arg.UserID,
+		arg.Email,
+		arg.Token,
+		arg.CreatedAt,
+		arg.CoolDown,
+		arg.ExpiresAt,
+		arg.IsUsed,
+		arg.ID,
 	)
 	return err
 }
@@ -78,14 +339,14 @@ WHERE id = $8
 `
 
 type UpdateUserParams struct {
-	Email            string           `db:"email" json:"email"`
-	PasswordHash     pgtype.Text      `db:"password_hash" json:"password_hash"`
-	UpdatedAt        pgtype.Timestamp `db:"updated_at" json:"updated_at"`
-	IsActive         bool             `db:"is_active" json:"is_active"`
-	IsEmailConfirmed bool             `db:"is_email_confirmed" json:"is_email_confirmed"`
-	TwoFactorEnabled bool             `db:"two_factor_enabled" json:"two_factor_enabled"`
-	TwoFactorSecret  pgtype.Text      `db:"two_factor_secret" json:"two_factor_secret"`
-	ID               uuid.UUID        `db:"id" json:"id"`
+	Email            string     `db:"email"`
+	PasswordHash     *string    `db:"password_hash"`
+	UpdatedAt        *time.Time `db:"updated_at"`
+	IsActive         bool       `db:"is_active"`
+	IsEmailConfirmed bool       `db:"is_email_confirmed"`
+	TwoFactorEnabled bool       `db:"two_factor_enabled"`
+	TwoFactorSecret  *string    `db:"two_factor_secret"`
+	ID               uuid.UUID  `db:"id"`
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {

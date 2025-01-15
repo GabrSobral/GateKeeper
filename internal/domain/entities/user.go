@@ -30,6 +30,7 @@ func CreateUser(email string, passwordHash *string) (*User, error) {
 		Email:            email,
 		PasswordHash:     passwordHash,
 		CreatedAt:        time.Now().UTC(),
+		UpdatedAt:        nil,
 		IsActive:         true,
 		IsEmailConfirmed: false,
 		TwoFactorEnabled: false,

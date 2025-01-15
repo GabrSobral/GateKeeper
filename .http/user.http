@@ -7,3 +7,4 @@ Authorization: Bearer {{token}}
 
 ### Get By ID
 GET {{baseUrl}}/v1/users/by-id/019417f6-9a26-7015-af0b-9d74ac199dbb
+Authorization: Bearer {{token}}

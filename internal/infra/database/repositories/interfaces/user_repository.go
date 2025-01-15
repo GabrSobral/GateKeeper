@@ -3,8 +3,8 @@ package repository_interfaces
 import (
 	"context"
 
+	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/google/uuid"
-	"github.com/guard-service/internal/domain/entities"
 )
 
 type IUserRepository interface {
