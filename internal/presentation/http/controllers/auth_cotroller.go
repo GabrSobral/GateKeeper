@@ -124,8 +124,6 @@ func (ac *AuthController) ExternalLoginAuthController(writter http.ResponseWrite
 
 	response, err := repositories.WithTransactionRs(request.Context(), params)
 
-	// response, err := ac.ExternalLoginService.Handler(request.Context(), externalLoginRequest)
-
 	if err != nil {
 		panic(err)
 	}

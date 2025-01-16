@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS email_confirmation (
 
 ---- create above / drop below ----
 
-DROP TABLE IF EXISTS email_confirmations;
+DROP TABLE IF EXISTS email_confirmation;
 
 -- Write your migrate down statements here. If this migration is irreversible
 -- Then delete the separator line above.
