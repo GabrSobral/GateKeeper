@@ -1,4 +1,4 @@
-package controllers
+package http_controllers
 
 import (
 	"net/http"
@@ -6,7 +6,7 @@ import (
 	getuserbyemail "github.com/gate-keeper/internal/application/services/user/get-user-by-email"
 	getuserbyid "github.com/gate-keeper/internal/application/services/user/get-user-by-id"
 	"github.com/gate-keeper/internal/infra/database/repositories"
-	utils "github.com/gate-keeper/internal/presentation/http"
+	http_router "github.com/gate-keeper/internal/presentation/http"
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -32,7 +32,7 @@ func (c *UserController) GetUserByEmailController(writter http.ResponseWriter, r
 		panic(err)
 	}
 
-	utils.SendJson(writter, response, 200)
+	http_router.SendJson(writter, response, 200)
 }
 
 func (c *UserController) GetUserByIDController(writter http.ResponseWriter, request *http.Request) {
@@ -57,5 +57,5 @@ func (c *UserController) GetUserByIDController(writter http.ResponseWriter, requ
 		panic(err)
 	}
 
-	utils.SendJson(writter, response, 200)
+	http_router.SendJson(writter, response, 200)
 }

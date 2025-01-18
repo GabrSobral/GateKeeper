@@ -11,6 +11,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type Application struct {
+	ID          uuid.UUID        `db:"id"`
+	TenantID    uuid.UUID        `db:"tenant_id"`
+	Name        string           `db:"name"`
+	Description *string          `db:"description"`
+	CreatedAt   pgtype.Timestamp `db:"created_at"`
+	UpdatedAt   *time.Time       `db:"updated_at"`
+}
+
 type EmailConfirmation struct {
 	ID        uuid.UUID        `db:"id"`
 	UserID    uuid.UUID        `db:"user_id"`
@@ -29,6 +38,22 @@ type ExternalLogin struct {
 	ProviderKey string    `db:"provider_key"`
 }
 
+type Group struct {
+	ID            uuid.UUID        `db:"id"`
+	ApplicationID uuid.UUID        `db:"application_id"`
+	Name          string           `db:"name"`
+	Description   *string          `db:"description"`
+	CreatedAt     pgtype.Timestamp `db:"created_at"`
+	UpdatedAt     *time.Time       `db:"updated_at"`
+}
+
+type GroupParticipation struct {
+	GroupID   uuid.UUID        `db:"group_id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	UpdatedAt *time.Time       `db:"updated_at"`
+}
+
 type PasswordResetToken struct {
 	ID        uuid.UUID        `db:"id"`
 	UserID    uuid.UUID        `db:"user_id"`
@@ -43,6 +68,14 @@ type RefreshToken struct {
 	AvailableRefreshes int32            `db:"available_refreshes"`
 	ExpiresAt          pgtype.Timestamp `db:"expires_at"`
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
+}
+
+type Tenant struct {
+	ID          uuid.UUID        `db:"id"`
+	Name        string           `db:"name"`
+	Description *string          `db:"description"`
+	CreatedAt   pgtype.Timestamp `db:"created_at"`
+	UpdatedAt   *time.Time       `db:"updated_at"`
 }
 
 type User struct {

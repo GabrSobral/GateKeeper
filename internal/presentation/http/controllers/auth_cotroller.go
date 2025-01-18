@@ -1,10 +1,10 @@
-package controllers
+package http_controllers
 
 import (
 	"net/http"
 
 	"github.com/gate-keeper/internal/infra/database/repositories"
-	utils "github.com/gate-keeper/internal/presentation/http"
+	http_router "github.com/gate-keeper/internal/presentation/http"
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	confirmuseremail "github.com/gate-keeper/internal/application/services/authentication/confirm-user-email"
@@ -24,7 +24,7 @@ type AuthController struct {
 func (ac *AuthController) SignInAuthController(writter http.ResponseWriter, request *http.Request) {
 	var signInRequest signin.Request
 
-	if err := utils.ParseBodyToSchema(&signInRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&signInRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -40,14 +40,14 @@ func (ac *AuthController) SignInAuthController(writter http.ResponseWriter, requ
 		panic(err)
 	}
 
-	utils.SendJson(writter, response, http.StatusOK)
+	http_router.SendJson(writter, response, http.StatusOK)
 }
 
 // Sign Up with credentials controller
 func (ac *AuthController) SignUpAuthController(writter http.ResponseWriter, request *http.Request) {
 	var signUpRequest signup.Request
 
-	if err := utils.ParseBodyToSchema(&signUpRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&signUpRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -61,14 +61,14 @@ func (ac *AuthController) SignUpAuthController(writter http.ResponseWriter, requ
 		panic(err)
 	}
 
-	utils.SendJson(writter, nil, http.StatusNoContent)
+	http_router.SendJson(writter, nil, http.StatusNoContent)
 }
 
 // Confirm email controller
 func (ac *AuthController) ConfirmEmailAuthController(writter http.ResponseWriter, request *http.Request) {
 	var confirmEmailRequest confirmuseremail.Request
 
-	if err := utils.ParseBodyToSchema(&confirmEmailRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&confirmEmailRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -84,14 +84,14 @@ func (ac *AuthController) ConfirmEmailAuthController(writter http.ResponseWriter
 		panic(err)
 	}
 
-	utils.SendJson(writter, response, http.StatusOK)
+	http_router.SendJson(writter, response, http.StatusOK)
 }
 
 // Resend Email Confirmation controller
 func (ac *AuthController) ResendEmailConfirmationAuthController(writter http.ResponseWriter, request *http.Request) {
 	var resendEmailConfirmationRequest resendemailconfirmation.Request
 
-	if err := utils.ParseBodyToSchema(&resendEmailConfirmationRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&resendEmailConfirmationRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -105,14 +105,14 @@ func (ac *AuthController) ResendEmailConfirmationAuthController(writter http.Res
 		panic(err)
 	}
 
-	utils.SendJson(writter, nil, http.StatusNoContent)
+	http_router.SendJson(writter, nil, http.StatusNoContent)
 }
 
 // Confirm email controller
 func (ac *AuthController) ExternalLoginAuthController(writter http.ResponseWriter, request *http.Request) {
 	var externalLoginRequest externalloginprovider.Request
 
-	if err := utils.ParseBodyToSchema(&externalLoginRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&externalLoginRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -128,14 +128,14 @@ func (ac *AuthController) ExternalLoginAuthController(writter http.ResponseWrite
 		panic(err)
 	}
 
-	utils.SendJson(writter, response, http.StatusOK)
+	http_router.SendJson(writter, response, http.StatusOK)
 }
 
 // Forgot Password controller
 func (ac *AuthController) ResetPasswordAuthController(writter http.ResponseWriter, request *http.Request) {
 	var resetPasswordRequest resetpassword.Request
 
-	if err := utils.ParseBodyToSchema(&resetPasswordRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&resetPasswordRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -149,14 +149,14 @@ func (ac *AuthController) ResetPasswordAuthController(writter http.ResponseWrite
 		panic(err)
 	}
 
-	utils.SendJson(writter, nil, http.StatusNoContent)
+	http_router.SendJson(writter, nil, http.StatusNoContent)
 }
 
 // Forgot Password controller
 func (ac *AuthController) ForgotPasswordAuthController(writter http.ResponseWriter, request *http.Request) {
 	var forgotPasswordRequest forgotpassword.Request
 
-	if err := utils.ParseBodyToSchema(&forgotPasswordRequest, request); err != nil {
+	if err := http_router.ParseBodyToSchema(&forgotPasswordRequest, request); err != nil {
 		panic(err)
 	}
 
@@ -170,5 +170,5 @@ func (ac *AuthController) ForgotPasswordAuthController(writter http.ResponseWrit
 		panic(err)
 	}
 
-	utils.SendJson(writter, nil, http.StatusNoContent)
+	http_router.SendJson(writter, nil, http.StatusNoContent)
 }

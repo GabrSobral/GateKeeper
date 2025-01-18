@@ -1,0 +1,12 @@
+@token = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwczovL3Byb3h5bWl0eS50ZWNoL2d1YXJkIiwiZW1haWwiOiJnYWJyaWVsLnNvYnJhbDEzNjdAZ21haWwuY29tIiwiZXhwIjoxNzM3MTcyODYwLCJmYW1pbHlfbmFtZSI6IlNvYnJhbCIsImdpdmVuX25hbWUiOiJHYWJyaWVsIiwiaXNzIjoiaHR0cHM6Ly9wcm94eW1pdHkudGVjaC9ndWFyZCIsIm9pZCI6IjAxOTQ3NzJlLWMzMGItNzE3MS1iYTZhLTUzNjM2ZTRmNzc5ZiJ9.NYll0laluwhGp7I0krjH2oQ-TW_VPuxjna7uPNWnfOc
+@baseUrl = http://localhost:8080 
+
+### Create Tenant
+
+POST {{baseUrl}}/v1/tenants
+Authorization: Bearer {{token}}
+
+{
+    "name": "Test Tenant",
+    "description": "Test Tenant Description"
+}

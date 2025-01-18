@@ -16,8 +16,8 @@ POST {{baseUrl}}/v1/auth/sign-in
 POST {{baseUrl}}/v1/auth/sign-up
 
 {
-    "first_name": "Test",
-    "last_name": "Test Last",
+    "first_name": "Gabriel",
+    "last_name": "Sobral",
     "email": "{{userEmail}}",
     "password": "123"
 }
@@ -27,7 +27,7 @@ POST {{baseUrl}}/v1/auth/confirm-email
 
 {
     "email": "{{userEmail}}",
-    "token": "985632"
+    "token": "613060"
 }
 
 ### Resend E-mail Confirmation v1
