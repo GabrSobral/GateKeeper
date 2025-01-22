@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Button from '$lib/components/ui/button/button.svelte';
-    import { page } from '$app/stores';
+    import { page } from '$app/state';
 
 	let { children } = $props();
 
-    const path = $derived($page .url.pathname);
+    const path = $derived(page.url.pathname);
 </script>
 
 <div

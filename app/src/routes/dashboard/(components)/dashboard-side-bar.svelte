@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Settings from 'lucide-svelte/icons/settings';
+	import LayoutPanelLeft from 'lucide-svelte/icons/layout-panel-left';
 	import House from 'lucide-svelte/icons/house';
 	import Plus from 'lucide-svelte/icons/plus';
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
@@ -8,19 +8,22 @@
 	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Avatar from '$lib/components/ui/avatar';
+	import { page } from '$app/state';
 
 	const items = [
 		{
 			title: 'Home',
-			url: '#',
+			url: '/dashboard',
 			icon: House
 		},
 		{
-			title: 'Settings',
-			url: '#',
-			icon: Settings
+			title: 'Applications',
+			url: '/dashboard/application',
+			icon: LayoutPanelLeft
 		}
 	];
+
+	const path = $derived(page.url.pathname);
 </script>
 
 <Sidebar.Root variant="sidebar">
@@ -39,10 +42,10 @@
 
 					<DropdownMenu.Content class="w-[--bits-dropdown-menu-anchor-width]">
 						<DropdownMenu.Item>
-							<span>Acme Inc</span>
+							<span>Organization 1</span>
 						</DropdownMenu.Item>
 						<DropdownMenu.Item>
-							<span>Acme Corp.</span>
+							<span>Organization 2</span>
 						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Root>
@@ -57,8 +60,8 @@
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					{#each items as item (item.title)}
-						<Sidebar.MenuItem>
-							<Sidebar.MenuButton>
+						<Sidebar.MenuItem >
+							<Sidebar.MenuButton isActive={item.url === path}>
 								{#snippet child({ props })}
 									<a href={item.url} {...props}>
 										<item.icon />

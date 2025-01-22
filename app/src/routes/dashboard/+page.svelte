@@ -1,4 +1,9 @@
 <script lang="ts">
-import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-
+	import Breadcrumbs from './(components)/breadcrumbs.svelte';
 </script>
+
+<Breadcrumbs
+	items={[
+		{ name: 'Dashboard', path: '/dashboard' },
+	]}
+/>
