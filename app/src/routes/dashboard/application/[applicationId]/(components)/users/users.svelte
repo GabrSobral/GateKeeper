@@ -16,16 +16,16 @@
 	import DataTableCheckbox from './data-table-checkbox.svelte';
 	import DataTableEmailButton from './data-table-email-button.svelte';
 	import DataTableActions from './data-table-actions.svelte';
-	import * as Table from '$lib/components/ui/table/index.js';
-	import { Button } from '$lib/components/ui/button/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
-	import { Input } from '$lib/components/ui/input/index.js';
+	import * as Table from '$lib/components/ui/table';
+	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import { Input } from '$lib/components/ui/input';
 	import {
 		FlexRender,
 		createSvelteTable,
 		renderComponent,
 		renderSnippet
-	} from '$lib/components/ui/data-table/index.js';
+	} from '$lib/components/ui/data-table';
 
 	type ApplicationUser = {
 		id: string;
@@ -47,12 +47,6 @@
 			displayName: 'Abigail Kuhn',
 			email: 'Abe45@gmail.com'
 		},
-		// {
-		// 	id: 'derv1ws0',
-		// 	isActive: true,
-		// 	displayName: 'Mon Serrat',
-		// 	email: 'Monserrat44@gmail.com'
-		// },
 		{
 			id: '5kma53ae',
 			isActive: true,

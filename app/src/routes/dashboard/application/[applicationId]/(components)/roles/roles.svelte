@@ -1,76 +1,74 @@
 <script lang="ts">
+	import Ellipsis from 'lucide-svelte/icons/ellipsis';
+
 	import * as Table from '$lib/components/ui/table';
+	import { Button } from '$lib/components/ui/button';
+	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
+	import Badge from '$lib/components/ui/badge/badge.svelte';
 
 	const invoices = [
 		{
-			invoice: 'INV001',
-			paymentStatus: 'Paid',
-			totalAmount: '$250.00',
-			paymentMethod: 'Credit Card'
+			id: 'INV001',
+			name: 'User',
+			permissions: [
+				{ id: "12345", name: "Consult Status" }
+			]
 		},
 		{
-			invoice: 'INV002',
-			paymentStatus: 'Pending',
-			totalAmount: '$150.00',
-			paymentMethod: 'PayPal'
-		},
-		{
-			invoice: 'INV003',
-			paymentStatus: 'Unpaid',
-			totalAmount: '$350.00',
-			paymentMethod: 'Bank Transfer'
-		},
-		{
-			invoice: 'INV004',
-			paymentStatus: 'Paid',
-			totalAmount: '$450.00',
-			paymentMethod: 'Credit Card'
-		},
-		{
-			invoice: 'INV005',
-			paymentStatus: 'Paid',
-			totalAmount: '$550.00',
-			paymentMethod: 'PayPal'
-		},
-		{
-			invoice: 'INV006',
-			paymentStatus: 'Pending',
-			totalAmount: '$200.00',
-			paymentMethod: 'Bank Transfer'
-		},
-		{
-			invoice: 'INV007',
-			paymentStatus: 'Unpaid',
-			totalAmount: '$300.00',
-			paymentMethod: 'Credit Card'
+			id: 'INV002',
+			name: 'Admin',
+			permissions: [
+				{ id: "123456", name: "Read Status" },
+				{ id: "123457", name: "Consult Status" }
+			]
 		}
-	];
+	]
 </script>
 
 <Table.Root>
-	<Table.Caption>A list of your recent invoices.</Table.Caption>
+	<Table.Caption>A list of application roles.</Table.Caption>
 	<Table.Header>
 		<Table.Row>
-			<Table.Head class="w-[100px]">Invoice</Table.Head>
-			<Table.Head>Status</Table.Head>
-			<Table.Head>Method</Table.Head>
-			<Table.Head class="text-right">Amount</Table.Head>
+			<Table.Head class="w-[200px]">ID</Table.Head>
+			<Table.Head>Name</Table.Head>
+			<Table.Head>Permissions</Table.Head>
+			<Table.Head>Actions</Table.Head>
 		</Table.Row>
 	</Table.Header>
 	<Table.Body>
-		{#each invoices as invoice, i (i)}
+		{#each invoices as role, i (i)}
 			<Table.Row>
-				<Table.Cell class="font-medium">{invoice.invoice}</Table.Cell>
-				<Table.Cell>{invoice.paymentStatus}</Table.Cell>
-				<Table.Cell>{invoice.paymentMethod}</Table.Cell>
-				<Table.Cell class="text-right">{invoice.totalAmount}</Table.Cell>
+				<Table.Cell class="font-medium">{role.id}</Table.Cell>
+				<Table.Cell>{role.name}</Table.Cell>
+				<Table.Cell class="flex gap-[1px]">
+					{#each role.permissions as permission (permission.id)}
+						<Badge>{permission.name}</Badge>
+					{/each}
+				</Table.Cell>
+				<Table.Cell>
+					<DropdownMenu.Root>
+						<DropdownMenu.Trigger>
+							{#snippet child({ props })}
+								<Button {...props} variant="ghost" size="icon" class="relative size-8 p-0">
+									<span class="sr-only">Open menu</span>
+									<Ellipsis />
+								</Button>
+							{/snippet}
+						</DropdownMenu.Trigger>
+						
+						<DropdownMenu.Content>
+							<DropdownMenu.Group>
+								<DropdownMenu.GroupHeading>Actions</DropdownMenu.GroupHeading>
+								<DropdownMenu.Item onclick={() => navigator.clipboard.writeText(role.id)}>
+									Copy role ID
+								</DropdownMenu.Item>
+							</DropdownMenu.Group>
+							<DropdownMenu.Separator />
+							<DropdownMenu.Item>View role details</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Root>
+				</Table.Cell>
 			</Table.Row>
 		{/each}
 	</Table.Body>
-	<Table.Footer>
-		<Table.Row>
-			<Table.Cell colspan={3}>Total</Table.Cell>
-			<Table.Cell class="text-right">$2,500.00</Table.Cell>
-		</Table.Row>
-	</Table.Footer>
 </Table.Root>
