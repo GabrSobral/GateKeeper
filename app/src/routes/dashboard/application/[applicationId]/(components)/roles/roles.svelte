@@ -4,23 +4,18 @@
 	import * as Table from '$lib/components/ui/table';
 	import { Button } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import Badge from '$lib/components/ui/badge/badge.svelte';
+	import Input from '$lib/components/ui/input/input.svelte';
 
 	const invoices = [
 		{
 			id: 'INV001',
 			name: 'User',
-			permissions: [
-				{ id: "12345", name: "Consult Status" }
-			]
+			description: 'A user of the application. Can view and manage data.'
 		},
 		{
 			id: 'INV002',
 			name: 'Admin',
-			permissions: [
-				{ id: "123456", name: "Read Status" },
-				{ id: "123457", name: "Consult Status" }
-			]
+			description: 'An admin of the application. Can manage users and roles.'
 		}
 	]
 </script>
@@ -31,7 +26,7 @@
 		<Table.Row>
 			<Table.Head class="w-[200px]">ID</Table.Head>
 			<Table.Head>Name</Table.Head>
-			<Table.Head>Permissions</Table.Head>
+			<Table.Head>Description</Table.Head>
 			<Table.Head>Actions</Table.Head>
 		</Table.Row>
 	</Table.Header>
@@ -39,12 +34,8 @@
 		{#each invoices as role, i (i)}
 			<Table.Row>
 				<Table.Cell class="font-medium">{role.id}</Table.Cell>
-				<Table.Cell>{role.name}</Table.Cell>
-				<Table.Cell class="flex gap-[1px]">
-					{#each role.permissions as permission (permission.id)}
-						<Badge>{permission.name}</Badge>
-					{/each}
-				</Table.Cell>
+				<Table.Cell class="font-bold">{role.name}</Table.Cell>
+				<Table.Cell>{role.description || "-"}</Table.Cell>
 				<Table.Cell>
 					<DropdownMenu.Root>
 						<DropdownMenu.Trigger>

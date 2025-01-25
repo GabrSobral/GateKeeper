@@ -8,12 +8,13 @@
 	import * as Tooltip from '$lib/components/ui/tooltip';
 
 	import Users from './(components)/users/users.svelte';
+	import Roles from './(components)/roles/roles.svelte';
 	import Overview from './(components)/overview/overview.svelte';
 	import Breadcrumbs from '../../(components)/breadcrumbs.svelte';
+	import Providers from './(components)/providers/providers.svelte';
 	
 	import { cn } from '$lib/utils';
 	import { buttonVariants } from '$lib/components/ui/button';
-	import Roles from './(components)/roles/roles.svelte';
 </script>
 
 <Breadcrumbs
@@ -76,6 +77,7 @@
 			<Tabs.Trigger value="overview">Overview</Tabs.Trigger>
 			<Tabs.Trigger value="users">Users</Tabs.Trigger>
 			<Tabs.Trigger value="roles">Roles</Tabs.Trigger>
+			<Tabs.Trigger value="providers">OAuth Providers</Tabs.Trigger>
 		</Tabs.List>
         
 		<Tabs.Content value="overview">
@@ -88,6 +90,10 @@
 
 		<Tabs.Content value="roles">
 			<Roles />
+		</Tabs.Content>
+
+		<Tabs.Content value="providers">
+			<Providers />
 		</Tabs.Content>
 	</Tabs.Root>
 </main>

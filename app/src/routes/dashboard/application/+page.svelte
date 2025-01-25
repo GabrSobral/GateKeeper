@@ -36,7 +36,7 @@
 		<Tabs.Content value="overview" class="flex flex-1 flex-wrap gap-3">
 			<Card.Root
 				onclick={() => goto('/dashboard/application/<random-uuid-here>')}
-				class="w-[calc(33.333%-8px)] min-w-[400px] transition-all hover:scale-105 hover:cursor-pointer"
+				class="w-[calc(33.333%-8px)] min-w-[400px] transition-all hover:shadow-lg hover:scale-[1.01] hover:cursor-pointer"
 			>
 				<Card.Header>
 					<Card.Title>ProxyMity</Card.Title>

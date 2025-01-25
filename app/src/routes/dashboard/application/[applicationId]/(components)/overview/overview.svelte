@@ -1,9 +1,8 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
+	import * as Tooltip from '$lib/components/ui/tooltip';
 	import Badge from '$lib/components/ui/badge/badge.svelte';
-	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
 
-	import * as Tooltip from '$lib/components/ui/tooltip/index.js';
 	import NewSecretDialog from './new-secret-dialog.svelte';
 	import DeleteSecretDialog from './delete-secret-dialog.svelte';
 </script>
@@ -18,12 +17,17 @@
 		<Card.Content class="flex flex-wrap gap-x-8 gap-y-4">
 			<div class="flex flex-col">
 				<span class="text-md font-semibold">Application ID</span>
-				<span class="text-sm">uuiddqwe-e123-3123-asds-1233123</span>
+				<span class="text-sm">{window.crypto.randomUUID()}</span>
 			</div>
 
 			<div class="flex flex-col">
 				<span class="text-md font-semibold">Status</span>
 				<Badge variant="default">Active</Badge>
+			</div>
+
+			<div class="flex flex-col">
+				<span class="text-md font-semibold">Multi Factor Auth</span>
+				<Badge variant="outline" class="w-fit">Yes</Badge>
 			</div>
 		</Card.Content>
 	</Card.Root>

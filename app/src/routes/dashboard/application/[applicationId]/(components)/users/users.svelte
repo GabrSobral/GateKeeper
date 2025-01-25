@@ -26,12 +26,18 @@
 		renderComponent,
 		renderSnippet
 	} from '$lib/components/ui/data-table';
+	import DataTableRoleButton from './data-table-role-button.svelte';
 
 	type ApplicationUser = {
 		id: string;
 		isActive: boolean;
 		displayName: string;
 		email: string;
+		role: {
+			id: string;
+			name: string;
+			description: string;
+		};
 	};
 
 	const data: ApplicationUser[] = [
@@ -39,25 +45,45 @@
 			id: 'm5gr84i9',
 			isActive: true,
 			displayName: "Ken O'Conner",
-			email: 'ken99@yahoo.com'
+			email: 'ken99@yahoo.com',
+			role: {
+				id: '1',
+				name: 'User',
+				description: 'A user of the application. Can view and manage data.'
+			}
 		},
 		{
 			id: '3u1reuv4',
 			isActive: true,
 			displayName: 'Abigail Kuhn',
-			email: 'Abe45@gmail.com'
+			email: 'Abe45@gmail.com',
+			role: {
+				id: '2',
+				name: 'Admin',
+				description: 'An admin of the application. Can manage users and roles.'
+			}
 		},
 		{
 			id: '5kma53ae',
 			isActive: true,
 			displayName: 'Silas Kuhn',
-			email: 'Silas22@gmail.com'
+			email: 'Silas22@gmail.com',
+			role: {
+				id: '1',
+				name: 'User',
+				description: 'A user of the application. Can view and manage data.'
+			}
 		},
 		{
 			id: 'bhqecj4p',
 			isActive: true,
 			displayName: 'Carmella Kuhn',
-			email: 'carmella@hotmail.com'
+			email: 'carmella@hotmail.com',
+			role: {
+				id: '1',
+				name: 'User',
+				description: 'A user of the application. Can view and manage data.'
+			}
 		}
 	];
 
@@ -110,6 +136,24 @@
 				});
 
 				return renderSnippet(emailSnippet, row.getValue('email'));
+			}
+		},
+
+		{
+			accessorKey: 'role',
+			header: ({ column }) =>
+				renderComponent(DataTableRoleButton, {
+					onclick: () => column.toggleSorting(column.getIsSorted() === 'asc')
+				}),
+			cell: ({ row }) => {
+				const emailSnippet = createRawSnippet<[ApplicationUser['role']]>((getRole) => {
+					const role = getRole();
+					return {
+						render: () => `<div class="font-bold">${role.name}</div>`
+					};
+				});
+
+				return renderSnippet(emailSnippet, row.getValue('role'));
 			}
 		},
 
@@ -204,7 +248,7 @@
 	});
 </script>
 
-<div class="w-full mx-auto">
+<div class="mx-auto w-full">
 	<div class="flex items-center py-4">
 		<Input
 			placeholder="Filter emails..."
