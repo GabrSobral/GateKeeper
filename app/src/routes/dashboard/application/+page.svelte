@@ -1,13 +1,16 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 
+	import { cn } from '$lib/utils';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
+	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
+	import { useApplicationsQuery } from '$lib/services/use-applications-query';
 
 	import Breadcrumbs from '../(components)/breadcrumbs.svelte';
-	import Button, { buttonVariants } from '$lib/components/ui/button/button.svelte';
-	import { cn } from '$lib/utils';
+
+	let applications = useApplicationsQuery({ accessToken: '' });
 </script>
 
 <Breadcrumbs
@@ -29,28 +32,43 @@
 			<Tabs.Trigger value="overview">Overview</Tabs.Trigger>
 		</Tabs.List>
 
-		<a href="/dashboard/application/create-application" class={cn("float-right", buttonVariants({ variant: "default" }))}>
+		<a
+			href="/dashboard/application/create-application"
+			class={cn('float-right', buttonVariants({ variant: 'default' }))}
+		>
 			New Application
 		</a>
 
 		<Tabs.Content value="overview" class="flex flex-1 flex-wrap gap-3">
-			<Card.Root
-				onclick={() => goto('/dashboard/application/<random-uuid-here>')}
-				class="w-[calc(33.333%-8px)] min-w-[400px] transition-all hover:shadow-lg hover:scale-[1.01] hover:cursor-pointer"
-			>
-				<Card.Header>
-					<Card.Title>ProxyMity</Card.Title>
-					<Card.Description class="line-clamp-4">
-						ProxyMity is a proxy server that allows you to access the internet securely.
-					</Card.Description>
-				</Card.Header>
+			{#if $applications.isLoading}
+				<div class="flex flex-1 items-center justify-center">Loading...</div>
+			{:else}
+				{#if $applications.error}
+					<div class="flex flex-1 items-center justify-center">Failed to load applications</div>
+				{/if}
 
-				<Card.Footer class="mt-3">
-					<Badge variant="outline">Chat</Badge>
-					<Badge variant="outline">C#</Badge>
-					<Badge variant="outline">Javascript</Badge>
-				</Card.Footer>
-			</Card.Root>
+				{#if $applications.data?.length === 0}
+					<div class="flex flex-1 items-center justify-center">No applications found</div>
+				{/if}
+
+				{#each $applications.data || [] as application (application.id)}
+					<Card.Root
+						onclick={() => goto(`/dashboard/application/${application.id}`)}
+						class="w-[calc(33.333%-8px)] min-w-[400px] transition-all hover:scale-[1.01] hover:cursor-pointer hover:shadow-lg"
+					>
+						<Card.Header>
+							<Card.Title>{application.name}</Card.Title>
+							<Card.Description class="line-clamp-4">{application.description}</Card.Description>
+						</Card.Header>
+
+						<Card.Footer class="mt-3">
+							{#each application.badges as tag}
+								<Badge variant="outline">{tag}</Badge>
+							{/each}
+						</Card.Footer>
+					</Card.Root>
+				{/each}
+			{/if}
 		</Tabs.Content>
 	</Tabs.Root>
 </main>

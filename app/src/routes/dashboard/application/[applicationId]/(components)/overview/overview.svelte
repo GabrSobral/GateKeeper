@@ -5,6 +5,12 @@
 
 	import NewSecretDialog from './new-secret-dialog.svelte';
 	import DeleteSecretDialog from './delete-secret-dialog.svelte';
+	import type { IApplication } from '$lib/services/use-application-by-id-query';
+	import { formatDate } from '$lib/utils';
+
+	type Props = { application?: IApplication | null }
+
+	let { application }: Props = $props();
 </script>
 
 <section class="flex w-full flex-col gap-y-4">
@@ -17,17 +23,28 @@
 		<Card.Content class="flex flex-wrap gap-x-8 gap-y-4">
 			<div class="flex flex-col">
 				<span class="text-md font-semibold">Application ID</span>
-				<span class="text-sm">{window.crypto.randomUUID()}</span>
+				<span class="text-sm">{application?.id}</span>
 			</div>
 
 			<div class="flex flex-col">
 				<span class="text-md font-semibold">Status</span>
-				<Badge variant="default">Active</Badge>
+				{#if !application?.deactivatedAt}
+					<Badge variant="default">Active</Badge>
+				{:else}
+					<Badge variant="destructive" class="flex gap-1">
+						Deactivated at{" "}
+						<span class="text-white">{formatDate(application?.deactivatedAt)}</span>
+					</Badge>
+				{/if}
 			</div>
 
 			<div class="flex flex-col">
 				<span class="text-md font-semibold">Multi Factor Auth</span>
-				<Badge variant="outline" class="w-fit">Yes</Badge>
+					{#if application?.multiFactorAuthEnabled}
+						<Badge variant="outline" class="w-fit">Yes</Badge>
+					{:else}
+						<Badge variant="outline" class="w-fit">No</Badge>
+					{/if}
 			</div>
 		</Card.Content>
 	</Card.Root>
@@ -45,51 +62,30 @@
 		</Card.Header>
 
 		<Card.Content class="flex flex-col gap-y-4">
-			<div class="flex items-center gap-4">
-				<div class="space-y-1">
-					<p class="text-sm font-medium leading-none">Secret Name</p>
-					<p class="text-muted-foreground">ysd!da?4*********************</p>
+			{#each application?.secrets || [] as secret (secret.id)}
+				<div class="flex items-center gap-4">
+					<div class="space-y-1">
+						<p class="text-sm font-medium leading-none">{secret.name}</p>
+						<p class="text-muted-foreground">{secret.value}</p>
+					</div>
+
+					<div class="ml-auto text-sm">
+						Expiração: <span class="text-md font-medium">{formatDate(secret.expirationDate)}</span>
+					</div>
+
+					<Tooltip.Provider>
+						<Tooltip.Root>
+							<Tooltip.Trigger>
+								<DeleteSecretDialog {secret}/>
+							</Tooltip.Trigger>
+
+							<Tooltip.Content>
+								<p>Delete secret</p>
+							</Tooltip.Content>
+						</Tooltip.Root>
+					</Tooltip.Provider>
 				</div>
-
-				<div class="ml-auto text-sm">
-					Expiração: <span class="text-md font-medium">30/03/2032</span>
-				</div>
-
-				<Tooltip.Provider>
-					<Tooltip.Root>
-						<Tooltip.Trigger>
-							<DeleteSecretDialog />
-						</Tooltip.Trigger>
-
-						<Tooltip.Content>
-							<p>Delete secret</p>
-						</Tooltip.Content>
-					</Tooltip.Root>
-				</Tooltip.Provider>
-			</div>
-
-			<div class="flex items-center gap-4">
-				<div class="space-y-1">
-					<p class="text-sm font-medium leading-none">Secret Name</p>
-					<p class="text-muted-foreground">ysd!da?4*********************</p>
-				</div>
-
-				<div class="ml-auto text-sm">
-					Expiração: <span class="text-md font-medium">30/03/2032</span>
-				</div>
-
-				<Tooltip.Provider>
-					<Tooltip.Root>
-						<Tooltip.Trigger>
-							<DeleteSecretDialog />
-						</Tooltip.Trigger>
-
-						<Tooltip.Content>
-							<p>Delete secret</p>
-						</Tooltip.Content>
-					</Tooltip.Root>
-				</Tooltip.Provider>
-			</div>
+			{/each}
 		</Card.Content>
 	</Card.Root>
 </section>

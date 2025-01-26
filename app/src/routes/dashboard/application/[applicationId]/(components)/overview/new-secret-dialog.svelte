@@ -46,13 +46,13 @@
 		</Dialog.Header>
 
 		<div class="grid gap-4 py-4">
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="name" class="text-right">Secret Name</Label>
+			<div class="flex flex-col gap-3">
+				<Label for="name">Secret Name</Label>
 				<Input id="name" placeholder="E.g: My Ultra Application Secret" class="col-span-3" />
 			</div>
 
-			<div class="grid grid-cols-4 items-center gap-4">
-				<Label for="username" class="text-right">Expires At</Label>
+			<div class="flex flex-col gap-3">
+				<Label for="username">Expires At</Label>
 				<DatePicker value={undefined} />
 			</div>
 		</div>

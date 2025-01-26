@@ -9,13 +9,15 @@
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import * as Avatar from '$lib/components/ui/avatar';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
+	import { useApplicationsQuery } from '$lib/services/use-applications-query';
 
 	const items = [
-		{
-			title: 'Home',
-			url: '/dashboard',
-			icon: House
-		},
+		// {
+		// 	title: 'Home',
+		// 	url: '/dashboard',
+		// 	icon: House
+		// },
 		{
 			title: 'Applications',
 			url: '/dashboard/application',
@@ -24,6 +26,8 @@
 	];
 
 	const path = $derived(page.url.pathname);
+
+	let applications = useApplicationsQuery({ accessToken: "" })
 </script>
 
 <Sidebar.Root variant="sidebar">
@@ -77,31 +81,23 @@
 
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>Applications</Sidebar.GroupLabel>
-			<Sidebar.GroupAction title="Add Project">
+			<Sidebar.GroupAction title="Add Project" onclick={() => goto('/dashboard/application/create-application')}>
 				<Plus /> <span class="sr-only">Add Project</span>
 			</Sidebar.GroupAction>
 
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
-					<Sidebar.MenuItem>
-						<Sidebar.MenuButton>
-							{#snippet child({ props })}
-								<a href="#" {...props}>
-									<span>ProxyMity</span>
-								</a>
-							{/snippet}
-						</Sidebar.MenuButton>
-					</Sidebar.MenuItem>
-
-					<Sidebar.MenuItem>
-						<Sidebar.MenuButton>
-							{#snippet child({ props })}
-								<a href="#" {...props}>
-									<span>GateKeeper</span>
-								</a>
-							{/snippet}
-						</Sidebar.MenuButton>
-					</Sidebar.MenuItem>
+					{#each $applications?.data || [] as application (application?.id)}
+						<Sidebar.MenuItem>
+							<Sidebar.MenuButton>
+								{#snippet child({ props })}
+									<a href={`/dashboard/application/${application.id}`} {...props}>
+										<span>{application.name}</span>
+									</a>
+								{/snippet}
+							</Sidebar.MenuButton>
+						</Sidebar.MenuItem>
+					{/each}
 				</Sidebar.Menu>
 			</Sidebar.GroupContent>
 		</Sidebar.Group>

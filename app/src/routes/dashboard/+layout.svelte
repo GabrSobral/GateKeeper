@@ -1,16 +1,24 @@
 <script lang="ts">
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+	import { QueryClient, QueryClientProvider } from '@sveltestack/svelte-query';
+
+	import { Toaster } from '$lib/components/ui/sonner';
+	import * as Sidebar from '$lib/components/ui/sidebar';
 	import DashboardSideBar from './(components)/dashboard-side-bar.svelte';
 
 	let { children } = $props();
+
+	const queryClient = new QueryClient();
 </script>
 
-<div class="flex h-screen w-screen">
-	<Sidebar.Provider>
-		<DashboardSideBar/>
+<QueryClientProvider client={queryClient}>
+	<div class="flex h-screen w-screen">
+		<Sidebar.Provider>
+			<DashboardSideBar />
 
-		<div class="flex-1">
-			{@render children?.()}
-		</div>
-	</Sidebar.Provider>
-</div>
+			<div class="flex-1">
+				<Toaster />
+				{@render children?.()}
+			</div>
+		</Sidebar.Provider>
+	</div>
+</QueryClientProvider>

@@ -6,6 +6,8 @@
 	import CreateApplicationForm from "./(components)/create-application-form.svelte";
 
     let { data }: { data: PageData } = $props();
+
+	$inspect(data);
 </script>
 
 <Breadcrumbs

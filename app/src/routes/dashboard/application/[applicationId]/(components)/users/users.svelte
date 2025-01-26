@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { goto } from '$app/navigation';
+
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import {
 		type ColumnDef,
@@ -13,11 +15,12 @@
 		getSortedRowModel
 	} from '@tanstack/table-core';
 	import { createRawSnippet } from 'svelte';
+	
 	import DataTableCheckbox from './data-table-checkbox.svelte';
 	import DataTableEmailButton from './data-table-email-button.svelte';
 	import DataTableActions from './data-table-actions.svelte';
 	import * as Table from '$lib/components/ui/table';
-	import { Button } from '$lib/components/ui/button';
+	import { Button, buttonVariants } from '$lib/components/ui/button';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
 	import { Input } from '$lib/components/ui/input';
 	import {
@@ -26,66 +29,16 @@
 		renderComponent,
 		renderSnippet
 	} from '$lib/components/ui/data-table';
-	import DataTableRoleButton from './data-table-role-button.svelte';
+	
+	import type { IApplication } from '$lib/services/use-application-by-id-query';
+	import DataTableUserRoles from './data-table-user-roles.svelte';
+	import DataTableUserStatus from './data-table-user-status.svelte';
+	import { cn } from '$lib/utils';
 
-	type ApplicationUser = {
-		id: string;
-		isActive: boolean;
-		displayName: string;
-		email: string;
-		role: {
-			id: string;
-			name: string;
-			description: string;
-		};
-	};
+	type Props = { application?: IApplication | null }
+	type ApplicationUser = IApplication["users"]["data"][number];
 
-	const data: ApplicationUser[] = [
-		{
-			id: 'm5gr84i9',
-			isActive: true,
-			displayName: "Ken O'Conner",
-			email: 'ken99@yahoo.com',
-			role: {
-				id: '1',
-				name: 'User',
-				description: 'A user of the application. Can view and manage data.'
-			}
-		},
-		{
-			id: '3u1reuv4',
-			isActive: true,
-			displayName: 'Abigail Kuhn',
-			email: 'Abe45@gmail.com',
-			role: {
-				id: '2',
-				name: 'Admin',
-				description: 'An admin of the application. Can manage users and roles.'
-			}
-		},
-		{
-			id: '5kma53ae',
-			isActive: true,
-			displayName: 'Silas Kuhn',
-			email: 'Silas22@gmail.com',
-			role: {
-				id: '1',
-				name: 'User',
-				description: 'A user of the application. Can view and manage data.'
-			}
-		},
-		{
-			id: 'bhqecj4p',
-			isActive: true,
-			displayName: 'Carmella Kuhn',
-			email: 'carmella@hotmail.com',
-			role: {
-				id: '1',
-				name: 'User',
-				description: 'A user of the application. Can view and manage data.'
-			}
-		}
-	];
+	let { application }: Props = $props();
 
 	const columns: ColumnDef<ApplicationUser>[] = [
 		{
@@ -140,36 +93,19 @@
 		},
 
 		{
-			accessorKey: 'role',
-			header: ({ column }) =>
-				renderComponent(DataTableRoleButton, {
-					onclick: () => column.toggleSorting(column.getIsSorted() === 'asc')
-				}),
-			cell: ({ row }) => {
-				const emailSnippet = createRawSnippet<[ApplicationUser['role']]>((getRole) => {
-					const role = getRole();
-					return {
-						render: () => `<div class="font-bold">${role.name}</div>`
-					};
-				});
-
-				return renderSnippet(emailSnippet, row.getValue('role'));
-			}
+			accessorKey: 'roles',
+			header: "Roles",
+			cell: ({ row }) => renderComponent(DataTableUserRoles, {
+				roles: row.getValue('roles') as ApplicationUser['roles']
+			})
 		},
 
 		{
-			accessorKey: 'isActive',
+			accessorKey: 'deactivatedAt',
 			header: 'Status',
-			cell: ({ row }) => {
-				const emailSnippet = createRawSnippet<[boolean]>((getStatus) => {
-					const isActive = getStatus();
-					return {
-						render: () => `<div>${isActive ? 'Active' : 'Inactive'}</div>`
-					};
-				});
-
-				return renderSnippet(emailSnippet, row.getValue('isActive'));
-			}
+			cell: ({ row }) => renderComponent(DataTableUserStatus, {
+				deactivatedAt: row.getValue('deactivatedAt') as ApplicationUser['deactivatedAt']
+			}),
 		},
 		{
 			id: 'actions',
@@ -186,25 +122,15 @@
 
 	const table = createSvelteTable({
 		get data() {
-			return data;
+			return application?.users.data ?? [];
 		},
 		columns,
 		state: {
-			get pagination() {
-				return pagination;
-			},
-			get sorting() {
-				return sorting;
-			},
-			get columnVisibility() {
-				return columnVisibility;
-			},
-			get rowSelection() {
-				return rowSelection;
-			},
-			get columnFilters() {
-				return columnFilters;
-			}
+			get pagination() { return pagination },
+			get sorting() { return sorting },
+			get columnVisibility() { return columnVisibility },
+			get rowSelection() { return rowSelection },
+			get columnFilters() { return columnFilters }
 		},
 		getCoreRowModel: getCoreRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
@@ -261,7 +187,12 @@
 		/>
 
 		<DropdownMenu.Root>
-			<Button class="ml-4">Add User</Button>
+			<a 
+				href={`/dashboard/application/${application?.id}/user/create-user`} 
+				class={cn(buttonVariants({ variant: 'default' }), "ml-4")}
+			>
+				Add User
+			</a>
 
 			<DropdownMenu.Trigger>
 				{#snippet child({ props })}
@@ -305,7 +236,11 @@
 
 			<Table.Body>
 				{#each table.getRowModel().rows as row (row.id)}
-					<Table.Row data-state={row.getIsSelected() && 'selected'}>
+					<Table.Row 
+						data-state={row.getIsSelected() && 'selected'} 
+						onclick={() => goto(`/dashboard/application/${application?.id}/user/${row.original.id}`)}
+						class="hover:cursor-pointer"
+					>
 						{#each row.getVisibleCells() as cell (cell.id)}
 							<Table.Cell class="[&:has([role=checkbox])]:pl-3">
 								<FlexRender content={cell.column.columnDef.cell} context={cell.getContext()} />
@@ -336,6 +271,7 @@
 			>
 				Previous
 			</Button>
+			
 			<Button
 				variant="outline"
 				size="sm"

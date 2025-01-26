@@ -45,7 +45,7 @@
 	});
 </script>
 
-<form onsubmit={onSubmit} class="mt-4 max-w-[700px]">
+<form onsubmit={onSubmit} class="mt-4 max-w-[600px]">
 	<div class="grid gap-2">
 		<Form.Field {form} name="name">
 			<Form.Control>
@@ -95,7 +95,7 @@
 			<Form.FieldErrors></Form.FieldErrors>
 		</Form.Field>
 
-		<Separator class="my-2" />
+		<Separator />
 
 		<Form.Field {form} name="passwordHashSecret">
 			<Form.Control>
@@ -123,7 +123,7 @@
 			<Form.FieldErrors></Form.FieldErrors>
 		</Form.Field>
 
-		<Separator class="my-2" />
+		<Separator />
 
 		<div class="flex flex-col gap-3">
 			<span class="font-medium text-sm">
