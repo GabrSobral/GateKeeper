@@ -2,8 +2,13 @@
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import { goto } from '$app/navigation';
+	import { copy } from '$lib/utils';
+	import { page } from '$app/state';
 
 	let { id }: { id: string } = $props();
+
+	let applicationId = page.params.applicationId;
 </script>
 
 <DropdownMenu.Root>
@@ -19,11 +24,19 @@
 	<DropdownMenu.Content>
 		<DropdownMenu.Group>
 			<DropdownMenu.GroupHeading>Actions</DropdownMenu.GroupHeading>
-			<DropdownMenu.Item onclick={() => navigator.clipboard.writeText(id)}>
+			<DropdownMenu.Item onclick={() => copy(id)}>
 				Copy user ID
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
+		
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item>View user details</DropdownMenu.Item>
+
+		<DropdownMenu.Item onclick={() => goto(`/dashboard/application/${applicationId}/user/${id}?edit=true`)}>
+			Update User
+		</DropdownMenu.Item>
+
+		<DropdownMenu.Item class="text-red-500 font-bold">
+			Remove User
+		</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

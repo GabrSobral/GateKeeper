@@ -1,5 +1,6 @@
 <script lang="ts">
-	import { goto } from '$app/navigation';
+	import { writable } from 'svelte/store';
+	import { createRawSnippet } from 'svelte';
 
 	import ChevronDown from 'lucide-svelte/icons/chevron-down';
 	import {
@@ -14,7 +15,6 @@
 		getPaginationRowModel,
 		getSortedRowModel
 	} from '@tanstack/table-core';
-	import { createRawSnippet } from 'svelte';
 	
 	import DataTableCheckbox from './data-table-checkbox.svelte';
 	import DataTableActions from './data-table-actions.svelte';
@@ -31,11 +31,17 @@
 	
 	import type { IApplication } from '$lib/services/use-application-by-id-query';
 	import NewRoleDialog from './new-role-dialog.svelte';
+	import DeleteRoleDialog from './delete-role-dialog.svelte';
+	import UpdateRoleDialog from './update-role-dialog.svelte';
 
 	type Props = { application?: IApplication | null }
 	type ApplicationRole = IApplication["roles"]["data"][number];
 
 	let { application }: Props = $props();
+
+	let isDeleteModalOpened = writable(false);
+	let isUpdateModalOpened = writable(false);
+	let selectedRole = $state<ApplicationRole | null>(null);
 
 	const columns: ColumnDef<ApplicationRole>[] = [
 		{
@@ -87,7 +93,17 @@
 		{
 			id: 'actions',
 			enableHiding: false,
-			cell: ({ row }) => renderComponent(DataTableActions, { id: row.original.id })
+			cell: ({ row }) => renderComponent(DataTableActions, { 
+				role: row.original,
+				selectRoleToDelete: () => {
+					selectedRole = row.original;
+					isDeleteModalOpened.set(true);
+				},
+				selectRoleToUpdate: () => {
+					selectedRole = row.original;
+					isUpdateModalOpened.set(true);
+				}
+			})
 		}
 	];
 
@@ -249,3 +265,6 @@
 		</div>
 	</div>
 </div>
+
+<DeleteRoleDialog role={selectedRole} isDeleteModalOpened={isDeleteModalOpened} />
+<UpdateRoleDialog role={selectedRole} isDeleteModalOpened={isUpdateModalOpened} />

@@ -1,9 +1,18 @@
 <script lang="ts">
 	import Ellipsis from 'lucide-svelte/icons/ellipsis';
+	
+	import { copy } from '$lib/utils';
 	import { Button } from '$lib/components/ui/button/index.js';
 	import * as DropdownMenu from '$lib/components/ui/dropdown-menu/index.js';
+	import type { IApplication } from '$lib/services/use-application-by-id-query';
 
-	let { id }: { id: string } = $props();
+	type Props = { 
+		role: IApplication["roles"]["data"][number] 
+		selectRoleToDelete: () => void
+		selectRoleToUpdate: () => void
+	};
+
+	let { role, selectRoleToDelete, selectRoleToUpdate }: Props = $props();
 </script>
 
 <DropdownMenu.Root>
@@ -19,11 +28,19 @@
 	<DropdownMenu.Content>
 		<DropdownMenu.Group>
 			<DropdownMenu.GroupHeading>Actions</DropdownMenu.GroupHeading>
-			<DropdownMenu.Item onclick={() => navigator.clipboard.writeText(id)}>
-				Copy user ID
+			<DropdownMenu.Item onclick={() => copy(role.id)}>
+				Copy role ID
 			</DropdownMenu.Item>
 		</DropdownMenu.Group>
+		
 		<DropdownMenu.Separator />
-		<DropdownMenu.Item>View user details</DropdownMenu.Item>
+
+		<DropdownMenu.Item onclick={selectRoleToUpdate}>
+			Update Role
+		</DropdownMenu.Item>
+
+		<DropdownMenu.Item class="text-red-500 font-bold" onclick={selectRoleToDelete}>
+			Remove Role
+		</DropdownMenu.Item>
 	</DropdownMenu.Content>
 </DropdownMenu.Root>

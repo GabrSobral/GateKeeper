@@ -24,14 +24,20 @@
 	import Badge from '$lib/components/ui/badge/badge.svelte';
 	import ResetPasswordDialog from './(components)/reset-password-dialog.svelte';
 	import { page } from '$app/state';
+	import { goto } from '$app/navigation';
 
 	type Props = { data: { form: SuperValidated<Infer<FormSchema>> } };
 	let { data }: Props = $props();
 
 	let isLoading = $state(false);
-	let isEditEnabled = $state(false);
+	let editQueryString = $derived(page.url.searchParams.get('edit') || "false");
+	let isEditEnabled = $state(editQueryString === "true");
 
 	let applicationId = $derived(page.params.applicationId);
+
+	$effect(() => {
+		isEditEnabled = editQueryString === "true";
+	});
 
 	const form = superForm(data.form, { validators: zodClient(formSchema) });
 	const { form: formData } = form;
@@ -141,7 +147,14 @@
 				<Tooltip.Root delayDuration={0}>
 					<Tooltip.Trigger
 						class={cn(buttonVariants({ variant: 'outline' }))}
-						onclick={() => (isEditEnabled = !isEditEnabled)}
+						onclick={() => {
+							isEditEnabled = !isEditEnabled;
+							if (isEditEnabled) {
+								goto(`/dashboard/application/${applicationId}/user/${applicationId}?edit=${isEditEnabled}`);
+							} else {
+								goto(`/dashboard/application/${applicationId}/user/${applicationId}`);
+							}
+						}}
 					>
 						<Pencil />
 					</Tooltip.Trigger>

@@ -10,6 +10,8 @@
 	import { Badge } from '$lib/components/ui/badge';
 	import * as Tooltip from '$lib/components/ui/tooltip';
 	import { buttonVariants } from '$lib/components/ui/button';
+	
+	import { useApplicationByIdQuery } from '$lib/services/use-application-by-id-query';
 
 	import Users from './(components)/users/users.svelte';
 	import Roles from './(components)/roles/roles.svelte';
@@ -17,7 +19,6 @@
 	import Providers from './(components)/providers/providers.svelte';
 	import Breadcrumbs from '../../(components)/breadcrumbs.svelte';
 	import DeleteApplicationDialog from './(components)/delete-application-dialog.svelte';
-	import { useApplicationByIdQuery } from '$lib/services/use-application-by-id-query';
 
 	let currentTab = $derived(page.url.searchParams.get('tab') || "overview") as "overview" | "users" | "roles" | "providers";
 	let applicationId = $derived(page.params.applicationId);
