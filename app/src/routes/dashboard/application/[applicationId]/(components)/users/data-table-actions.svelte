@@ -6,7 +6,12 @@
 	import { copy } from '$lib/utils';
 	import { page } from '$app/state';
 
-	let { id }: { id: string } = $props();
+	type Props = { 
+		id: string;
+		selectUserToDelete: () => void; 
+	}
+	
+	let { id, selectUserToDelete }: Props = $props();
 
 	let applicationId = page.params.applicationId;
 </script>
@@ -35,7 +40,7 @@
 			Update User
 		</DropdownMenu.Item>
 
-		<DropdownMenu.Item class="text-red-500 font-bold">
+		<DropdownMenu.Item class="text-red-500 font-bold" onclick={selectUserToDelete}>
 			Remove User
 		</DropdownMenu.Item>
 	</DropdownMenu.Content>

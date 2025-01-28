@@ -34,9 +34,14 @@
 	import DataTableUserRoles from './data-table-user-roles.svelte';
 	import DataTableUserStatus from './data-table-user-status.svelte';
 	import { cn } from '$lib/utils';
+	import DeleteUserDialog from './delete-user-dialog.svelte';
+	import { writable } from 'svelte/store';
 
 	type Props = { application?: IApplication | null }
 	type ApplicationUser = IApplication["users"]["data"][number];
+
+	let isDeleteModalOpened = writable(false);
+	let selectedUser = $state<ApplicationUser | null>(null);
 
 	let { application }: Props = $props();
 
@@ -110,7 +115,13 @@
 		{
 			id: 'actions',
 			enableHiding: false,
-			cell: ({ row }) => renderComponent(DataTableActions, { id: row.original.id })
+			cell: ({ row }) => renderComponent(DataTableActions, { 
+				id: row.original.id,
+				selectUserToDelete: () => {
+					selectedUser = row.original;
+					isDeleteModalOpened.set(true);
+				} 
+			})
 		}
 	];
 
@@ -283,3 +294,5 @@
 		</div>
 	</div>
 </div>
+
+<DeleteUserDialog user={selectedUser} {isDeleteModalOpened}/>

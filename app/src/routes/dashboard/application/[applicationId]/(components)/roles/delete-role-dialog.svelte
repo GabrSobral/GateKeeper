@@ -1,10 +1,11 @@
 <script lang="ts">
 	
+	import type { Writable } from "svelte/store";
+
 	import * as Dialog from '$lib/components/ui/dialog';
 	import { buttonVariants } from '$lib/components/ui/button';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import type { IApplication } from "$lib/services/use-application-by-id-query";
-	import type { Writable } from "svelte/store";
 
 	let isLoading = $state(false);
 
@@ -17,9 +18,11 @@
 
 	function handler() {
 		isLoading = true;
-
+		
 		// Logic here
 		isLoading = false;
+
+		isDeleteModalOpened.set(false);
 	}
 </script>
 
