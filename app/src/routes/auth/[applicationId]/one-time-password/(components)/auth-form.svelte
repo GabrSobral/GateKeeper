@@ -23,9 +23,9 @@
 	}
 </script>
 
-<div class='grid gap-6'>
+<div class='grid gap-4'>
 	<form on:submit|preventDefault={onSubmit}>
-		<div class="grid gap-6">
+		<div class="grid gap-2">
 			<InputOTP.Root maxlength={6} class="mx-auto">
 				{#snippet children({ cells })}
 				  <InputOTP.Group>

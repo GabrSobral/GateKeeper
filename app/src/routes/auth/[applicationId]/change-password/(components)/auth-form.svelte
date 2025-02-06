@@ -9,6 +9,7 @@
 	import { cn } from '$lib/utils.js';
 	import { formSchema, type FormSchema } from '../schema';
 	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
 
 	let {
 		data,
@@ -18,6 +19,7 @@
 		class?: string | null;
 	} = $props();
 
+	let applicationId = page.params.applicationId;
 	let isLoading = $state(false);
 
 	const form = superForm(data.form, { validators: zodClient(formSchema) });
@@ -26,7 +28,7 @@
 	async function onSubmit() {
 		isLoading = true;
 
-		goto("/auth/one-time-password");
+		goto(`/auth/${applicationId}/one-time-password`);
 
 		setTimeout(() => {
 			isLoading = false;
@@ -34,7 +36,7 @@
 	}
 </script>
 
-<div class={cn('grid gap-6', className)}>
+<div class={cn('grid gap-4', className)}>
 	<form on:submit|preventDefault={onSubmit}>
 		<div class="grid gap-2">
 			<Form.Field {form} name="password">

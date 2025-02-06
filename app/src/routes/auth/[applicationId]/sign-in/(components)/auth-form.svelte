@@ -7,18 +7,21 @@
 	import Input from '$lib/components/ui/input/input.svelte';
 
 	import { cn } from '$lib/utils.js';
-
 	import { formSchema, type FormSchema } from '../schema';
+	import { goto } from '$app/navigation';
+	import { page } from '$app/state';
+	import type { PageData } from '../$types';
 
 	let {
 		data,
 		class: className
 	}: {
-		data: { form: SuperValidated<Infer<FormSchema>> };
+		data: PageData;
 		class?: string | null;
 	} = $props();
 
 	let isLoading = $state(false);
+	let applicationId = page.params.applicationId;
 
 	const form = superForm(data.form, { validators: zodClient(formSchema) });
 	const { form: formData, enhance } = form;
@@ -26,47 +29,17 @@
 	async function onSubmit() {
 		isLoading = true;
 
+		goto(`/auth/${applicationId}/one-time-password`);
+
 		setTimeout(() => {
 			isLoading = false;
 		}, 3000);
 	}
 </script>
 
-<div class={cn('grid gap-6', className)}>
+<div class={cn('grid gap-4', className)}>
 	<form on:submit|preventDefault={onSubmit}>
 		<div class="grid gap-2">
-			<Form.Field {form} name="firstName">
-				<Form.Control>
-					{#snippet children({ props })}
-						<Form.Label>First Name</Form.Label>
-						<Input
-							{...props}
-							bind:value={$formData.firstName}
-							placeholder="Type your first name"
-							autocomplete="given-name"
-						/>
-					{/snippet}
-				</Form.Control>
-				<Form.Description />
-				<Form.FieldErrors />
-			</Form.Field>
-
-			<Form.Field {form} name="lastName">
-				<Form.Control>
-					{#snippet children({ props })}
-						<Form.Label>Last Name</Form.Label>
-						<Input
-							{...props}
-							bind:value={$formData.lastName}
-							placeholder="Type your last name"
-							autocomplete="family-name"
-						/>
-					{/snippet}
-				</Form.Control>
-				<Form.Description />
-				<Form.FieldErrors />
-			</Form.Field>
-
 			<Form.Field {form} name="email">
 				<Form.Control>
 					{#snippet children({ props })}
@@ -83,7 +56,7 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-            <Form.Field {form} name="password">
+			<Form.Field {form} name="password">
 				<Form.Control>
 					{#snippet children({ props })}
 						<Form.Label>Password</Form.Label>
@@ -99,7 +72,20 @@
 				<Form.FieldErrors />
 			</Form.Field>
 
-			<Button type="submit" disabled={isLoading}>Sign up with Email</Button>
+			<div class="flex items-center justify-between gap-2">
+				<a
+					href={`/auth/${applicationId}/forgot-password`}
+					class="text-md mb-2 text-center hover:underline">Forgot password</a
+				>
+
+				{#if data.applicationData?.canSelfRegister}
+					<a href={`/auth/${applicationId}/sign-up`} class="font-semibold text-md text-center hover:underline">
+						Create an account
+					</a>
+				{/if}
+			</div>
+
+			<Button type="submit" disabled={isLoading}>Sign In with Email</Button>
 		</div>
 	</form>
 
@@ -112,5 +98,11 @@
 		</div>
 	</div>
 
-	<Button variant="outline" type="button" disabled={isLoading}>GitHub</Button>
+	<div class="flex flex-col gap-1">
+		{#each data.applicationData?.oauthProviders || [] as provider}
+			<Button variant="outline" type="button" disabled={isLoading}>
+				{provider.name}
+			</Button>
+		{/each}
+	</div>
 </div>
