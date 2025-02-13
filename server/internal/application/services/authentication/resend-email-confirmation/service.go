@@ -11,14 +11,16 @@ import (
 	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	mailservice "github.com/gate-keeper/internal/infra/mail-service"
+	"github.com/google/uuid"
 )
 
 type Request struct {
-	Email string `json:"email"`
+	ApplicationID uuid.UUID `json:"applicationId"`
+	Email         string    `json:"email"`
 }
 
 type ResendEmailConfirmation struct {
-	UserRepository              repository_interfaces.IUserRepository
+	ApplicationUserRepository   repository_interfaces.IApplicationUserRepository
 	UserProfileRepository       repository_interfaces.IUserProfileRepository
 	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
 
@@ -27,7 +29,7 @@ type ResendEmailConfirmation struct {
 
 func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
 	return &ResendEmailConfirmation{
-		UserRepository:              repository_handlers.UserRepository{Store: q},
+		ApplicationUserRepository:   repository_handlers.ApplicationUserRepository{Store: q},
 		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
 		EmailConfirmationRepository: repository_handlers.EmailConfirmationRepository{Store: q},
 		MailService:                 &mailservice.MailService{},
@@ -35,7 +37,7 @@ func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
 }
 
 func (cm *ResendEmailConfirmation) Handler(ctx context.Context, request Request) error {
-	user, err := cm.UserRepository.GetUserByEmail(ctx, request.Email)
+	user, err := cm.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
 		return nil

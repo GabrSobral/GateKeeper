@@ -1,13 +1,14 @@
 package http_controllers
 
 import (
+	"log"
 	"net/http"
 
 	getuserbyemail "github.com/gate-keeper/internal/application/services/user/get-user-by-email"
 	getuserbyid "github.com/gate-keeper/internal/application/services/user/get-user-by-id"
 	"github.com/gate-keeper/internal/infra/database/repositories"
 	http_router "github.com/gate-keeper/internal/presentation/http"
-	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -36,7 +37,12 @@ func (c *UserController) GetUserByEmailController(writter http.ResponseWriter, r
 }
 
 func (c *UserController) GetUserByIDController(writter http.ResponseWriter, request *http.Request) {
+	log.Printf("asd;askdl;as")
+
 	userIDString := chi.URLParam(request, "userID")
+
+	log.Printf("UUID here: %v", userIDString)
+
 	userIdUUID, err := uuid.Parse(userIDString)
 
 	if err != nil {

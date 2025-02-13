@@ -15,9 +15,10 @@ import (
 )
 
 type ResetPasswordService struct {
-	UserRepository          repository_interfaces.IUserRepository
-	RefreshTokenRepository  repository_interfaces.IRefreshTokenRepository
-	PasswordResetRepository repository_interfaces.IPasswordResetRepository
+	ApplicationRepository     repository_interfaces.IApplicationRepository
+	ApplicationUserRepository repository_interfaces.IApplicationUserRepository
+	RefreshTokenRepository    repository_interfaces.IRefreshTokenRepository
+	PasswordResetRepository   repository_interfaces.IPasswordResetRepository
 }
 
 type Request struct {
@@ -28,9 +29,10 @@ type Request struct {
 
 func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
 	return &ResetPasswordService{
-		UserRepository:          repository_handlers.UserRepository{Store: q},
-		RefreshTokenRepository:  repository_handlers.RefreshTokenRepository{Store: q},
-		PasswordResetRepository: repository_handlers.PasswordResetRepository{Store: q},
+		ApplicationRepository:     repository_handlers.ApplicationRepository{Store: q},
+		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
+		RefreshTokenRepository:    repository_handlers.RefreshTokenRepository{Store: q},
+		PasswordResetRepository:   repository_handlers.PasswordResetRepository{Store: q},
 	}
 }
 
@@ -53,7 +55,7 @@ func (fp *ResetPasswordService) Handler(ctx context.Context, request Request) er
 		return &errors.ErrPasswordResetTokenMismatch
 	}
 
-	user, err := fp.UserRepository.GetUserByID(ctx, passwordResetToken.UserID)
+	user, err := fp.ApplicationUserRepository.GetUserByID(ctx, passwordResetToken.UserID)
 
 	if err != nil {
 		return err
@@ -63,7 +65,13 @@ func (fp *ResetPasswordService) Handler(ctx context.Context, request Request) er
 		return &errors.ErrUserNotFound
 	}
 
-	hashedPassword, err := application_utils.HashPassword(request.NewPassword)
+	application, err := fp.ApplicationRepository.GetApplicationByID(ctx, user.ApplicationID)
+
+	if err != nil {
+		return err
+	}
+
+	hashedPassword, err := application_utils.HashPassword(request.NewPassword, application.PasswordHashSecret)
 
 	if err != nil {
 		return err
@@ -71,7 +79,7 @@ func (fp *ResetPasswordService) Handler(ctx context.Context, request Request) er
 
 	user.PasswordHash = &hashedPassword
 
-	fp.UserRepository.UpdateUser(ctx, user)
+	fp.ApplicationUserRepository.UpdateUser(ctx, user)
 	fp.RefreshTokenRepository.RevokeRefreshTokenFromUser(ctx, user.ID)
 	fp.PasswordResetRepository.DeletePasswordResetFromUser(ctx, user.ID)
 

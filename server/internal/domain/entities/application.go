@@ -7,15 +7,20 @@ import (
 )
 
 type Application struct {
-	ID          uuid.UUID
-	TenantID    uuid.UUID
-	Name        string
-	Description *string
-	CreatedAt   time.Time
-	UpdatedAt   *time.Time
+	ID                 uuid.UUID
+	OrganizationID     uuid.UUID
+	Name               string
+	Description        *string
+	IsActive           bool
+	HasMfaAuthApp      bool
+	HasMfaEmail        bool
+	PasswordHashSecret string
+	Badges             []string
+	CreatedAt          time.Time
+	UpdatedAt          *time.Time
 }
 
-func NewApplication(name string, description *string, tenantID uuid.UUID) *Application {
+func NewApplication(name string, description *string, organizationID uuid.UUID, passwordHashSecret string) *Application {
 	newID, err := uuid.NewV7()
 
 	if err != nil {
@@ -23,11 +28,16 @@ func NewApplication(name string, description *string, tenantID uuid.UUID) *Appli
 	}
 
 	return &Application{
-		ID:          newID,
-		TenantID:    tenantID,
-		Name:        name,
-		Description: description,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   nil,
+		ID:                 newID,
+		OrganizationID:     organizationID,
+		Name:               name,
+		Description:        description,
+		CreatedAt:          time.Now(),
+		UpdatedAt:          nil,
+		PasswordHashSecret: passwordHashSecret,
+		IsActive:           true,
+		HasMfaAuthApp:      false,
+		HasMfaEmail:        false,
+		Badges:             []string{},
 	}
 }

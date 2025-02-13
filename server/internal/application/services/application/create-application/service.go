@@ -12,16 +12,24 @@ import (
 )
 
 type Request struct {
-	Name        string    `json:"name" validate:"required,min=3,max=100"`
-	Description *string   `json:"description" validate:"omitempty,min=3,max=100"`
-	TenantID    uuid.UUID `json:"tenant_id" validate:"required"`
+	Name               string    `json:"name" validate:"required,min=3,max=100"`
+	Description        *string   `json:"description" validate:"omitempty,min=3,max=100"`
+	PasswordHashSecret string    `json:"passwordHashSecret" validate:"required,min=64,max=258"`
+	Badges             []string  `json:"badges" validate:"required"`
+	HasMfaEmail        bool      `json:"hasMfaEmail" validate:"boolean"`
+	HasMfaAuthApp      bool      `json:"hasMfaAuthApp" validate:"boolean"`
+	OrganizationID     uuid.UUID `json:"organizationId" validate:"required"`
 }
 
 type Response struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description"`
-	TenantID    uuid.UUID `json:"tenant_id"`
+	ID                 uuid.UUID `json:"id"`
+	Name               string    `json:"name"`
+	Description        *string   `json:"description"`
+	PasswordHashSecret string    `json:"passwordHashSecret"`
+	Badges             []string  `json:"badges"`
+	HasMfaEmail        bool      `json:"hasMfaEmail"`
+	HasMfaAuthApp      bool      `json:"hasMfaAuthApp"`
+	OrganizationID     uuid.UUID `json:"organizationId"`
 }
 
 type CreateApplicationService struct {
@@ -35,7 +43,7 @@ func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 }
 
 func (s *CreateApplicationService) Handler(ctx context.Context, request Request) (*Response, error) {
-	newApplication := entities.NewApplication(request.Name, request.Description, request.TenantID)
+	newApplication := entities.NewApplication(request.Name, request.Description, request.OrganizationID, request.PasswordHashSecret)
 
 	err := s.ApplicationRepository.AddApplication(ctx, newApplication)
 
@@ -44,9 +52,13 @@ func (s *CreateApplicationService) Handler(ctx context.Context, request Request)
 	}
 
 	return &Response{
-		ID:          newApplication.ID,
-		Name:        newApplication.Name,
-		Description: newApplication.Description,
-		TenantID:    newApplication.TenantID,
+		ID:                 newApplication.ID,
+		Name:               newApplication.Name,
+		Description:        newApplication.Description,
+		OrganizationID:     newApplication.OrganizationID,
+		PasswordHashSecret: newApplication.PasswordHashSecret,
+		Badges:             newApplication.Badges,
+		HasMfaEmail:        newApplication.HasMfaEmail,
+		HasMfaAuthApp:      newApplication.HasMfaAuthApp,
 	}, nil
 }

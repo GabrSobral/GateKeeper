@@ -11,8 +11,8 @@ import (
 	mailservice "github.com/gate-keeper/internal/infra/mail-service"
 )
 
-func setupTest() (*inmemory_repositories.InMemoryUserRepository, *inmemory_repositories.InMemoryUserProfileRepository, *inmemory_repositories.InMemoryRefreshTokenRepository, *signup.SignUpService) {
-	inMemoryUserRepository := inmemory_repositories.InMemoryUserRepository{Users: make(map[string]*entities.User)}
+func setupTest() (*inmemory_repositories.InMemoryApplicationUserRepository, *inmemory_repositories.InMemoryUserProfileRepository, *inmemory_repositories.InMemoryRefreshTokenRepository, *signup.SignUpService) {
+	inMemoryApplicationUserRepository := inmemory_repositories.InMemoryApplicationUserRepository{Users: make(map[string]*entities.ApplicationUser)}
 	inMemoryUserProfileRepository := inmemory_repositories.InMemoryUserProfileRepository{Users: make(map[string]*entities.UserProfile)}
 	inMemoryRefreshTokenRepository := inmemory_repositories.InMemoryRefreshTokenRepository{RefreshTokens: make(map[string]*entities.RefreshToken)}
 	inMemoryEmailConfirmationRepository := inmemory_repositories.InMemoryEmailConfirmationRepository{Emails: make(map[string]*entities.EmailConfirmation)}
@@ -20,14 +20,14 @@ func setupTest() (*inmemory_repositories.InMemoryUserRepository, *inmemory_repos
 	mailServiceMock := mailservice.MailServiceMock{}
 
 	signUpService := signup.SignUpService{
-		UserRepository:              inMemoryUserRepository,
+		ApplicationUserRepository:   inMemoryApplicationUserRepository,
 		UserProfileRepository:       inMemoryUserProfileRepository,
 		RefreshTokenRepository:      inMemoryRefreshTokenRepository,
 		EmailConfirmationRepository: inMemoryEmailConfirmationRepository,
 		MailService:                 &mailServiceMock,
 	}
 
-	return &inMemoryUserRepository, &inMemoryUserProfileRepository, &inMemoryRefreshTokenRepository, &signUpService
+	return &inMemoryApplicationUserRepository, &inMemoryUserProfileRepository, &inMemoryRefreshTokenRepository, &signUpService
 }
 
 func TestSignUpCredentialService(t *testing.T) {
@@ -59,7 +59,7 @@ func TestSignUpCredentialService(t *testing.T) {
 	t.Run("Should run without any error", func(t *testing.T) {
 		ctx := context.Background()
 
-		inMemoryUserRepository, inMemoryUserProfileRepository, _, signUpService := setupTest()
+		inMemoryApplicationUserRepository, inMemoryUserProfileRepository, _, signUpService := setupTest()
 
 		request := signup.Request{
 			Email:     "test@email.com",
@@ -78,8 +78,8 @@ func TestSignUpCredentialService(t *testing.T) {
 			t.Errorf("Expected users profiles length == 1, got %v", len(inMemoryUserProfileRepository.Users))
 		}
 
-		if len(inMemoryUserRepository.Users) != 1 {
-			t.Errorf("Expected users length == 1, got %v", len(inMemoryUserRepository.Users))
+		if len(inMemoryApplicationUserRepository.Users) != 1 {
+			t.Errorf("Expected users length == 1, got %v", len(inMemoryApplicationUserRepository.Users))
 		}
 	})
 

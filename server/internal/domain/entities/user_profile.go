@@ -4,6 +4,7 @@ import "github.com/google/uuid"
 
 type UserProfile struct {
 	UserID      uuid.UUID
+	DisplayName string
 	FirstName   string
 	LastName    string
 	PhoneNumber *string
@@ -11,7 +12,7 @@ type UserProfile struct {
 	PhotoURL    *string
 }
 
-func NewUserProfile(userID uuid.UUID, firstName, lastName string, phoneNumber, address, photoURL *string) *UserProfile {
+func NewUserProfile(userID uuid.UUID, firstName, lastName, displayName string, phoneNumber, address, photoURL *string) *UserProfile {
 	return &UserProfile{
 		UserID:      userID,
 		FirstName:   firstName,

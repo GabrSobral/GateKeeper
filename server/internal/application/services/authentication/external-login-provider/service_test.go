@@ -13,14 +13,14 @@ func TestExternalLoginService(t *testing.T) {
 	t.Run("Should run without any error when is the first access", func(t *testing.T) {
 		ctx := context.Background()
 
-		inMemoryUserRepository := inmemory_repositories.InMemoryUserRepository{Users: make(map[string]*entities.User)}
+		inMemoryApplicationUserRepository := inmemory_repositories.InMemoryApplicationUserRepository{Users: make(map[string]*entities.ApplicationUser)}
 		inMemoryUserProfileRepository := inmemory_repositories.InMemoryUserProfileRepository{Users: make(map[string]*entities.UserProfile)}
 		inMemoryExternalLoginRepository := inmemory_repositories.InMemoryExternalLoginRepository{Logins: make(map[string]*entities.ExternalLogin)}
 
 		externalLoginService := externalloginprovider.ExternalLoginProvider{
-			UserRepository:          inMemoryUserRepository,
-			UserProfileRepository:   inMemoryUserProfileRepository,
-			ExternalLoginRepository: inMemoryExternalLoginRepository,
+			ApplicationUserRepository: inMemoryApplicationUserRepository,
+			UserProfileRepository:     inMemoryUserProfileRepository,
+			ExternalLoginRepository:   inMemoryExternalLoginRepository,
 		}
 
 		request := externalloginprovider.Request{
@@ -41,7 +41,7 @@ func TestExternalLoginService(t *testing.T) {
 			t.Error("Response should not be nil")
 		}
 
-		if len(inMemoryUserRepository.Users) == 0 {
+		if len(inMemoryApplicationUserRepository.Users) == 0 {
 			t.Error("User should be created")
 		}
 
@@ -57,14 +57,14 @@ func TestExternalLoginService(t *testing.T) {
 	t.Run("Should run without any error when is the second access or more", func(t *testing.T) {
 		ctx := context.Background()
 
-		inMemoryUserRepository := inmemory_repositories.InMemoryUserRepository{Users: make(map[string]*entities.User)}
+		inMemoryApplicationUserRepository := inmemory_repositories.InMemoryApplicationUserRepository{Users: make(map[string]*entities.ApplicationUser)}
 		inMemoryUserProfileRepository := inmemory_repositories.InMemoryUserProfileRepository{Users: make(map[string]*entities.UserProfile)}
 		inMemoryExternalLoginRepository := inmemory_repositories.InMemoryExternalLoginRepository{Logins: make(map[string]*entities.ExternalLogin)}
 
 		externalLoginService := externalloginprovider.ExternalLoginProvider{
-			UserRepository:          inMemoryUserRepository,
-			UserProfileRepository:   inMemoryUserProfileRepository,
-			ExternalLoginRepository: inMemoryExternalLoginRepository,
+			ApplicationUserRepository: inMemoryApplicationUserRepository,
+			UserProfileRepository:     inMemoryUserProfileRepository,
+			ExternalLoginRepository:   inMemoryExternalLoginRepository,
 		}
 
 		request := externalloginprovider.Request{
@@ -85,7 +85,7 @@ func TestExternalLoginService(t *testing.T) {
 			t.Error("Response should not be nil")
 		}
 
-		if len(inMemoryUserRepository.Users) == 0 {
+		if len(inMemoryApplicationUserRepository.Users) == 0 {
 			t.Error("User should be created")
 		}
 
@@ -107,7 +107,7 @@ func TestExternalLoginService(t *testing.T) {
 			t.Error("Response should not be nil")
 		}
 
-		if len(inMemoryUserRepository.Users) != 1 {
+		if len(inMemoryApplicationUserRepository.Users) != 1 {
 			t.Error("Users Length should be 1")
 		}
 

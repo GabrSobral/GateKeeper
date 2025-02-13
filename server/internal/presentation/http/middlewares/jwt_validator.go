@@ -19,7 +19,14 @@ func JwtHandler(next http.Handler) http.Handler {
 			return
 		}
 
-		jwtToken := strings.Split(authHeader, "Bearer ")[1]
+		jwtTokenParts := strings.Split(authHeader, "Bearer ")
+
+		if len(jwtTokenParts) != 2 {
+			WriteJSONError(w, http.StatusUnauthorized, "Unauthorized", "Invalid token", ctx)
+			return
+		}
+
+		jwtToken := jwtTokenParts[1]
 		isValid, userID, err := application_utils.ValidateToken(jwtToken)
 
 		if !isValid {

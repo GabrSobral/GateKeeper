@@ -14,38 +14,45 @@ import (
 )
 
 const addApplication = `-- name: AddApplication :exec
-
-INSERT INTO "application" (
-    id,
-    tenant_id,
-    name,
-    description,
-    created_at,
-    updated_at
-) VALUES (
-    $1, -- id
-    $2, -- tenant_id
-    $3, -- name
-    $4, -- description
-    $5, -- created_at
-    $6 -- updated_at
-)
+INSERT INTO
+    "application" (
+        id,
+        organization_id,
+        name,
+        description,
+        created_at,
+        updated_at
+    )
+VALUES
+    (
+        $1,
+        -- id
+        $2,
+        -- organization_id
+        $3,
+        -- name
+        $4,
+        -- description
+        $5,
+        -- created_at
+        $6 -- updated_at
+    )
 `
 
 type AddApplicationParams struct {
-	ID          uuid.UUID        `db:"id"`
-	TenantID    uuid.UUID        `db:"tenant_id"`
-	Name        string           `db:"name"`
-	Description *string          `db:"description"`
-	CreatedAt   pgtype.Timestamp `db:"created_at"`
-	UpdatedAt   *time.Time       `db:"updated_at"`
+	ID             uuid.UUID        `db:"id"`
+	OrganizationID uuid.UUID        `db:"organization_id"`
+	Name           string           `db:"name"`
+	Description    *string          `db:"description"`
+	CreatedAt      pgtype.Timestamp `db:"created_at"`
+	UpdatedAt      *time.Time       `db:"updated_at"`
 }
 
 // ----------------------------------COMMANDS--------------------------------------
 func (q *Queries) AddApplication(ctx context.Context, arg AddApplicationParams) error {
 	_, err := q.db.Exec(ctx, addApplication,
 		arg.ID,
-		arg.TenantID,
+		arg.OrganizationID,
 		arg.Name,
 		arg.Description,
 		arg.CreatedAt,
@@ -54,8 +61,31 @@ func (q *Queries) AddApplication(ctx context.Context, arg AddApplicationParams) 
 	return err
 }
 
+const checkIfApplicationExists = `-- name: CheckIfApplicationExists :one
+SELECT
+    EXISTS (
+        SELECT
+            1
+        FROM
+            "application"
+        WHERE
+            id = $1
+    )
+`
+
+// ----------------------------------QUERIES--------------------------------------
+func (q *Queries) CheckIfApplicationExists(ctx context.Context, id uuid.UUID) (bool, error) {
+	row := q.db.QueryRow(ctx, checkIfApplicationExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
 const deleteApplication = `-- name: DeleteApplication :exec
-DELETE FROM "application" WHERE id = $1
+DELETE FROM
+    "application"
+WHERE
+    id = $1
 `
 
 func (q *Queries) DeleteApplication(ctx context.Context, id uuid.UUID) error {
@@ -64,61 +94,97 @@ func (q *Queries) DeleteApplication(ctx context.Context, id uuid.UUID) error {
 }
 
 const getApplicationByID = `-- name: GetApplicationByID :one
-
 SELECT
     id,
-    tenant_id,
+    organization_id,
     name,
     description,
+    badges,
+    is_active,
+    has_mfa_auth_app,
+    has_mfa_email,
+    password_hash_secret,
     created_at,
     updated_at
-FROM "application"
+FROM
+    "application"
 WHERE
     id = $1
 `
 
-// ----------------------------------QUERIES--------------------------------------
-func (q *Queries) GetApplicationByID(ctx context.Context, id uuid.UUID) (Application, error) {
+type GetApplicationByIDRow struct {
+	ID                 uuid.UUID        `db:"id"`
+	OrganizationID     uuid.UUID        `db:"organization_id"`
+	Name               string           `db:"name"`
+	Description        *string          `db:"description"`
+	Badges             *string          `db:"badges"`
+	IsActive           bool             `db:"is_active"`
+	HasMfaAuthApp      bool             `db:"has_mfa_auth_app"`
+	HasMfaEmail        bool             `db:"has_mfa_email"`
+	PasswordHashSecret string           `db:"password_hash_secret"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
+}
+
+func (q *Queries) GetApplicationByID(ctx context.Context, id uuid.UUID) (GetApplicationByIDRow, error) {
 	row := q.db.QueryRow(ctx, getApplicationByID, id)
-	var i Application
+	var i GetApplicationByIDRow
 	err := row.Scan(
 		&i.ID,
-		&i.TenantID,
+		&i.OrganizationID,
 		&i.Name,
 		&i.Description,
+		&i.Badges,
+		&i.IsActive,
+		&i.HasMfaAuthApp,
+		&i.HasMfaEmail,
+		&i.PasswordHashSecret,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
-const listApplicationsFromTenant = `-- name: ListApplicationsFromTenant :many
+const listApplicationsFromOrganization = `-- name: ListApplicationsFromOrganization :many
 SELECT
     id,
-    tenant_id,
+    organization_id,
     name,
     description,
+    badges,
     created_at,
     updated_at
-FROM "application"
+FROM
+    "application"
 WHERE
-    tenant_id = $1
+    organization_id = $1
 `
 
-func (q *Queries) ListApplicationsFromTenant(ctx context.Context, tenantID uuid.UUID) ([]Application, error) {
-	rows, err := q.db.Query(ctx, listApplicationsFromTenant, tenantID)
+type ListApplicationsFromOrganizationRow struct {
+	ID             uuid.UUID        `db:"id"`
+	OrganizationID uuid.UUID        `db:"organization_id"`
+	Name           string           `db:"name"`
+	Description    *string          `db:"description"`
+	Badges         *string          `db:"badges"`
+	CreatedAt      pgtype.Timestamp `db:"created_at"`
+	UpdatedAt      *time.Time       `db:"updated_at"`
+}
+
+func (q *Queries) ListApplicationsFromOrganization(ctx context.Context, organizationID uuid.UUID) ([]ListApplicationsFromOrganizationRow, error) {
+	rows, err := q.db.Query(ctx, listApplicationsFromOrganization, organizationID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Application
+	var items []ListApplicationsFromOrganizationRow
 	for rows.Next() {
-		var i Application
+		var i ListApplicationsFromOrganizationRow
 		if err := rows.Scan(
 			&i.ID,
-			&i.TenantID,
+			&i.OrganizationID,
 			&i.Name,
 			&i.Description,
+			&i.Badges,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -133,25 +199,28 @@ func (q *Queries) ListApplicationsFromTenant(ctx context.Context, tenantID uuid.
 }
 
 const updateApplication = `-- name: UpdateApplication :exec
-UPDATE "application" SET
-    tenant_id = $1,
+UPDATE
+    "application"
+SET
+    organization_id = $1,
     name = $2,
     description = $3,
     updated_at = $4
-WHERE id = $5
+WHERE
+    id = $5
 `
 
 type UpdateApplicationParams struct {
-	TenantID    uuid.UUID  `db:"tenant_id"`
-	Name        string     `db:"name"`
-	Description *string    `db:"description"`
-	UpdatedAt   *time.Time `db:"updated_at"`
-	ID          uuid.UUID  `db:"id"`
+	OrganizationID uuid.UUID  `db:"organization_id"`
+	Name           string     `db:"name"`
+	Description    *string    `db:"description"`
+	UpdatedAt      *time.Time `db:"updated_at"`
+	ID             uuid.UUID  `db:"id"`
 }
 
 func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error {
 	_, err := q.db.Exec(ctx, updateApplication,
-		arg.TenantID,
+		arg.OrganizationID,
 		arg.Name,
 		arg.Description,
 		arg.UpdatedAt,

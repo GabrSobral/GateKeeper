@@ -4,7 +4,6 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"fmt"
-	"os"
 	"strings"
 
 	"github.com/gate-keeper/internal/domain/errors"
@@ -12,8 +11,8 @@ import (
 )
 
 // HashPassword hashes the given password using argon2
-func HashPassword(password string) (string, error) {
-	saltString := os.Getenv("PASSWORD_SALT")
+func HashPassword(password, passwordHashSecret string) (string, error) {
+	saltString := passwordHashSecret
 	salt := []byte(saltString)
 	memory := uint32(64 * 1024) // 64MB
 	threads := uint8(4)
@@ -40,7 +39,7 @@ type params struct {
 	keyLength   uint32
 }
 
-func ComparePassword(encodedHash string, password string) (match bool, err error) {
+func ComparePassword(encodedHash, password string) (match bool, err error) {
 	// Extract the parameters, salt and derived key from the encoded password
 	// hash.
 	p, salt, hash, err := decodeHash(encodedHash)

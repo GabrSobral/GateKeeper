@@ -13,18 +13,18 @@ import (
 	"github.com/google/uuid"
 )
 
-func setupTest() (*inmemory_repositories.InMemoryUserRepository, *inmemory_repositories.InMemoryUserProfileRepository, *inmemory_repositories.InMemoryRefreshTokenRepository, *signin.SignInService) {
-	inMemoryUserRepository := inmemory_repositories.InMemoryUserRepository{Users: make(map[string]*entities.User)}
+func setupTest() (*inmemory_repositories.InMemoryApplicationUserRepository, *inmemory_repositories.InMemoryUserProfileRepository, *inmemory_repositories.InMemoryRefreshTokenRepository, *signin.SignInService) {
+	inMemoryApplicationUserRepository := inmemory_repositories.InMemoryApplicationUserRepository{Users: make(map[string]*entities.ApplicationUser)}
 	inMemoryUserProfileRepository := inmemory_repositories.InMemoryUserProfileRepository{Users: make(map[string]*entities.UserProfile)}
 	inMemoryRefreshTokenRepository := inmemory_repositories.InMemoryRefreshTokenRepository{RefreshTokens: make(map[string]*entities.RefreshToken)}
 
 	signInService := signin.SignInService{
-		UserRepository:         inMemoryUserRepository,
-		UserProfileRepository:  inMemoryUserProfileRepository,
-		RefreshTokenRepository: inMemoryRefreshTokenRepository,
+		ApplicationUserRepository: inMemoryApplicationUserRepository,
+		UserProfileRepository:     inMemoryUserProfileRepository,
+		RefreshTokenRepository:    inMemoryRefreshTokenRepository,
 	}
 
-	return &inMemoryUserRepository, &inMemoryUserProfileRepository, &inMemoryRefreshTokenRepository, &signInService
+	return &inMemoryApplicationUserRepository, &inMemoryUserProfileRepository, &inMemoryRefreshTokenRepository, &signInService
 }
 
 func TestSignInCredentialService(t *testing.T) {
@@ -56,9 +56,9 @@ func TestSignInCredentialService(t *testing.T) {
 	t.Run("Should return an error when email is not valid", func(t *testing.T) {
 		ctx := context.Background()
 
-		inMemoryUserRepository, inMemoryUserProfileRepository, _, signInService := setupTest()
+		inMemoryApplicationUserRepository, inMemoryUserProfileRepository, _, signInService := setupTest()
 
-		hashedPassword, err := application_utils.HashPassword("123")
+		hashedPassword, err := application_utils.HashPassword("123", "123")
 
 		if err != nil {
 			t.Errorf("Expected nil, got error %v", err)
@@ -70,7 +70,7 @@ func TestSignInCredentialService(t *testing.T) {
 			t.Errorf("Expected nil, got error %v", err)
 		}
 
-		inMemoryUserRepository.Users[userId.String()] = &entities.User{
+		inMemoryApplicationUserRepository.Users[userId.String()] = &entities.ApplicationUser{
 			ID:               userId,
 			Email:            "test@email.com",
 			PasswordHash:     &hashedPassword,
@@ -107,9 +107,9 @@ func TestSignInCredentialService(t *testing.T) {
 	t.Run("Should run without any error", func(t *testing.T) {
 		ctx := context.Background()
 
-		inMemoryUserRepository, inMemoryUserProfileRepository, inMemoryRefreshTokenRepository, signInService := setupTest()
+		inMemoryApplicationUserRepository, inMemoryUserProfileRepository, inMemoryRefreshTokenRepository, signInService := setupTest()
 
-		hashedPassword, err := application_utils.HashPassword("123")
+		hashedPassword, err := application_utils.HashPassword("123", "123")
 
 		if err != nil {
 			t.Errorf("Expected nil, got error %v", err)
@@ -117,7 +117,7 @@ func TestSignInCredentialService(t *testing.T) {
 
 		newId, _ := uuid.NewV7()
 
-		inMemoryUserRepository.Users[newId.String()] = &entities.User{
+		inMemoryApplicationUserRepository.Users[newId.String()] = &entities.ApplicationUser{
 			ID:               newId,
 			Email:            "test@email.com",
 			PasswordHash:     &hashedPassword,

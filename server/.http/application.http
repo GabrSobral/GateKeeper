@@ -10,5 +10,5 @@ Authorization: Bearer {{token}}
 {
     "name": "Test Application",
     "description": "Test Application Description",
-    "tenant_id": "0194776c-c9b1-77f9-a046-f054603e863c"
+    "organization_id": "0194776c-c9b1-77f9-a046-f054603e863c"
 }

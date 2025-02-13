@@ -12,5 +12,6 @@ type IApplicationRepository interface {
 	GetApplicationByID(ctx context.Context, applicationID uuid.UUID) (*entities.Application, error)
 	RemoveApplication(ctx context.Context, applicationID uuid.UUID) error
 	UpdateApplication(ctx context.Context, newApplication *entities.Application) error
-	ListApplicationsFromTenant(ctx context.Context, tenantID uuid.UUID) (*[]entities.Application, error)
+	ListApplicationsFromOrganization(ctx context.Context, organizationID uuid.UUID) (*[]entities.Application, error)
+	CheckIfApplicationExists(ctx context.Context, applicationID uuid.UUID) (bool, error)
 }

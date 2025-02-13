@@ -12,33 +12,33 @@ import (
 )
 
 type Request struct {
-	UserID uuid.UUID `json:"user_id"` // This is the user ID
+	UserID uuid.UUID `json:"userId"` // This is the user ID
 }
 
 type Response struct {
 	ID              uuid.UUID `json:"id"`
 	Email           string    `json:"email"`
-	FirstName       string    `json:"first_name"`
-	Lastname        string    `json:"last_name"`
+	FirstName       string    `json:"firstName"`
+	Lastname        string    `json:"lastName"`
 	Address         *string   `json:"address"`
-	PhotoURL        *string   `json:"photo_url"`
-	IsEmailVerified bool      `json:"is_email_verified"`
+	PhotoURL        *string   `json:"photoUrl"`
+	IsEmailVerified bool      `json:"isEmailVerified"`
 }
 
 type GetUserByID struct {
-	UserRepository        repository_interfaces.IUserRepository
-	UserProfileRepository repository_interfaces.IUserProfileRepository
+	ApplicationUserRepository repository_interfaces.IApplicationUserRepository
+	UserProfileRepository     repository_interfaces.IUserProfileRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &GetUserByID{
-		UserRepository:        repository_handlers.UserRepository{Store: q},
-		UserProfileRepository: repository_handlers.UserProfileRepository{Store: q},
+		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
+		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
 	}
 }
 
 func (s *GetUserByID) Handler(ctx context.Context, request Request) (*Response, error) {
-	user, err := s.UserRepository.GetUserByID(ctx, request.UserID)
+	user, err := s.ApplicationUserRepository.GetUserByID(ctx, request.UserID)
 
 	if err != nil {
 		return nil, nil

@@ -12,12 +12,71 @@ import (
 )
 
 type Application struct {
-	ID          uuid.UUID        `db:"id"`
-	TenantID    uuid.UUID        `db:"tenant_id"`
-	Name        string           `db:"name"`
-	Description *string          `db:"description"`
-	CreatedAt   pgtype.Timestamp `db:"created_at"`
-	UpdatedAt   *time.Time       `db:"updated_at"`
+	ID                 uuid.UUID        `db:"id"`
+	OrganizationID     uuid.UUID        `db:"organization_id"`
+	Name               string           `db:"name"`
+	Description        *string          `db:"description"`
+	IsActive           bool             `db:"is_active"`
+	HasMfaAuthApp      bool             `db:"has_mfa_auth_app"`
+	HasMfaEmail        bool             `db:"has_mfa_email"`
+	PasswordHashSecret string           `db:"password_hash_secret"`
+	Badges             *string          `db:"badges"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
+}
+
+type ApplicationMailConfig struct {
+	ID            uuid.UUID        `db:"id"`
+	ApplicationID uuid.UUID        `db:"application_id"`
+	Host          string           `db:"host"`
+	Username      string           `db:"username"`
+	Password      string           `db:"password"`
+	Port          int32            `db:"port"`
+	CreatedAt     pgtype.Timestamp `db:"created_at"`
+	UpdatedAt     *time.Time       `db:"updated_at"`
+}
+
+type ApplicationOauthProvider struct {
+	ID            uuid.UUID        `db:"id"`
+	ApplicationID uuid.UUID        `db:"application_id"`
+	Name          string           `db:"name"`
+	ClientID      string           `db:"client_id"`
+	ClientSecret  string           `db:"client_secret"`
+	CreatedAt     pgtype.Timestamp `db:"created_at"`
+	UpdatedAt     *time.Time       `db:"updated_at"`
+}
+
+type ApplicationRole struct {
+	ID            uuid.UUID        `db:"id"`
+	ApplicationID uuid.UUID        `db:"application_id"`
+	Name          string           `db:"name"`
+	Description   *string          `db:"description"`
+	CreatedAt     pgtype.Timestamp `db:"created_at"`
+	UpdatedAt     *time.Time       `db:"updated_at"`
+}
+
+type ApplicationSecret struct {
+	ID            uuid.UUID        `db:"id"`
+	ApplicationID uuid.UUID        `db:"application_id"`
+	Name          string           `db:"name"`
+	Value         string           `db:"value"`
+	Description   *string          `db:"description"`
+	CreatedAt     pgtype.Timestamp `db:"created_at"`
+	UpdatedAt     *time.Time       `db:"updated_at"`
+	ExpiresAt     *time.Time       `db:"expires_at"`
+}
+
+type ApplicationUser struct {
+	ID               uuid.UUID        `db:"id"`
+	ApplicationID    uuid.UUID        `db:"application_id"`
+	Email            string           `db:"email"`
+	PasswordHash     *string          `db:"password_hash"`
+	CreatedAt        pgtype.Timestamp `db:"created_at"`
+	UpdatedAt        *time.Time       `db:"updated_at"`
+	IsActive         bool             `db:"is_active"`
+	IsEmailConfirmed bool             `db:"is_email_confirmed"`
+	TwoFactorEnabled bool             `db:"two_factor_enabled"`
+	TwoFactorSecret  *string          `db:"two_factor_secret"`
 }
 
 type EmailConfirmation struct {
@@ -38,20 +97,12 @@ type ExternalLogin struct {
 	ProviderKey string    `db:"provider_key"`
 }
 
-type Group struct {
-	ID            uuid.UUID        `db:"id"`
-	ApplicationID uuid.UUID        `db:"application_id"`
-	Name          string           `db:"name"`
-	Description   *string          `db:"description"`
-	CreatedAt     pgtype.Timestamp `db:"created_at"`
-	UpdatedAt     *time.Time       `db:"updated_at"`
-}
-
-type GroupParticipation struct {
-	GroupID   uuid.UUID        `db:"group_id"`
-	UserID    uuid.UUID        `db:"user_id"`
-	CreatedAt pgtype.Timestamp `db:"created_at"`
-	UpdatedAt *time.Time       `db:"updated_at"`
+type Organization struct {
+	ID          uuid.UUID        `db:"id"`
+	Name        string           `db:"name"`
+	Description *string          `db:"description"`
+	CreatedAt   pgtype.Timestamp `db:"created_at"`
+	UpdatedAt   *time.Time       `db:"updated_at"`
 }
 
 type PasswordResetToken struct {
@@ -70,26 +121,6 @@ type RefreshToken struct {
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
 }
 
-type Tenant struct {
-	ID          uuid.UUID        `db:"id"`
-	Name        string           `db:"name"`
-	Description *string          `db:"description"`
-	CreatedAt   pgtype.Timestamp `db:"created_at"`
-	UpdatedAt   *time.Time       `db:"updated_at"`
-}
-
-type User struct {
-	ID               uuid.UUID        `db:"id"`
-	Email            string           `db:"email"`
-	PasswordHash     *string          `db:"password_hash"`
-	CreatedAt        pgtype.Timestamp `db:"created_at"`
-	UpdatedAt        *time.Time       `db:"updated_at"`
-	IsActive         bool             `db:"is_active"`
-	IsEmailConfirmed bool             `db:"is_email_confirmed"`
-	TwoFactorEnabled bool             `db:"two_factor_enabled"`
-	TwoFactorSecret  *string          `db:"two_factor_secret"`
-}
-
 type UserProfile struct {
 	UserID      uuid.UUID `db:"user_id"`
 	FirstName   string    `db:"first_name"`
@@ -97,4 +128,10 @@ type UserProfile struct {
 	PhoneNumber *string   `db:"phone_number"`
 	Address     *string   `db:"address"`
 	PhotoUrl    *string   `db:"photo_url"`
+}
+
+type UserRole struct {
+	UserID    uuid.UUID        `db:"user_id"`
+	RoleID    uuid.UUID        `db:"role_id"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
 }

@@ -10,30 +10,32 @@ import (
 	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	mailservice "github.com/gate-keeper/internal/infra/mail-service"
+	"github.com/google/uuid"
 )
 
 type ForgotPasswordService struct {
-	PasswordResetRepository repository_interfaces.IPasswordResetRepository
-	UserRepository          repository_interfaces.IUserRepository
-	UserProfileRepository   repository_interfaces.IUserProfileRepository
-	MailService             mailservice.IMailService
+	PasswordResetRepository   repository_interfaces.IPasswordResetRepository
+	ApplicationUserRepository repository_interfaces.IApplicationUserRepository
+	UserProfileRepository     repository_interfaces.IUserProfileRepository
+	MailService               mailservice.IMailService
 }
 
 type Request struct {
-	Email string `json:"email" validate:"required,email"`
+	ApplicationID uuid.UUID `json:"application_id" validate:"required,uuid"`
+	Email         string    `json:"email" validate:"required,email"`
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
 	return &ForgotPasswordService{
-		UserRepository:          repository_handlers.UserRepository{Store: q},
-		UserProfileRepository:   repository_handlers.UserProfileRepository{Store: q},
-		PasswordResetRepository: repository_handlers.PasswordResetRepository{Store: q},
-		MailService:             &mailservice.MailService{},
+		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
+		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
+		PasswordResetRepository:   repository_handlers.PasswordResetRepository{Store: q},
+		MailService:               &mailservice.MailService{},
 	}
 }
 
 func (fp *ForgotPasswordService) Handler(ctx context.Context, request Request) error {
-	user, err := fp.UserRepository.GetUserByEmail(ctx, request.Email)
+	user, err := fp.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
 		return err

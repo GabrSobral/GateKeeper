@@ -1,0 +1,20 @@
+-- Write your migrate up statements here
+CREATE TABLE IF NOT EXISTS "application" (
+    id UUID PRIMARY KEY,
+    organization_id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    description TEXT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    has_mfa_auth_app BOOLEAN NOT NULL DEFAULT FALSE,
+    has_mfa_email BOOLEAN NOT NULL DEFAULT FALSE,
+    password_hash_secret VARCHAR(255) NOT NULL,
+    badges TEXT NULL,
+    created_at TIMESTAMP NOT NULL,
+    updated_at TIMESTAMP NULL
+);
+
+---- create above / drop below ----
+DROP TABLE IF EXISTS "application";
+
+-- Write your migrate down statements here. If this migration is irreversible
+-- Then delete the separator line above.

@@ -16,8 +16,9 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 	authController := AuthController{DbPool: pool}
 	userController := UserController{DbPool: pool}
 	applicationController := ApplicationController{DbPool: pool}
-	groupController := GroupController{DbPool: pool}
-	tenantController := TenantController{DbPool: pool}
+	organizationController := OrganizationController{DbPool: pool}
+	applicationRoleController := ApplicationRoleController{DbPool: pool}
+	applicationSecretController := ApplicationSecretController{DbPool: pool}
 
 	r := chi.NewRouter()
 
@@ -58,31 +59,38 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 		})
 
 		r.Route("/users", func(r chi.Router) {
-			r.Use(http_middlewares.JwtHandler)
+			// r.Use(http_middlewares.JwtHandler)
 
-			r.Get("/by-email/{email}", userController.GetUserByEmailController)
 			r.Get("/by-id/{userID}", userController.GetUserByIDController)
+			r.Get("/by-email/{email}", userController.GetUserByEmailController)
 		})
 
-		r.Route("/applications", func(r chi.Router) {
-			r.Use(http_middlewares.JwtHandler)
+		r.Route("/organizations", func(r chi.Router) {
+			// r.Use(http_middlewares.JwtHandler)
 
-			r.Post("/", applicationController.CreateApplication)
-			r.Delete("/{applicationID}", applicationController.RemoveApplication)
-		})
+			r.Get("/", organizationController.ListOrganizations)
+			r.Post("/", organizationController.CreateOrganization)
 
-		r.Route("/groups", func(r chi.Router) {
-			r.Use(http_middlewares.JwtHandler)
+			r.Route("/{organizationID}", func(r chi.Router) {
+				r.Delete("/", organizationController.RemoveOrganization)
 
-			r.Post("/", groupController.CreateGroup)
-			r.Delete("/{groupID}", groupController.RemoveGroup)
-		})
+				r.Route("/applications", func(r chi.Router) {
+					r.Get("/", applicationController.ListApplications)
+					r.Post("/", applicationController.CreateApplication)
+					r.Get("/{applicationID}", applicationController.GetApplicationByID)
+					r.Delete("/{applicationID}", applicationController.RemoveApplication)
 
-		r.Route("/tenants", func(r chi.Router) {
-			r.Use(http_middlewares.JwtHandler)
+					r.Route("/{applicationID}/roles", func(r chi.Router) {
+						r.Post("/", applicationRoleController.CreateRole)
+						r.Delete("/{roleID}", applicationRoleController.RemoveRole)
+					})
 
-			r.Post("/", tenantController.CreateTenant)
-			r.Delete("/{tenantID}", tenantController.RemoveTenant)
+					r.Route("/{applicationID}/secrets", func(r chi.Router) {
+						r.Post("/", applicationSecretController.CreateSecret)
+						r.Delete("/{secretID}", applicationSecretController.RemoveSecret)
+					})
+				})
+			})
 		})
 	})
 

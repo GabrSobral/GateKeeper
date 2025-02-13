@@ -12,17 +12,21 @@ import (
 	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	mailservice "github.com/gate-keeper/internal/infra/mail-service"
+	"github.com/google/uuid"
 )
 
 type Request struct {
-	FirstName string `json:"first_name" validate:"required"`
-	LastName  string `json:"last_name" validate:"required"`
-	Email     string `json:"email" validate:"required,email"`
-	Password  string `json:"password" validate:"required"`
+	ApplicationID uuid.UUID `json:"application_id" validate:"required,uuid4"`
+	DisplayName   string    `json:"display_name"`
+	FirstName     string    `json:"first_name" validate:"required"`
+	LastName      string    `json:"last_name" validate:"required"`
+	Email         string    `json:"email" validate:"required,email"`
+	Password      string    `json:"password" validate:"required"`
 }
 
 type SignUpService struct {
-	UserRepository              repository_interfaces.IUserRepository
+	ApplicationRepository       repository_interfaces.IApplicationRepository
+	ApplicationUserRepository   repository_interfaces.IApplicationUserRepository
 	UserProfileRepository       repository_interfaces.IUserProfileRepository
 	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
 	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
@@ -31,7 +35,8 @@ type SignUpService struct {
 
 func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
 	return &SignUpService{
-		UserRepository:              repository_handlers.UserRepository{Store: q},
+		ApplicationRepository:       repository_handlers.ApplicationRepository{Store: q},
+		ApplicationUserRepository:   repository_handlers.ApplicationUserRepository{Store: q},
 		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
 		RefreshTokenRepository:      repository_handlers.RefreshTokenRepository{Store: q},
 		EmailConfirmationRepository: repository_handlers.EmailConfirmationRepository{Store: q},
@@ -46,7 +51,7 @@ func (ss *SignUpService) Handler(ctx context.Context, request Request) error {
 		return &errors.ErrInvalidEmail
 	}
 
-	isUserExist, err := ss.UserRepository.IsUserExistsByEmail(ctx, request.Email)
+	isUserExist, err := ss.ApplicationUserRepository.IsUserExistsByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
 		return err
@@ -56,13 +61,19 @@ func (ss *SignUpService) Handler(ctx context.Context, request Request) error {
 		return &errors.ErrUserAlreadyExists
 	}
 
-	hashedPassword, err := application_utils.HashPassword(request.Password)
+	application, err := ss.ApplicationRepository.GetApplicationByID(ctx, request.ApplicationID)
 
 	if err != nil {
 		return err
 	}
 
-	user, err := entities.CreateUser(request.Email, &hashedPassword)
+	hashedPassword, err := application_utils.HashPassword(request.Password, application.PasswordHashSecret)
+
+	if err != nil {
+		return err
+	}
+
+	user, err := entities.CreateUser(request.Email, &hashedPassword, request.ApplicationID)
 
 	if err != nil {
 		return err
@@ -72,12 +83,13 @@ func (ss *SignUpService) Handler(ctx context.Context, request Request) error {
 		user.ID,
 		request.FirstName,
 		request.LastName,
+		request.DisplayName,
 		nil,
 		nil,
 		nil,
 	)
 
-	if err := ss.UserRepository.AddUser(ctx, user); err != nil {
+	if err := ss.ApplicationUserRepository.AddUser(ctx, user); err != nil {
 		return err
 	}
 

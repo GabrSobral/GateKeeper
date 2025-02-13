@@ -15,11 +15,12 @@ import (
 )
 
 type Request struct {
-	Provider    string `json:"provider" validate:"required"`
-	ProviderKey string `json:"provider_key" validate:"required"`
-	Email       string `json:"email" validate:"required,email"`
-	FirstName   string `json:"first_name" validate:"required"`
-	LastName    string `json:"last_name" validate:"required"`
+	ApplicationID uuid.UUID `json:"application" validate:"required"`
+	Provider      string    `json:"provider" validate:"required"`
+	ProviderKey   string    `json:"provider_key" validate:"required"`
+	Email         string    `json:"email" validate:"required,email"`
+	FirstName     string    `json:"first_name" validate:"required"`
+	LastName      string    `json:"last_name" validate:"required"`
 }
 
 type Response struct {
@@ -33,16 +34,16 @@ type Response struct {
 }
 
 type ExternalLoginProvider struct {
-	UserRepository          repository_interfaces.IUserRepository
-	UserProfileRepository   repository_interfaces.IUserProfileRepository
-	ExternalLoginRepository repository_interfaces.IExternalLoginRepository
+	ApplicationUserRepository repository_interfaces.IApplicationUserRepository
+	UserProfileRepository     repository_interfaces.IUserProfileRepository
+	ExternalLoginRepository   repository_interfaces.IExternalLoginRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &ExternalLoginProvider{
-		UserRepository:          repository_handlers.UserRepository{Store: q},
-		UserProfileRepository:   repository_handlers.UserProfileRepository{Store: q},
-		ExternalLoginRepository: repository_handlers.ExternalLoginRepository{Store: q},
+		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
+		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
+		ExternalLoginRepository:   repository_handlers.ExternalLoginRepository{Store: q},
 	}
 }
 
@@ -54,7 +55,7 @@ func (elp *ExternalLoginProvider) Handler(ctx context.Context, request Request) 
 	}
 
 	if externalLogin != nil {
-		user, err := elp.UserRepository.GetUserByID(ctx, externalLogin.UserID)
+		user, err := elp.ApplicationUserRepository.GetUserByID(ctx, externalLogin.UserID)
 
 		if err != nil {
 			return nil, err
@@ -81,7 +82,7 @@ func (elp *ExternalLoginProvider) Handler(ctx context.Context, request Request) 
 		}, nil
 	}
 
-	user, err := elp.UserRepository.GetUserByEmail(ctx, request.Email)
+	user, err := elp.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
 		return nil, err
@@ -96,7 +97,7 @@ func (elp *ExternalLoginProvider) Handler(ctx context.Context, request Request) 
 			return nil, err
 		}
 
-		user = &entities.User{
+		user = &entities.ApplicationUser{
 			ID:               userID,
 			Email:            request.Email,
 			PasswordHash:     nil,
@@ -108,7 +109,7 @@ func (elp *ExternalLoginProvider) Handler(ctx context.Context, request Request) 
 			TwoFactorSecret:  nil,
 		}
 
-		if err = elp.UserRepository.AddUser(ctx, user); err != nil {
+		if err = elp.ApplicationUserRepository.AddUser(ctx, user); err != nil {
 			return nil, err
 		}
 

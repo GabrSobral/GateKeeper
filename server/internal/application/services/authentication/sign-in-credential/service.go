@@ -16,8 +16,9 @@ import (
 )
 
 type Request struct {
-	Email    string `json:"email" validate:"required,email"`
-	Password string `json:"password" validate:"required"`
+	ApplicationID uuid.UUID `json:"applicationId" validate:"required"`
+	Email         string    `json:"email" validate:"required,email"`
+	Password      string    `json:"password" validate:"required"`
 }
 
 type Response struct {
@@ -36,23 +37,23 @@ type UserResponse struct {
 }
 
 type SignInService struct {
-	UserRepository         repository_interfaces.IUserRepository
-	UserProfileRepository  repository_interfaces.IUserProfileRepository
-	RefreshTokenRepository repository_interfaces.IRefreshTokenRepository
+	ApplicationUserRepository repository_interfaces.IApplicationUserRepository
+	UserProfileRepository     repository_interfaces.IUserProfileRepository
+	RefreshTokenRepository    repository_interfaces.IRefreshTokenRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &SignInService{
-		UserRepository:         repository_handlers.UserRepository{Store: q},
-		UserProfileRepository:  repository_handlers.UserProfileRepository{Store: q},
-		RefreshTokenRepository: repository_handlers.RefreshTokenRepository{Store: q},
+		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
+		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
+		RefreshTokenRepository:    repository_handlers.RefreshTokenRepository{Store: q},
 	}
 }
 
 func (ss *SignInService) Handler(ctx context.Context, request Request) (*Response, error) {
 	slog.InfoContext(ctx, "Trying to sign in user with email: %s", request.Email, nil)
 
-	user, err := ss.UserRepository.GetUserByEmail(ctx, request.Email)
+	user, err := ss.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
 		return nil, &errors.ErrUserNotFound

@@ -12,15 +12,17 @@ import (
 	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
 	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
+	"github.com/google/uuid"
 )
 
 type Request struct {
-	Token string `json:"token" validate:"required"`
-	Email string `json:"email" validate:"required,email"`
+	Token         string    `json:"token" validate:"required"`
+	Email         string    `json:"email" validate:"required,email"`
+	ApplicationID uuid.UUID `json:"application_id" validate:"required"`
 }
 
 type ConfirmUserEmail struct {
-	UserRepository              repository_interfaces.IUserRepository
+	ApplicationUserRepository   repository_interfaces.IApplicationUserRepository
 	UserProfileRepository       repository_interfaces.IUserProfileRepository
 	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
 	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
@@ -28,7 +30,7 @@ type ConfirmUserEmail struct {
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *signin.Response] {
 	return &ConfirmUserEmail{
-		UserRepository:              repository_handlers.UserRepository{Store: q},
+		ApplicationUserRepository:   repository_handlers.ApplicationUserRepository{Store: q},
 		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
 		RefreshTokenRepository:      repository_handlers.RefreshTokenRepository{Store: q},
 		EmailConfirmationRepository: repository_handlers.EmailConfirmationRepository{Store: q},
@@ -36,7 +38,7 @@ func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *signin.Resp
 }
 
 func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*signin.Response, error) {
-	user, err := cm.UserRepository.GetUserByEmail(ctx, request.Email)
+	user, err := cm.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
 		return nil, err
@@ -71,7 +73,7 @@ func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*sign
 	user.IsEmailConfirmed = true
 	emailConfirmation.IsUsed = true
 
-	cm.UserRepository.UpdateUser(ctx, user)
+	cm.ApplicationUserRepository.UpdateUser(ctx, user)
 	cm.EmailConfirmationRepository.UpdateEmailConfirmation(ctx, emailConfirmation)
 
 	userProfile, err := cm.UserProfileRepository.GetUserById(ctx, user.ID)
