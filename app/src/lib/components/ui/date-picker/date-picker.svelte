@@ -8,7 +8,7 @@
 
 	const df = new DateFormatter('en-US', { dateStyle: 'long' });
 
-    let { value }: { value?: DateValue  } = $props();
+	let { value }: { value?: DateValue } = $props();
 
 	let contentRef = $state<HTMLElement | null>(null);
 </script>

@@ -8,7 +8,7 @@
 	import type { IApplication } from '$lib/services/use-application-by-id-query';
 	import { formatDate } from '$lib/utils';
 
-	type Props = { application?: IApplication | null }
+	type Props = { application?: IApplication | null };
 
 	let { application }: Props = $props();
 </script>
@@ -32,7 +32,7 @@
 					<Badge variant="default">Active</Badge>
 				{:else}
 					<Badge variant="destructive" class="flex gap-1">
-						Deactivated at{" "}
+						Deactivated at{' '}
 						<span class="text-white">{formatDate(application?.deactivatedAt)}</span>
 					</Badge>
 				{/if}
@@ -40,11 +40,11 @@
 
 			<div class="flex flex-col">
 				<span class="text-md font-semibold">Multi Factor Auth</span>
-					{#if application?.multiFactorAuthEnabled}
-						<Badge variant="outline" class="w-fit">Yes</Badge>
-					{:else}
-						<Badge variant="outline" class="w-fit">No</Badge>
-					{/if}
+				{#if application?.multiFactorAuthEnabled}
+					<Badge variant="outline" class="w-fit">Yes</Badge>
+				{:else}
+					<Badge variant="outline" class="w-fit">No</Badge>
+				{/if}
 			</div>
 		</Card.Content>
 	</Card.Root>
@@ -70,13 +70,15 @@
 					</div>
 
 					<div class="ml-auto text-sm">
-						Expiração: <span class="text-md font-medium">{formatDate(secret.expirationDate)}</span>
+						Expiração: <span class="text-md font-medium"
+							>{secret.expirationDate ? formatDate(secret.expirationDate) : 'Lifetime'}</span
+						>
 					</div>
 
 					<Tooltip.Provider>
 						<Tooltip.Root>
 							<Tooltip.Trigger>
-								<DeleteSecretDialog {secret}/>
+								<DeleteSecretDialog {secret} applicationId={application?.id} />
 							</Tooltip.Trigger>
 
 							<Tooltip.Content>

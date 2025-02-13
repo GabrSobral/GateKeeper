@@ -9,16 +9,44 @@
 	import { buttonVariants } from '$lib/components/ui/button';
 	import Button from '$lib/components/ui/button/button.svelte';
 	import DatePicker from '$lib/components/ui/date-picker/date-picker.svelte';
+	import { createApplicationSecretApi } from '$lib/services/create-application-secret';
+	import { toast } from 'svelte-sonner';
+	import { organizationStore } from '$lib/stores/organization';
+	import { page } from '$app/state';
+	import type { DateValue } from '@internationalized/date';
 
 	let isLoading = $state(false);
 
 	let copied = $state(false);
 	let secret = $state('');
 
-	function generate() {
+	let secretName = $state('');
+	let expiresAt = $state<DateValue | undefined>(undefined);
+
+	let applicationId = $derived(page.params.applicationId);
+
+	$inspect(expiresAt);
+
+	async function generate() {
 		isLoading = true;
 
-		secret = 'aksdjask';
+		const [response, err] = await createApplicationSecretApi(
+			{
+				name: secretName,
+				expiresAt: expiresAt?.toDate('pt-br') || null,
+				applicationId: applicationId,
+				organizationId: $organizationStore?.id
+			},
+			{ accessToken: '' }
+		);
+
+		if (err) {
+			toast.error('Failed to generate secret');
+			console.error(err);
+			return;
+		}
+
+		secret = response?.value || '';
 
 		isLoading = false;
 	}
@@ -27,14 +55,12 @@
 		navigator.clipboard.writeText(secret).then(() => {
 			copied = true;
 
-			setTimeout(() => {
-				copied = false;
-			}, 1000);
+			setTimeout(() => (copied = false), 1000);
 		});
 	}
 </script>
 
-<Dialog.Root onOpenChange={isOpened => isOpened && (secret = '')}>
+<Dialog.Root onOpenChange={(isOpened) => isOpened && (secret = '')}>
 	<Dialog.Trigger class={buttonVariants({ variant: 'default' })}>New Secret</Dialog.Trigger>
 
 	<Dialog.Content class="top-[40%] sm:max-w-[450px]">
@@ -48,12 +74,17 @@
 		<div class="grid gap-4 py-4">
 			<div class="flex flex-col gap-3">
 				<Label for="name">Secret Name</Label>
-				<Input id="name" placeholder="E.g: My Ultra Application Secret" class="col-span-3" />
+				<Input
+					id="name"
+					placeholder="E.g: My Ultra Application Secret"
+					class="col-span-3"
+					bind:value={secretName}
+				/>
 			</div>
 
 			<div class="flex flex-col gap-3">
 				<Label for="username">Expires At</Label>
-				<DatePicker value={undefined} />
+				<DatePicker value={expiresAt} />
 			</div>
 		</div>
 
@@ -83,12 +114,12 @@
 
 		<Dialog.Footer>
 			<Button type="submit" onclick={generate}>
-                {#if isLoading}
-                    Generating...
-                {:else}
-                    Generate
-                {/if}
-            </Button>
+				{#if isLoading}
+					Generating...
+				{:else}
+					Generate
+				{/if}
+			</Button>
 		</Dialog.Footer>
 	</Dialog.Content>
 </Dialog.Root>

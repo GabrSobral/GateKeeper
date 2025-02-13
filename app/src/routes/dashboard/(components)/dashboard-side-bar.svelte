@@ -1,23 +1,18 @@
 <script lang="ts">
-	import LayoutPanelLeft from 'lucide-svelte/icons/layout-panel-left';
-	import House from 'lucide-svelte/icons/house';
-	import Plus from 'lucide-svelte/icons/plus';
-	import ChevronDown from 'lucide-svelte/icons/chevron-down';
-	import Logout from 'lucide-svelte/icons/log-out';
-
-	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
-	import * as DropdownMenu from '$lib/components/ui/dropdown-menu';
-	import * as Avatar from '$lib/components/ui/avatar';
 	import { page } from '$app/state';
 	import { goto } from '$app/navigation';
+
+	import Plus from 'lucide-svelte/icons/plus';
+	import Logout from 'lucide-svelte/icons/log-out';
+	import LayoutPanelLeft from 'lucide-svelte/icons/layout-panel-left';
+
+	import * as Avatar from '$lib/components/ui/avatar';
+	import * as Sidebar from '$lib/components/ui/sidebar/index.js';
+
 	import { useApplicationsQuery } from '$lib/services/use-applications-query';
+	import OrganizationsInput from './organizations-input.svelte';
 
 	const items = [
-		// {
-		// 	title: 'Home',
-		// 	url: '/dashboard',
-		// 	icon: House
-		// },
 		{
 			title: 'Applications',
 			url: '/dashboard/application',
@@ -27,32 +22,16 @@
 
 	const path = $derived(page.url.pathname);
 
-	let applications = useApplicationsQuery({ accessToken: "" })
+	let applications = useApplicationsQuery({ accessToken: '' });
 </script>
 
 <Sidebar.Root variant="sidebar">
 	<Sidebar.Header>
 		<Sidebar.Menu>
 			<Sidebar.MenuItem>
-				<DropdownMenu.Root>
-					<DropdownMenu.Trigger>
-						{#snippet child({ props })}
-							<Sidebar.MenuButton {...props}>
-								Select Organization
-								<ChevronDown class="ml-auto" />
-							</Sidebar.MenuButton>
-						{/snippet}
-					</DropdownMenu.Trigger>
-
-					<DropdownMenu.Content class="w-[--bits-dropdown-menu-anchor-width]">
-						<DropdownMenu.Item>
-							<span>Organization 1</span>
-						</DropdownMenu.Item>
-						<DropdownMenu.Item>
-							<span>Organization 2</span>
-						</DropdownMenu.Item>
-					</DropdownMenu.Content>
-				</DropdownMenu.Root>
+				<div>
+					<OrganizationsInput />
+				</div>
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 	</Sidebar.Header>
@@ -64,7 +43,7 @@
 			<Sidebar.GroupContent>
 				<Sidebar.Menu>
 					{#each items as item (item.title)}
-						<Sidebar.MenuItem >
+						<Sidebar.MenuItem>
 							<Sidebar.MenuButton isActive={item.url === path}>
 								{#snippet child({ props })}
 									<a href={item.url} {...props}>
@@ -81,7 +60,10 @@
 
 		<Sidebar.Group>
 			<Sidebar.GroupLabel>Applications</Sidebar.GroupLabel>
-			<Sidebar.GroupAction title="Add Project" onclick={() => goto('/dashboard/application/create-application')}>
+			<Sidebar.GroupAction
+				title="Add Project"
+				onclick={() => goto('/dashboard/application/create-application')}
+			>
 				<Plus /> <span class="sr-only">Add Project</span>
 			</Sidebar.GroupAction>
 
@@ -113,7 +95,7 @@
 			</Sidebar.MenuItem>
 		</Sidebar.Menu>
 
-        <Sidebar.Separator />
+		<Sidebar.Separator />
 
 		<div class="flex gap-2">
 			<Avatar.Root>
@@ -122,9 +104,9 @@
 			</Avatar.Root>
 
 			<div class="flex flex-col">
-              <span class="text-sm font-semibold">John Doe</span>
-              <span class="text-sm">Johndoe@email.com</span>
-            </div>
+				<span class="text-sm font-semibold">John Doe</span>
+				<span class="text-sm">Johndoe@email.com</span>
+			</div>
 		</div>
 	</Sidebar.Footer>
 </Sidebar.Root>

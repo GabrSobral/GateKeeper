@@ -1,16 +1,24 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
+	import { useQuery } from '@sveltestack/svelte-query';
 
 	import { cn } from '$lib/utils';
 	import * as Tabs from '$lib/components/ui/tabs';
 	import * as Card from '$lib/components/ui/card';
 	import { Badge } from '$lib/components/ui/badge';
 	import { buttonVariants } from '$lib/components/ui/button/button.svelte';
-	import { useApplicationsQuery } from '$lib/services/use-applications-query';
+	import { getApplicationsService } from '$lib/services/use-applications-query';
 
 	import Breadcrumbs from '../(components)/breadcrumbs.svelte';
+	import { organizationStore } from '$lib/stores/organization';
 
-	let applications = useApplicationsQuery({ accessToken: '' });
+	let applicationsResult = useQuery(
+		['list-applications', $organizationStore?.id],
+		() => getApplicationsService({ organizationId: $organizationStore?.id }, { accessToken: '' }),
+		{ refetchOnWindowFocus: false }
+	);
+
+	$inspect($organizationStore?.id);
 </script>
 
 <Breadcrumbs
@@ -40,20 +48,23 @@
 		</a>
 
 		<Tabs.Content value="overview" class="flex flex-1 flex-wrap gap-3">
-			{#if $applications.isLoading}
+			{#if $applicationsResult.isLoading}
 				<div class="flex flex-1 items-center justify-center">Loading...</div>
 			{:else}
-				{#if $applications.error}
+				{#if $applicationsResult.error}
 					<div class="flex flex-1 items-center justify-center">Failed to load applications</div>
 				{/if}
 
-				{#if $applications.data?.length === 0}
+				{#if $applicationsResult.data?.length === 0}
 					<div class="flex flex-1 items-center justify-center">No applications found</div>
 				{/if}
 
-				{#each $applications.data || [] as application (application.id)}
+				{#each $applicationsResult.data || [] as application (application.id)}
 					<Card.Root
-						onclick={() => goto(`/dashboard/application/${application.id}`)}
+						onclick={() =>
+							goto(
+								`/dashboard/application/${application.id}?organizationId=${$organizationStore?.id}`
+							)}
 						class="w-[calc(33.333%-8px)] min-w-[400px] transition-all hover:scale-[1.01] hover:cursor-pointer hover:shadow-lg"
 					>
 						<Card.Header>

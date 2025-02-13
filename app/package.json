@@ -23,8 +23,9 @@
 		"@tailwindcss/forms": "^0.5.10",
 		"@tailwindcss/typography": "^0.5.16",
 		"autoprefixer": "^10.4.20",
-		"bits-ui": "^1.0.0-next.78",
+		"bits-ui": "^1.0.0-next.87",
 		"clsx": "^2.1.1",
+		"cmdk-sv": "^0.0.18",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
 		"eslint-plugin-svelte": "^2.46.1",
@@ -51,6 +52,7 @@
 	"dependencies": {
 		"@inlang/paraglide-sveltekit": "^0.15.5",
 		"@sveltestack/svelte-query": "^1.6.0",
-		"@tanstack/table-core": "^8.20.5"
+		"@tanstack/table-core": "^8.20.5",
+		"axios": "^1.7.9"
 	}
 }

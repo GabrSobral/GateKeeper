@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { toast } from 'svelte-sonner';
 	import { zodClient } from 'sveltekit-superforms/adapters';
 	import { type SuperValidated, type Infer, superForm } from 'sveltekit-superforms';
 	
@@ -13,7 +14,8 @@
 
 	import { formSchema, type FormSchema } from '../schema';
 	import StrongPasswordModal from './strong-password-modal.svelte';
-	import { toast } from 'svelte-sonner';
+	import { createApplicationApi } from '$lib/services/create-application';
+	import { organizationStore } from '$lib/stores/organization';
 
 	type Props = { data: { form: SuperValidated<Infer<FormSchema>> } } 
 	let { data }: Props = $props();
@@ -29,12 +31,46 @@
 		}
 	) {
 		e.preventDefault();
+
+		const { valid } = await form.validateForm();
+		
+		if (!valid) {
+			toast.error('Please fill all the required fields');
+			return;
+		}
+
+		if (!$organizationStore) {
+			toast.error('You need to be in an organization to create an application');
+			return;
+		}
+		
 		isLoading = true;
 
-		setTimeout(() => {
-			isLoading = false
-			toast.success('Application created successfully!')
-		}, 3000);
+		const [result, err] = await createApplicationApi({
+			name: $formData.name,
+			description: $formData.description || null,
+			badges: badges,
+			passwordHashSecret: $formData.passwordHashSecret,
+			hasMfaAuthApp: $formData.hasMfaAuthApp,
+			hasMfaEmail: $formData.hasMfaEmail,
+			organizationId: $organizationStore.id,
+		}, { accessToken: "" });
+
+		$formData.badges = [];
+		$formData.name = '';
+		$formData.description = '';
+		$formData.hasMfaAuthApp = false;
+		$formData.hasMfaEmail = false;
+		$formData.passwordHashSecret = '';
+
+		if (err) {
+			isLoading = false;
+			toast.error(err.response?.data.message || 'An error occurred while creating the application');
+			return;
+		}
+
+		isLoading = false
+		toast.success('Application created successfully!')
 	}
 
 	let badges: string[] = $state([]);
@@ -66,13 +102,13 @@
 			<Form.FieldErrors></Form.FieldErrors>
 		</Form.Field>
 
-		<Form.Field {form} name="Description">
+		<Form.Field {form} name="description">
 			<Form.Control>
 				{#snippet children({ props })}
 					<Form.Label>Description</Form.Label>
 					<Textarea
 						{...props}
-						bind:value={$formData.Description}
+						bind:value={$formData.description} 
 						placeholder="Type the application description"
 					/>
 				{/snippet}
@@ -135,7 +171,7 @@
 			</span>
 
 			<div class="flex items-center space-x-2">
-				<Checkbox id="e-mail-mfa" checked={false} aria-labelledby="terms-label" />
+				<Checkbox id="e-mail-mfa" bind:checked={$formData.hasMfaEmail} aria-labelledby="terms-label" />
 	
 				<Label
 				  id="e-mail-mfa-label"
@@ -147,7 +183,7 @@
 			</div>
 	
 			<div class="flex items-center space-x-2">
-				<Checkbox id="auth-app-mfa" checked={false} aria-labelledby="terms-label" />
+				<Checkbox id="auth-app-mfa" bind:checked={$formData.hasMfaAuthApp} aria-labelledby="terms-label" />
 	
 				<Label
 				  id="auth-app-mfa-label"

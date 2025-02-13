@@ -10,6 +10,10 @@
 	$inspect(data);
 </script>
 
+<svelte:head>
+	<title>Create Application - GateKeeper</title>
+</svelte:head>
+
 <Breadcrumbs
 	items={[
 		{ name: 'Dashboard', path: '/dashboard' },
