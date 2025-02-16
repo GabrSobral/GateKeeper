@@ -25,13 +25,13 @@ type Request struct {
 }
 
 type Response struct {
-	ID            uuid.UUID
-	ApplicationID uuid.UUID
-	Name          string
-	Value         string
-	CreatedAt     time.Time
-	UpdatedAt     *time.Time
-	ExpiresAt     *time.Time
+	ID            uuid.UUID  `json:"id"`
+	ApplicationID uuid.UUID  `json:"applicationId"`
+	Name          string     `json:"name"`
+	Value         string     `json:"value"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	UpdatedAt     *time.Time `json:"updatedAt"`
+	ExpiresAt     *time.Time `json:"expiresAt"`
 }
 
 type CreateApplicationSecretService struct {
