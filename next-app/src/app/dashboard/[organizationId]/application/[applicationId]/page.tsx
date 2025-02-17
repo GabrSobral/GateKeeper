@@ -16,10 +16,10 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Overview } from "./(components)/overview";
-import { DeleteApplicationDialog } from "./(components)/delete-application-dialog";
 import { Users } from "./(components)/users";
 import { Roles } from "./(components)/roles";
 import { Providers } from "./(components)/providers";
+import { DeleteApplicationDialog } from "./(components)/delete-application-dialog";
 
 type Props = {
   params: Promise<{

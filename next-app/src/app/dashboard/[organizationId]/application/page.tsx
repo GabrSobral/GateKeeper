@@ -7,7 +7,15 @@ import { Tabs, TabsTrigger, TabsList, TabsContent } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { ApplicationCard } from "./(components)/ApplicationCard";
 
-export default function ApplicationsPage() {
+type Props = {
+  params: Promise<{
+    organizationId: string;
+  }>;
+};
+
+export default async function ApplicationsPage({ params }: Props) {
+  const { organizationId } = await params;
+
   return (
     <>
       <Breadcrumbs
@@ -20,7 +28,7 @@ export default function ApplicationsPage() {
       <main className="flex flex-col p-4">
         <h2 className="text-3xl font-bold tracking-tight">Applications</h2>
 
-        <span className="mt-3 text-sm tracking-tight text-gray-600">
+        <span className="mt-3 text-sm tracking-tight text-gray-600 dark:text-gray-300">
           Applications are the projects you have created. You can add, edit, and
           delete them here.
         </span>
@@ -32,7 +40,7 @@ export default function ApplicationsPage() {
             </TabsList>
 
             <Link
-              href="/dashboard/application/create-application"
+              href={`/dashboard/${organizationId}/application/create-application`}
               className={cn(
                 "float-right w-fit",
                 buttonVariants({ variant: "default" })

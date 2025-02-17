@@ -11,7 +11,8 @@ export interface IApplication {
   createdAt: Date;
   updatedAt: Date;
   deactivatedAt?: Date;
-  multiFactorAuthEnabled: boolean;
+  mfaEmailEnabled: boolean;
+  mfaAuthAppEnabled: boolean;
   passwordHashingSecret: string;
   secrets: {
     id: string;

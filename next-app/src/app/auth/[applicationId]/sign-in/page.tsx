@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { AuthForm } from "./(components)/AuthForm";
+import { AuthForm } from "./(components)/auth-form";
 
 export default function SignInPage() {
   return (

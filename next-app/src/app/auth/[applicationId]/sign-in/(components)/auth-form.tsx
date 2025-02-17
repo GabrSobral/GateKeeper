@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 
 export function AuthForm() {
   const applicationId = useParams().applicationId;
@@ -31,7 +32,7 @@ export function AuthForm() {
     },
   });
 
-  const isLoading = false;
+  const [isLoading] = useState(false);
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Do something with the form values.
