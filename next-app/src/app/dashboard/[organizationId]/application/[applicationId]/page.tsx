@@ -105,7 +105,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
         </span>
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {["Java", "Javascript"].map((badge, i) => (
+          {application?.badges.map((badge, i) => (
             <Badge variant="outline" key={i}>
               {badge}
             </Badge>

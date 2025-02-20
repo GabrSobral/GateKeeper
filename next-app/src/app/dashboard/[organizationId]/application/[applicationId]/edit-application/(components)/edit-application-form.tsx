@@ -1,6 +1,7 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,12 +26,18 @@ import { StrongPasswordDialog } from "../../../create-application/(components)/s
 
 import { formSchema } from "../schema";
 import { IApplication } from "@/services/dashboard/get-application-by-id";
+import { editApplicationApi } from "@/services/dashboard/edit-application";
+import { useParams, useRouter } from "next/navigation";
+import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
 
 type Props = {
   application: IApplication | null;
 };
 
 export function EditApplicationForm({ application }: Props) {
+  const router = useRouter();
+  const { organizationId } = useParams() as { organizationId: string };
+
   const [isLoading, setIsLoading] = useState(false);
   const [isStrongPasswordModalOpened, setIsStrongPasswordModalOpened] =
     useState(false);
@@ -47,14 +54,68 @@ export function EditApplicationForm({ application }: Props) {
     },
   });
 
-  function onSubmit() {
+  const { mutate } = useApplicationsSWR(
+    { organizationId },
+    { accessToken: "" }
+  );
+
+  async function onSubmit() {
+    if (!application) {
+      console.error("Application not found");
+      toast.error("Application not found");
+      return;
+    }
+
     setIsLoading(true);
 
     console.log(form.getValues());
 
-    setTimeout(() => {
+    const [response, err] = await editApplicationApi(
+      {
+        ...form.getValues(),
+        organizationId,
+        id: application.id,
+        isActive: true,
+      },
+      { accessToken: "" }
+    );
+
+    if (err) {
+      console.error(err);
+      toast.error("Failed to update application");
       setIsLoading(false);
-    }, 2000);
+      return;
+    }
+
+    mutate((state) => {
+      if (state && response) {
+        const index = state.findIndex((app) => app.id === application.id);
+
+        if (index === -1) {
+          return state;
+        }
+
+        state[index] = {
+          id: response.id,
+          name: response.name,
+          description: response.description || "",
+          badges: response.badges,
+          createdAt: new Date(),
+          isActive: response.isActive,
+          updatedAt: new Date(),
+        };
+
+        return state;
+      }
+
+      return undefined;
+    });
+
+    toast.success("Application updated successfully");
+
+    router.push(`/dashboard/${organizationId}/application/${application.id}`);
+
+    setIsLoading(false);
   }
 
   return (

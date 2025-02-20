@@ -24,17 +24,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 import { ThemeToggle } from "../ui/theme-togle";
 
-const items = [
-  {
-    title: "Applications",
-    url: "/dashboard/application",
-    icon: LayoutPanelLeft,
-  },
-];
-
 export function DashboardSidebar() {
   const organizationId = useParams().organizationId as string;
   const { data } = useApplicationsSWR({ organizationId }, { accessToken: "" });
+
+  const items = [
+    {
+      title: "Applications",
+      url: `/dashboard/${organizationId}/application`,
+      icon: LayoutPanelLeft,
+    },
+  ];
 
   return (
     <Sidebar collapsible="icon">

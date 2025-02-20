@@ -14,7 +14,7 @@ export type ApplicationsResponse = {
   description: string;
   createdAt: Date;
   updatedAt: Date | null;
-  deactivatedAt: Date | null;
+  isActive: boolean;
   badges: string[];
 }[];
 
