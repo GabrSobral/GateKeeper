@@ -24,11 +24,23 @@ import {
 import { formSchema } from "../schema";
 
 import { StrongPasswordDialog } from "./strong-password-dialog";
+import { createApplicationApi } from "@/services/dashboard/create-application";
+import { toast } from "sonner";
+import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
+import { useParams, useRouter } from "next/navigation";
 
 export function CreateApplicationForm() {
+  const router = useRouter();
+  const { organizationId } = useParams() as { organizationId: string };
+
   const [isLoading, setIsLoading] = useState(false);
   const [isStrongPasswordModalOpened, setIsStrongPasswordModalOpened] =
     useState(false);
+
+  const { mutate } = useApplicationsSWR(
+    { organizationId },
+    { accessToken: "" }
+  );
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,14 +54,47 @@ export function CreateApplicationForm() {
     },
   });
 
-  function onSubmit() {
+  async function onSubmit() {
     setIsLoading(true);
 
-    console.log(form.getValues());
+    const [response, err] = await createApplicationApi(
+      { ...form.getValues(), organizationId },
+      {
+        accessToken: "fake-access",
+      }
+    );
 
-    setTimeout(() => {
+    if (err) {
+      console.error(err);
+      toast.error("An error occurred while creating the application.");
       setIsLoading(false);
-    }, 2000);
+      return;
+    }
+
+    mutate((state) => {
+      if (state && response) {
+        return [
+          ...state,
+          {
+            id: response.id,
+            name: response.name,
+            description: response.description || "",
+            badges: response.badges,
+            hasMfaAuthApp: response.hasMfaAuthApp,
+            hasMfaEmail: response.hasMfaEmail,
+            createdAt: new Date(),
+            updatedAt: null,
+            deactivatedAt: null,
+          },
+        ];
+      }
+
+      return undefined;
+    });
+
+    router.push(`/dashboard/${organizationId}/application/${response?.id}`);
+
+    setIsLoading(false);
   }
 
   return (

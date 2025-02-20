@@ -73,7 +73,7 @@ export default async function ApplicationDetailPage({ params }: Props) {
           <div className="flex gap-1">
             <Tooltip>
               <TooltipTrigger asChild>
-                <DeleteApplicationDialog />
+                <DeleteApplicationDialog application={application} />
               </TooltipTrigger>
 
               <TooltipContent>

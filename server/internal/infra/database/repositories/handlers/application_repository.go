@@ -25,12 +25,21 @@ func (r ApplicationRepository) CheckIfApplicationExists(ctx context.Context, app
 }
 
 func (r ApplicationRepository) AddApplication(ctx context.Context, newApplication *entities.Application) error {
+	badges := strings.Join(newApplication.Badges, ",")
+
 	err := r.Store.AddApplication(ctx, pgstore.AddApplicationParams{
-		ID:             newApplication.ID,
-		Name:           newApplication.Name,
-		Description:    newApplication.Description,
-		OrganizationID: newApplication.OrganizationID,
-		CreatedAt:      pgtype.Timestamp{Time: newApplication.CreatedAt, Valid: true},
+		ID:                 newApplication.ID,
+		Name:               newApplication.Name,
+		Description:        newApplication.Description,
+		OrganizationID:     newApplication.OrganizationID,
+		IsActive:           newApplication.IsActive,
+		HasMfaAuthApp:      newApplication.HasMfaAuthApp,
+		HasMfaEmail:        newApplication.HasMfaEmail,
+		PasswordHashSecret: newApplication.PasswordHashSecret,
+		Badges:             &badges,
+		UpdatedAt:          newApplication.UpdatedAt,
+
+		CreatedAt: pgtype.Timestamp{Time: newApplication.CreatedAt, Valid: true},
 	})
 
 	if err != nil {

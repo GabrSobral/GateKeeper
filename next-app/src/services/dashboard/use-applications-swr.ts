@@ -13,8 +13,8 @@ export type ApplicationsResponse = {
   name: string;
   description: string;
   createdAt: Date;
-  updatedAt: Date;
-  deactivatedAt?: Date;
+  updatedAt: Date | null;
+  deactivatedAt: Date | null;
   badges: string[];
 }[];
 

@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	createsecret "github.com/gate-keeper/internal/application/services/application-secret/create-secret"
-	deletesecret "github.com/gate-keeper/internal/application/services/application-secret/delete-role"
+	deletesecret "github.com/gate-keeper/internal/application/services/application-secret/delete-secret"
 	"github.com/gate-keeper/internal/infra/database/repositories"
 	http_router "github.com/gate-keeper/internal/presentation/http"
 	"github.com/go-chi/chi"

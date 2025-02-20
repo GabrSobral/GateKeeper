@@ -11,9 +11,8 @@ import (
 )
 
 type Request struct {
-	ApplicationID uuid.UUID `json:"application_id" validate:"required"`
-	Name          string    `json:"name" validate:"required"`
-	Description   string    `json:"description"`
+	ApplicationID  uuid.UUID `json:"applicationId" validate:"required"`
+	OrganizationID uuid.UUID `json:"organizationId" validate:"required"`
 }
 
 type RemoveApplicationService struct {

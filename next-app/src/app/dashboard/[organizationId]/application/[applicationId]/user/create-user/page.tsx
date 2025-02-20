@@ -12,7 +12,7 @@ type Props = {
   }>;
 };
 
-export default async function UserDetailAndEditPage({ params }: Props) {
+export default async function CreateUserPage({ params }: Props) {
   const { organizationId, applicationId, userId } = await params;
 
   return (

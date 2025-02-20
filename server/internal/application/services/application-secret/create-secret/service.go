@@ -31,7 +31,7 @@ type Response struct {
 	Value         string     `json:"value"`
 	CreatedAt     time.Time  `json:"createdAt"`
 	UpdatedAt     *time.Time `json:"updatedAt"`
-	ExpiresAt     *time.Time `json:"expiresAt"`
+	ExpiresAt     *time.Time `json:"expirationDate"`
 }
 
 type CreateApplicationSecretService struct {

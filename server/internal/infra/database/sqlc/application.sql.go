@@ -14,11 +14,31 @@ import (
 )
 
 const addApplication = `-- name: AddApplication :exec
+/*
+ CREATE TABLE IF NOT EXISTS "application" (
+ id UUID PRIMARY KEY,
+ organization_id UUID NOT NULL,
+ name VARCHAR(255) NOT NULL,
+ description TEXT NULL,
+ is_active BOOLEAN NOT NULL DEFAULT TRUE,
+ has_mfa_auth_app BOOLEAN NOT NULL DEFAULT FALSE,
+ has_mfa_email BOOLEAN NOT NULL DEFAULT FALSE,
+ password_hash_secret VARCHAR(255) NOT NULL,
+ badges TEXT NULL,
+ created_at TIMESTAMP NOT NULL,
+ updated_at TIMESTAMP NULL
+ );
+ */
 INSERT INTO
     "application" (
         id,
         organization_id,
         name,
+        is_active,
+        has_mfa_auth_app,
+        has_mfa_email,
+        password_hash_secret,
+        badges,
         description,
         created_at,
         updated_at
@@ -26,26 +46,31 @@ INSERT INTO
 VALUES
     (
         $1,
-        -- id
         $2,
-        -- organization_id
         $3,
-        -- name
         $4,
-        -- description
         $5,
-        -- created_at
-        $6 -- updated_at
+        $6,
+        $7,
+        $8,
+        $9,
+        $10,
+        $11
     )
 `
 
 type AddApplicationParams struct {
-	ID             uuid.UUID        `db:"id"`
-	OrganizationID uuid.UUID        `db:"organization_id"`
-	Name           string           `db:"name"`
-	Description    *string          `db:"description"`
-	CreatedAt      pgtype.Timestamp `db:"created_at"`
-	UpdatedAt      *time.Time       `db:"updated_at"`
+	ID                 uuid.UUID        `db:"id"`
+	OrganizationID     uuid.UUID        `db:"organization_id"`
+	Name               string           `db:"name"`
+	IsActive           bool             `db:"is_active"`
+	HasMfaAuthApp      bool             `db:"has_mfa_auth_app"`
+	HasMfaEmail        bool             `db:"has_mfa_email"`
+	PasswordHashSecret string           `db:"password_hash_secret"`
+	Badges             *string          `db:"badges"`
+	Description        *string          `db:"description"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
 }
 
 // ----------------------------------COMMANDS--------------------------------------
@@ -54,6 +79,11 @@ func (q *Queries) AddApplication(ctx context.Context, arg AddApplicationParams) 
 		arg.ID,
 		arg.OrganizationID,
 		arg.Name,
+		arg.IsActive,
+		arg.HasMfaAuthApp,
+		arg.HasMfaEmail,
+		arg.PasswordHashSecret,
+		arg.Badges,
 		arg.Description,
 		arg.CreatedAt,
 		arg.UpdatedAt,

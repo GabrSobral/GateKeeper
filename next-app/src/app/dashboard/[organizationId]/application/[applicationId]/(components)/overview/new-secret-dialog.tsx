@@ -22,8 +22,12 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { formatDate } from "@/lib/utils";
+import { IApplication } from "@/services/dashboard/get-application-by-id";
 
-export function NewSecretDialog() {
+type Props = {
+  addSecret(newSecret: IApplication["secrets"][number]): void;
+};
+export function NewSecretDialog({ addSecret }: Props) {
   const params = useParams();
 
   const applicationId = params.applicationId as string;
@@ -56,6 +60,7 @@ export function NewSecretDialog() {
     }
 
     setSecret(response?.value || "");
+    addSecret(response as unknown as IApplication["secrets"][number]);
 
     setIsLoading(false);
   }

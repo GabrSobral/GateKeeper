@@ -22,9 +22,10 @@ import { IApplication } from "@/services/dashboard/get-application-by-id";
 
 type Props = {
   secret: IApplication["secrets"][number];
+  removeSecret: () => void;
 };
 
-export function DeleteSecretDialog({ secret }: Props) {
+export function DeleteSecretDialog({ secret, removeSecret }: Props) {
   const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
 
@@ -56,6 +57,8 @@ export function DeleteSecretDialog({ secret }: Props) {
       setIsLoading(false);
       return;
     }
+
+    removeSecret();
 
     // Logic here
     setIsLoading(false);

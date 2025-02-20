@@ -34,15 +34,17 @@ import { formSchema } from "../schema";
 import { DeleteUserDialog } from "./delete-user-dialog";
 import { MultiFactorAuthForm } from "./multi-factor-auth-form";
 import { ApplicationRolesSection } from "./application-roles-section";
+import { ResetPasswordDialog } from "./reset-password-dialog";
 
 export function UserDetailForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [isEditEnabled, setIsEditEnabled] = useState(false);
 
   const router = useRouter();
-  const { applicationId, organizationId } = useParams() as {
+  const { applicationId, organizationId, userId } = useParams() as {
     organizationId: string;
     applicationId: string;
+    userId: string;
   };
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -139,15 +141,15 @@ export function UserDetailForm() {
                 onClick={() => {
                   setIsEditEnabled((state) => !state);
 
-                  // if (isEditEnabled) {
-                  //   router.push(
-                  //     `/dashboard/${organizationId}/application/${applicationId}/user/${applicationId}?edit=${isEditEnabled}`
-                  //   );
-                  // } else {
-                  //   router.push(
-                  //     `/dashboard/${organizationId}/application/${applicationId}/user/${applicationId}`
-                  //   );
-                  // }
+                  if (isEditEnabled) {
+                    router.push(
+                      `/dashboard/${organizationId}/application/${applicationId}/user/${userId}?edit=${isEditEnabled}`
+                    );
+                  } else {
+                    router.push(
+                      `/dashboard/${organizationId}/application/${applicationId}/user/${userId}`
+                    );
+                  }
                 }}
               >
                 <Pencil />
@@ -317,7 +319,7 @@ export function UserDetailForm() {
                 change it on the next login.
               </span>
 
-              {/* <ResetPasswordDialog /> */}
+              <ResetPasswordDialog />
             </div>
 
             <Separator className="my-2" />

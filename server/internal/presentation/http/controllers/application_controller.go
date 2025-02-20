@@ -104,10 +104,16 @@ func (c *ApplicationController) RemoveApplication(writter http.ResponseWriter, r
 		panic(err)
 	}
 
-	var requestSchema removeapplication.Request
+	organizationIDString := chi.URLParam(request, "organizationID")
+	organizationIdUUID, err := uuid.Parse(organizationIDString)
 
-	if err := http_router.ParseBodyToSchema(&requestSchema, request); err != nil {
+	if err != nil {
 		panic(err)
+	}
+
+	requestSchema := removeapplication.Request{
+		ApplicationID:  applicationIdUUID,
+		OrganizationID: organizationIdUUID,
 	}
 
 	requestSchema.ApplicationID = applicationIdUUID
