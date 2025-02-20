@@ -7,6 +7,7 @@ import (
 	getapplicationbyid "github.com/gate-keeper/internal/application/services/application/get-application-by-id"
 	listapplications "github.com/gate-keeper/internal/application/services/application/list-applications"
 	removeapplication "github.com/gate-keeper/internal/application/services/application/remove-application"
+	updateapplication "github.com/gate-keeper/internal/application/services/application/update-application"
 	"github.com/gate-keeper/internal/infra/database/repositories"
 	http_router "github.com/gate-keeper/internal/presentation/http"
 	"github.com/go-chi/chi"
@@ -94,6 +95,28 @@ func (c *ApplicationController) CreateApplication(writter http.ResponseWriter, r
 	}
 
 	http_router.SendJson(writter, response, http.StatusCreated)
+}
+
+func (c *ApplicationController) UpdateApplication(writter http.ResponseWriter, request *http.Request) {
+	var updateApplicationRequest updateapplication.Request
+
+	if err := http_router.ParseBodyToSchema(&updateApplicationRequest, request); err != nil {
+		panic(err)
+	}
+
+	params := repositories.ParamsRs[updateapplication.Request, *updateapplication.Response, updateapplication.UpdateApplicationService]{
+		DbPool:  c.DbPool,
+		New:     updateapplication.New,
+		Request: updateApplicationRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
 }
 
 func (c *ApplicationController) RemoveApplication(writter http.ResponseWriter, request *http.Request) {

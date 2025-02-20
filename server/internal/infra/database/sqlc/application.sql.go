@@ -14,21 +14,6 @@ import (
 )
 
 const addApplication = `-- name: AddApplication :exec
-/*
- CREATE TABLE IF NOT EXISTS "application" (
- id UUID PRIMARY KEY,
- organization_id UUID NOT NULL,
- name VARCHAR(255) NOT NULL,
- description TEXT NULL,
- is_active BOOLEAN NOT NULL DEFAULT TRUE,
- has_mfa_auth_app BOOLEAN NOT NULL DEFAULT FALSE,
- has_mfa_email BOOLEAN NOT NULL DEFAULT FALSE,
- password_hash_secret VARCHAR(255) NOT NULL,
- badges TEXT NULL,
- created_at TIMESTAMP NOT NULL,
- updated_at TIMESTAMP NULL
- );
- */
 INSERT INTO
     "application" (
         id,
@@ -232,27 +217,39 @@ const updateApplication = `-- name: UpdateApplication :exec
 UPDATE
     "application"
 SET
-    organization_id = $1,
-    name = $2,
-    description = $3,
-    updated_at = $4
+    name = $1,
+    description = $2,
+    has_mfa_auth_app = $3,
+    badges = $4,
+    is_active = $5,
+    has_mfa_email = $6,
+    password_hash_secret = $7,
+    updated_at = $8
 WHERE
-    id = $5
+    id = $9
 `
 
 type UpdateApplicationParams struct {
-	OrganizationID uuid.UUID  `db:"organization_id"`
-	Name           string     `db:"name"`
-	Description    *string    `db:"description"`
-	UpdatedAt      *time.Time `db:"updated_at"`
-	ID             uuid.UUID  `db:"id"`
+	Name               string     `db:"name"`
+	Description        *string    `db:"description"`
+	HasMfaAuthApp      bool       `db:"has_mfa_auth_app"`
+	Badges             *string    `db:"badges"`
+	IsActive           bool       `db:"is_active"`
+	HasMfaEmail        bool       `db:"has_mfa_email"`
+	PasswordHashSecret string     `db:"password_hash_secret"`
+	UpdatedAt          *time.Time `db:"updated_at"`
+	ID                 uuid.UUID  `db:"id"`
 }
 
 func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error {
 	_, err := q.db.Exec(ctx, updateApplication,
-		arg.OrganizationID,
 		arg.Name,
 		arg.Description,
+		arg.HasMfaAuthApp,
+		arg.Badges,
+		arg.IsActive,
+		arg.HasMfaEmail,
+		arg.PasswordHashSecret,
 		arg.UpdatedAt,
 		arg.ID,
 	)

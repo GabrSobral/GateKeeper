@@ -79,6 +79,7 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 					r.Post("/", applicationController.CreateApplication)
 					r.Get("/{applicationID}", applicationController.GetApplicationByID)
 					r.Delete("/{applicationID}", applicationController.RemoveApplication)
+					r.Put("/{applicationID}", applicationController.UpdateApplication)
 
 					r.Route("/{applicationID}/roles", func(r chi.Router) {
 						r.Post("/", applicationRoleController.CreateRole)

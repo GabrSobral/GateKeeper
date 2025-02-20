@@ -82,11 +82,18 @@ func (r ApplicationRepository) RemoveApplication(ctx context.Context, applicatio
 }
 
 func (r ApplicationRepository) UpdateApplication(ctx context.Context, newApplication *entities.Application) error {
+	badges := strings.Join(newApplication.Badges, ",")
+
 	err := r.Store.UpdateApplication(ctx, pgstore.UpdateApplicationParams{
-		ID:             newApplication.ID,
-		Name:           newApplication.Name,
-		OrganizationID: newApplication.OrganizationID,
-		Description:    newApplication.Description,
+		ID:                 newApplication.ID,
+		Name:               newApplication.Name,
+		Description:        newApplication.Description,
+		HasMfaAuthApp:      newApplication.HasMfaAuthApp,
+		Badges:             &badges,
+		IsActive:           newApplication.IsActive,
+		HasMfaEmail:        newApplication.HasMfaEmail,
+		PasswordHashSecret: newApplication.PasswordHashSecret,
+		UpdatedAt:          newApplication.UpdatedAt,
 	})
 
 	if err != nil {

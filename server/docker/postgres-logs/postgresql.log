@@ -1,0 +1,1535 @@
+2025-02-20 17:03:45.737 UTC [1] LOG:  starting PostgreSQL 17.2 on x86_64-pc-linux-musl, compiled by gcc (Alpine 14.2.0) 14.2.0, 64-bit
+2025-02-20 17:03:45.738 UTC [1] LOG:  listening on IPv4 address "0.0.0.0", port 5432
+2025-02-20 17:03:45.738 UTC [1] LOG:  listening on IPv6 address "::", port 5432
+2025-02-20 17:03:45.747 UTC [1] LOG:  listening on Unix socket "/var/run/postgresql/.s.PGSQL.5432"
+2025-02-20 17:03:45.847 UTC [30] LOG:  database system was interrupted; last known up at 2025-02-20 16:56:43 UTC
+2025-02-20 17:03:55.858 UTC [30] LOG:  syncing data directory (pre-fsync), elapsed time: 10.00 s, current path: ./base/4/3503
+2025-02-20 17:04:06.478 UTC [30] LOG:  database system was not properly shut down; automatic recovery in progress
+2025-02-20 17:04:06.537 UTC [30] LOG:  redo starts at 0/1CA0358
+2025-02-20 17:04:06.538 UTC [30] LOG:  invalid record length at 0/1CA0460: expected at least 24, got 0
+2025-02-20 17:04:06.538 UTC [30] LOG:  redo done at 0/1CA0428 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2025-02-20 17:04:06.588 UTC [28] LOG:  checkpoint starting: end-of-recovery immediate wait
+2025-02-20 17:04:06.694 UTC [28] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.036 s, sync=0.010 s, total=0.111 s; sync files=2, longest=0.005 s, average=0.005 s; distance=0 kB, estimate=0 kB; lsn=0/1CA0460, redo lsn=0/1CA0460
+2025-02-20 17:04:06.713 UTC [1] LOG:  database system is ready to accept connections
+2025-02-20 17:04:07.875 UTC [38] LOG:  statement: begin
+2025-02-20 17:04:07.875 UTC [39] LOG:  statement: begin
+2025-02-20 17:04:07.929 UTC [38] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:07.929 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:07.929 UTC [39] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:04:07.931 UTC [39] LOG:  statement: commit
+2025-02-20 17:04:07.946 UTC [38] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:04:07.946 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:07.949 UTC [38] LOG:  statement: commit
+2025-02-20 17:04:11.295 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:04:11.297 UTC [38] LOG:  statement: begin
+2025-02-20 17:04:11.298 UTC [38] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:11.298 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:11.302 UTC [38] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:11.302 UTC [38] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:04:11.313 UTC [38] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:04:11.313 UTC [38] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:04:11.323 UTC [38] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:04:11.323 UTC [38] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:04:11.325 UTC [38] LOG:  statement: commit
+2025-02-20 17:04:12.676 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:04:12.678 UTC [38] LOG:  statement: begin
+2025-02-20 17:04:12.682 UTC [38] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:04:12.684 UTC [38] LOG:  statement: commit
+2025-02-20 17:04:12.685 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:04:12.686 UTC [39] LOG:  statement: begin
+2025-02-20 17:04:12.690 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:12.690 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:12.699 UTC [39] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:04:12.699 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:12.700 UTC [39] LOG:  statement: commit
+2025-02-20 17:04:46.941 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:04:46.945 UTC [39] LOG:  statement: begin
+2025-02-20 17:04:46.949 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:04:46.949 UTC [39] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:04:46.953 UTC [38] LOG:  statement: begin
+2025-02-20 17:04:46.953 UTC [39] LOG:  statement: commit
+2025-02-20 17:04:46.957 UTC [38] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:46.957 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:46.960 UTC [38] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:04:46.960 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:46.964 UTC [38] LOG:  statement: commit
+2025-02-20 17:04:47.317 UTC [38] LOG:  statement: begin
+2025-02-20 17:04:47.318 UTC [38] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:47.318 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:04:47.320 UTC [38] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:04:47.320 UTC [38] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:04:47.322 UTC [38] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:04:47.322 UTC [38] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:04:47.323 UTC [38] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:04:47.323 UTC [38] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:04:47.325 UTC [38] LOG:  statement: commit
+2025-02-20 17:05:00.355 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:05:00.357 UTC [39] LOG:  statement: begin
+2025-02-20 17:05:00.365 UTC [39] LOG:  execute stmtcache_20baf1d99729ede7766e01131973cead9c54f82bdb316fc4: -- name: UpdateApplication :exec
+	UPDATE
+	    "application"
+	SET
+	    name = $1,
+	    description = $2,
+	    has_mfa_auth_app = $3,
+	    badges = $4,
+	    is_active = $5,
+	    has_mfa_email = $6,
+	    password_hash_secret = $7,
+	    updated_at = $8
+	WHERE
+	    id = $9
+	
+2025-02-20 17:05:00.365 UTC [39] DETAIL:  Parameters: $1 = 'App Four Updated', $2 = 'Fourth mock application', $3 = 'f', $4 = 'gaming,social', $5 = 't', $6 = 't', $7 = 'YY7ZH<ChQqpzxN]Y2w-=R)rC2TV2qMs$', $8 = '2025-02-20 14:05:00.356605', $9 = '01952451-dfc5-7873-8692-581aa9b28e9a'
+2025-02-20 17:05:00.374 UTC [39] LOG:  statement: commit
+2025-02-20 17:05:00.419 UTC [39] LOG:  statement: begin
+2025-02-20 17:05:00.423 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:05:00.423 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:05:00.426 UTC [39] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:05:00.426 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:05:00.429 UTC [39] LOG:  statement: commit
+2025-02-20 17:05:00.708 UTC [39] LOG:  statement: begin
+2025-02-20 17:05:00.709 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:05:00.709 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:05:00.713 UTC [39] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:05:00.713 UTC [39] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:05:00.721 UTC [39] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:05:00.721 UTC [39] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:05:00.737 UTC [39] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:05:00.737 UTC [39] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:05:00.738 UTC [39] LOG:  statement: commit
+2025-02-20 17:06:22.192 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:06:22.193 UTC [38] LOG:  statement: begin
+2025-02-20 17:06:22.195 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:06:22.195 UTC [38] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:06:22.196 UTC [39] LOG:  statement: begin
+2025-02-20 17:06:22.197 UTC [38] LOG:  statement: commit
+2025-02-20 17:06:22.197 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:06:22.197 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:06:22.199 UTC [39] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:06:22.199 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:06:22.201 UTC [39] LOG:  statement: commit
+2025-02-20 17:07:09.356 UTC [43] LOG:  execute <unnamed>: 
+	      SELECT
+	        table_schema,
+	        table_name,
+	        column_name,
+	        is_nullable,
+	        is_generated,
+	        ordinal_position,
+	        column_default,
+	        CASE
+	          WHEN character_maximum_length is not null  and udt_name != 'text'
+	            THEN udt_name || '(' || character_maximum_length::varchar(255) || ')'
+	          WHEN numeric_precision is not null and numeric_scale is not null
+	            THEN udt_name || '(' || numeric_precision::varchar(255) || ',' || numeric_scale::varchar(255) || ')'
+	          WHEN numeric_precision is not null and numeric_scale is null
+	            THEN udt_name || '(' || numeric_precision::varchar(255) || ')'
+	          WHEN datetime_precision is not null AND udt_name != 'date' THEN
+	            udt_name || '(' || datetime_precision::varchar(255) || ')'
+	          ELSE udt_name
+	        END as data_type,
+	        CASE
+	          WHEN data_type = 'ARRAY' THEN 'YES'
+	          ELSE 'NO'
+	        END as is_array,
+	        pg_catalog.col_description(format('%I.%I', table_schema, table_name)::regclass::oid, ordinal_position) as column_comment
+	      FROM information_schema.columns
+	      WHERE table_schema = $1 AND table_name = $2
+	      ORDER BY table_schema, table_name, ordinal_position
+	    
+2025-02-20 17:07:09.356 UTC [43] DETAIL:  Parameters: $1 = 'public', $2 = 'organization'
+2025-02-20 17:07:09.456 UTC [43] LOG:  execute <unnamed>: 
+	      SELECT
+	        kcu.constraint_schema AS from_schema,
+	        kcu.table_name AS from_table,
+	        STRING_AGG(kcu.column_name, ',' ORDER BY kcu.ordinal_position) AS from_column,
+	        rc.unique_constraint_schema AS to_schema,
+	        tc.constraint_name,
+	        rc.update_rule,
+	        rc.delete_rule,
+	        (
+	          SELECT STRING_AGG(kcu2.column_name, ',' ORDER BY kcu2.ordinal_position)
+	          FROM information_schema.key_column_usage AS kcu2
+	          WHERE kcu2.constraint_name = rc.unique_constraint_name
+	        ) AS to_column,
+	        (
+	          SELECT kcu2.table_name
+	          FROM information_schema.key_column_usage AS kcu2
+	          WHERE kcu2.constraint_name = rc.unique_constraint_name LIMIT 1
+	        ) AS to_table
+	      FROM
+	        information_schema.key_column_usage AS kcu
+	      JOIN
+	        information_schema.table_constraints AS tc
+	      ON
+	        tc.constraint_name = kcu.constraint_name
+	      JOIN
+	        information_schema.referential_constraints AS rc
+	      ON
+	        rc.constraint_name = kcu.constraint_name
+	      WHERE
+	        tc.constraint_type = 'FOREIGN KEY' AND
+	        kcu.table_schema NOT LIKE 'pg_%' AND
+	        kcu.table_schema = $2 AND
+	        kcu.table_name = $1
+	      GROUP BY
+	        kcu.constraint_schema,
+	        kcu.table_name,
+	        rc.unique_constraint_schema,
+	        rc.unique_constraint_name,
+	        tc.constraint_name,
+	        rc.update_rule,
+	        rc.delete_rule;
+	    
+2025-02-20 17:07:09.456 UTC [43] DETAIL:  Parameters: $1 = 'organization', $2 = 'public'
+2025-02-20 17:07:09.472 UTC [43] LOG:  statement: 
+	      SELECT
+	        a.attname as column_name,
+	        format_type(a.atttypid, a.atttypmod) AS data_type,
+	        a.attnum as position
+	      FROM   pg_index i
+	      JOIN   pg_attribute a ON a.attrelid = i.indrelid
+	                          AND a.attnum = ANY(i.indkey)
+	      WHERE  i.indrelid = '"public"."organization"'::regclass
+	      AND    i.indisprimary
+	      ORDER BY a.attnum
+	    
+2025-02-20 17:07:09.519 UTC [43] LOG:  statement: 
+	      SELECT * 
+	      FROM "public"."organization"
+	      
+	    
+	      ORDER BY "id" ASC
+	      LIMIT 100
+	      OFFSET 0
+	      
+2025-02-20 17:07:09.592 UTC [43] LOG:  execute <unnamed>: 
+	      SELECT
+	        table_schema,
+	        table_name,
+	        column_name,
+	        is_nullable,
+	        is_generated,
+	        ordinal_position,
+	        column_default,
+	        CASE
+	          WHEN character_maximum_length is not null  and udt_name != 'text'
+	            THEN udt_name || '(' || character_maximum_length::varchar(255) || ')'
+	          WHEN numeric_precision is not null and numeric_scale is not null
+	            THEN udt_name || '(' || numeric_precision::varchar(255) || ',' || numeric_scale::varchar(255) || ')'
+	          WHEN numeric_precision is not null and numeric_scale is null
+	            THEN udt_name || '(' || numeric_precision::varchar(255) || ')'
+	          WHEN datetime_precision is not null AND udt_name != 'date' THEN
+	            udt_name || '(' || datetime_precision::varchar(255) || ')'
+	          ELSE udt_name
+	        END as data_type,
+	        CASE
+	          WHEN data_type = 'ARRAY' THEN 'YES'
+	          ELSE 'NO'
+	        END as is_array,
+	        pg_catalog.col_description(format('%I.%I', table_schema, table_name)::regclass::oid, ordinal_position) as column_comment
+	      FROM information_schema.columns
+	      WHERE table_schema = $1 AND table_name = $2
+	      ORDER BY table_schema, table_name, ordinal_position
+	    
+2025-02-20 17:07:09.592 UTC [43] DETAIL:  Parameters: $1 = 'public', $2 = 'organization'
+2025-02-20 17:07:23.215 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:07:23.244 UTC [38] LOG:  statement: begin
+2025-02-20 17:07:23.244 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:07:23.255 UTC [38] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:07:23.256 UTC [39] LOG:  statement: begin
+2025-02-20 17:07:23.262 UTC [38] LOG:  statement: commit
+2025-02-20 17:07:23.278 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:07:23.278 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:07:23.310 UTC [39] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:07:23.310 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:07:23.312 UTC [39] LOG:  statement: commit
+2025-02-20 17:07:25.224 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:07:25.225 UTC [39] LOG:  statement: begin
+2025-02-20 17:07:25.227 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:07:25.227 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:07:25.230 UTC [39] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:07:25.230 UTC [39] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:07:25.234 UTC [39] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:07:25.234 UTC [39] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:07:25.236 UTC [39] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:07:25.236 UTC [39] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:07:25.239 UTC [39] LOG:  statement: commit
+2025-02-20 17:07:38.596 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:07:38.596 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:07:38.599 UTC [39] LOG:  statement: begin
+2025-02-20 17:07:38.600 UTC [38] LOG:  statement: begin
+2025-02-20 17:07:38.603 UTC [39] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:07:38.604 UTC [38] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:07:38.604 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:07:38.607 UTC [39] LOG:  statement: commit
+2025-02-20 17:07:38.608 UTC [38] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:07:38.608 UTC [38] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:07:38.611 UTC [38] LOG:  statement: commit
+2025-02-20 17:12:38.427 UTC [39] LOG:  statement: -- ping
+2025-02-20 17:12:38.427 UTC [38] LOG:  statement: -- ping
+2025-02-20 17:12:38.429 UTC [39] LOG:  statement: begin
+2025-02-20 17:12:38.429 UTC [38] LOG:  statement: begin
+2025-02-20 17:12:38.430 UTC [39] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:12:38.430 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:12:38.430 UTC [38] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:12:38.432 UTC [39] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:12:38.432 UTC [39] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:12:38.432 UTC [38] LOG:  statement: commit
+2025-02-20 17:12:38.434 UTC [39] LOG:  statement: commit
+2025-02-20 17:15:52.070 UTC [57] LOG:  statement: begin
+2025-02-20 17:15:52.070 UTC [56] LOG:  statement: begin
+2025-02-20 17:15:52.078 UTC [56] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:15:52.078 UTC [57] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:52.078 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:52.079 UTC [56] LOG:  statement: commit
+2025-02-20 17:15:52.084 UTC [57] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:15:52.084 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:52.086 UTC [57] LOG:  statement: commit
+2025-02-20 17:15:52.365 UTC [57] LOG:  statement: begin
+2025-02-20 17:15:52.367 UTC [57] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:52.367 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:52.371 UTC [57] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:52.371 UTC [57] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:15:52.380 UTC [57] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:15:52.380 UTC [57] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:15:52.387 UTC [57] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:15:52.387 UTC [57] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:15:52.389 UTC [57] LOG:  statement: commit
+2025-02-20 17:15:54.054 UTC [57] LOG:  statement: -- ping
+2025-02-20 17:15:54.056 UTC [57] LOG:  statement: begin
+2025-02-20 17:15:54.061 UTC [57] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:15:54.064 UTC [57] LOG:  statement: commit
+2025-02-20 17:15:54.071 UTC [57] LOG:  statement: begin
+2025-02-20 17:15:54.072 UTC [57] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:54.072 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:54.074 UTC [57] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:15:54.074 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:54.077 UTC [57] LOG:  statement: commit
+2025-02-20 17:15:58.710 UTC [57] LOG:  statement: -- ping
+2025-02-20 17:15:58.711 UTC [57] LOG:  statement: begin
+2025-02-20 17:15:58.713 UTC [57] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:58.713 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:58.715 UTC [57] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:58.715 UTC [57] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:15:58.716 UTC [57] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:15:58.716 UTC [57] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:15:58.718 UTC [57] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:15:58.718 UTC [57] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:15:58.719 UTC [57] LOG:  statement: commit
+2025-02-20 17:15:59.147 UTC [57] LOG:  statement: begin
+2025-02-20 17:15:59.148 UTC [57] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:15:59.148 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:59.151 UTC [57] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:15:59.151 UTC [57] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:15:59.152 UTC [57] LOG:  statement: commit
+2025-02-20 17:16:28.399 UTC [56] LOG:  statement: -- ping
+2025-02-20 17:16:28.399 UTC [57] LOG:  statement: -- ping
+2025-02-20 17:16:28.402 UTC [57] LOG:  statement: begin
+2025-02-20 17:16:28.403 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:28.405 UTC [57] LOG:  execute stmtcache_1a467b61eb1a51185713fdd01369d70d20a375fa4beebf75: -- name: ListOrganizations :many
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM organization
+	ORDER BY created_at DESC
+	
+2025-02-20 17:16:28.408 UTC [57] LOG:  statement: commit
+2025-02-20 17:16:28.409 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:28.409 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:28.420 UTC [56] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:16:28.420 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:28.423 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:28.522 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:28.526 UTC [56] LOG:  execute stmtcache_20baf1d99729ede7766e01131973cead9c54f82bdb316fc4: -- name: UpdateApplication :exec
+	UPDATE
+	    "application"
+	SET
+	    name = $1,
+	    description = $2,
+	    has_mfa_auth_app = $3,
+	    badges = $4,
+	    is_active = $5,
+	    has_mfa_email = $6,
+	    password_hash_secret = $7,
+	    updated_at = $8
+	WHERE
+	    id = $9
+	
+2025-02-20 17:16:28.526 UTC [56] DETAIL:  Parameters: $1 = 'App Four Updated', $2 = 'Fourth mock application', $3 = 't', $4 = 'gaming,social', $5 = 't', $6 = 't', $7 = '1&2E&A=anV+Cm@?3#>krz._xIu%(6GVU', $8 = '2025-02-20 14:16:28.523588', $9 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:28.532 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:28.567 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:28.569 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:28.569 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:28.571 UTC [56] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:16:28.571 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:28.572 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:28.796 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:28.798 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:28.798 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:28.802 UTC [56] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:28.802 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:28.807 UTC [56] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:28.807 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:28.814 UTC [56] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:28.814 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:28.815 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:37.488 UTC [56] LOG:  statement: -- ping
+2025-02-20 17:16:37.490 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:37.492 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:37.492 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:37.494 UTC [56] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:37.494 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:37.495 UTC [56] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:37.495 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:37.496 UTC [56] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:37.496 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:37.498 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:37.856 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:37.857 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:37.857 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:37.859 UTC [56] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:16:37.859 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:37.860 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:52.318 UTC [56] LOG:  statement: -- ping
+2025-02-20 17:16:52.321 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:52.322 UTC [56] LOG:  execute stmtcache_20baf1d99729ede7766e01131973cead9c54f82bdb316fc4: -- name: UpdateApplication :exec
+	UPDATE
+	    "application"
+	SET
+	    name = $1,
+	    description = $2,
+	    has_mfa_auth_app = $3,
+	    badges = $4,
+	    is_active = $5,
+	    has_mfa_email = $6,
+	    password_hash_secret = $7,
+	    updated_at = $8
+	WHERE
+	    id = $9
+	
+2025-02-20 17:16:52.322 UTC [56] DETAIL:  Parameters: $1 = 'App Four Updated again', $2 = 'Fourth mock application wow', $3 = 'f', $4 = 'gaming,social,updated,rs', $5 = 't', $6 = 't', $7 = '1&2E&A=anV+Cm@?3#>krz._xIu%(6GVU', $8 = '2025-02-20 14:16:52.322204', $9 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:52.324 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:52.349 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:52.351 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:52.351 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:52.353 UTC [56] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:16:52.353 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:52.356 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:52.603 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:52.604 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:52.604 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:52.606 UTC [56] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:52.606 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:52.608 UTC [56] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:52.608 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:52.610 UTC [56] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:52.610 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:52.611 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:57.470 UTC [56] LOG:  statement: -- ping
+2025-02-20 17:16:57.471 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:57.473 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:57.473 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:57.475 UTC [56] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:57.475 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:57.477 UTC [56] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:57.477 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:57.478 UTC [56] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:16:57.478 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:16:57.480 UTC [56] LOG:  statement: commit
+2025-02-20 17:16:57.618 UTC [56] LOG:  statement: begin
+2025-02-20 17:16:57.620 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:16:57.620 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:57.622 UTC [56] LOG:  execute stmtcache_4a8818cee458ff43f3b37ab1799495c021bbfd3ec4b2ac58: -- name: ListApplicationsFromOrganization :many
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    organization_id = $1
+	
+2025-02-20 17:16:57.622 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:16:57.623 UTC [56] LOG:  statement: commit
+2025-02-20 17:17:00.728 UTC [56] LOG:  statement: -- ping
+2025-02-20 17:17:00.730 UTC [56] LOG:  statement: begin
+2025-02-20 17:17:00.732 UTC [56] LOG:  execute stmtcache_a9739b51505c71794bc80a13c1be67229ffcfa13d6946243: -- name: GetOrganizationByID :one
+	
+	
+	SELECT
+	    id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM "organization"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:17:00.732 UTC [56] DETAIL:  Parameters: $1 = '123e4567-e89b-12d3-a456-426614174003'
+2025-02-20 17:17:00.734 UTC [56] LOG:  execute stmtcache_3b3a6c2064e24e3674fcca820f88a9e1146efb18427d3bb0: -- name: GetApplicationByID :one
+	SELECT
+	    id,
+	    organization_id,
+	    name,
+	    description,
+	    badges,
+	    is_active,
+	    has_mfa_auth_app,
+	    has_mfa_email,
+	    password_hash_secret,
+	    created_at,
+	    updated_at
+	FROM
+	    "application"
+	WHERE
+	    id = $1
+	
+2025-02-20 17:17:00.734 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:17:00.736 UTC [56] LOG:  execute stmtcache_0df431e0c5c030f9d7436d918d58ed22e699cbc36799a79c: -- name: ListRolesFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    description,
+	    created_at,
+	    updated_at
+	FROM
+	    application_role
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:17:00.736 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:17:00.738 UTC [56] LOG:  execute stmtcache_b69b22155f960ff4f3a3360d1641b079c0fb72d179f8e8f2: -- name: ListSecretsFromApplication :many
+	SELECT
+	    id,
+	    application_id,
+	    name,
+	    value,
+	    created_at,
+	    updated_at,
+	    expires_at
+	FROM
+	    application_secret
+	WHERE
+	    application_id = $1
+	
+2025-02-20 17:17:00.738 UTC [56] DETAIL:  Parameters: $1 = '550e8400-e29b-41d4-a716-446655440003'
+2025-02-20 17:17:00.740 UTC [56] LOG:  statement: commit

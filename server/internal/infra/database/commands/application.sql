@@ -1,19 +1,4 @@
 ------------------------------------COMMANDS--------------------------------------
-/*
- CREATE TABLE IF NOT EXISTS "application" (
- id UUID PRIMARY KEY,
- organization_id UUID NOT NULL,
- name VARCHAR(255) NOT NULL,
- description TEXT NULL,
- is_active BOOLEAN NOT NULL DEFAULT TRUE,
- has_mfa_auth_app BOOLEAN NOT NULL DEFAULT FALSE,
- has_mfa_email BOOLEAN NOT NULL DEFAULT FALSE,
- password_hash_secret VARCHAR(255) NOT NULL,
- badges TEXT NULL,
- created_at TIMESTAMP NOT NULL,
- updated_at TIMESTAMP NULL
- );
- */
 -- name: AddApplication :exec
 INSERT INTO
     "application" (
@@ -48,9 +33,13 @@ VALUES
 UPDATE
     "application"
 SET
-    organization_id = sqlc.arg('organization_id'),
     name = sqlc.arg('name'),
     description = sqlc.narg('description'),
+    has_mfa_auth_app = sqlc.arg('has_mfa_auth_app'),
+    badges = sqlc.narg('badges'),
+    is_active = sqlc.arg('is_active'),
+    has_mfa_email = sqlc.arg('has_mfa_email'),
+    password_hash_secret = sqlc.arg('password_hash_secret'),
     updated_at = sqlc.arg('updated_at')
 WHERE
     id = sqlc.arg('id');

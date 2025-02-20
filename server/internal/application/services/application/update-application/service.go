@@ -1,7 +1,8 @@
-package createapplication
+package updateapplication
 
 import (
 	"context"
+	"time"
 
 	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/infra/database/repositories"
@@ -12,6 +13,7 @@ import (
 )
 
 type Request struct {
+	ID                 uuid.UUID `json:"id" validate:"required"`
 	Name               string    `json:"name" validate:"required,min=3,max=100"`
 	Description        *string   `json:"description" validate:"omitempty,min=3,max=100"`
 	PasswordHashSecret string    `json:"passwordHashSecret" validate:"required,min=32,max=258"`
@@ -19,6 +21,7 @@ type Request struct {
 	HasMfaEmail        bool      `json:"hasMfaEmail" validate:"boolean"`
 	HasMfaAuthApp      bool      `json:"hasMfaAuthApp" validate:"boolean"`
 	OrganizationID     uuid.UUID `json:"organizationId" validate:"required"`
+	IsActive           bool      `json:"isActive" validate:"required"`
 }
 
 type Response struct {
@@ -33,44 +36,48 @@ type Response struct {
 	IsActive           bool      `json:"isActive"`
 }
 
-type CreateApplicationService struct {
+type UpdateApplicationService struct {
 	ApplicationRepository repository_interfaces.IApplicationRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
-	return &CreateApplicationService{
+	return &UpdateApplicationService{
 		ApplicationRepository: repository_handlers.ApplicationRepository{Store: q},
 	}
 }
 
-func (s *CreateApplicationService) Handler(ctx context.Context, request Request) (*Response, error) {
-	newApplication := entities.AddApplication(
-		request.Name,
-		request.Description,
-		request.OrganizationID,
-		request.PasswordHashSecret,
-		request.Badges,
-		request.HasMfaEmail,
-		request.HasMfaAuthApp,
-		true, // IsActive
-		nil,  // UpdatedAt
-	)
+func (s *UpdateApplicationService) Handler(ctx context.Context, request Request) (*Response, error) {
+	now := time.Now()
 
-	err := s.ApplicationRepository.AddApplication(ctx, newApplication)
+	application := entities.Application{
+		ID:                 request.ID,
+		OrganizationID:     request.OrganizationID,
+		Name:               request.Name,
+		Description:        request.Description,
+		IsActive:           request.IsActive,
+		HasMfaAuthApp:      request.HasMfaAuthApp,
+		HasMfaEmail:        request.HasMfaEmail,
+		PasswordHashSecret: request.PasswordHashSecret,
+		Badges:             request.Badges,
+		CreatedAt:          now,
+		UpdatedAt:          &now,
+	}
+
+	err := s.ApplicationRepository.UpdateApplication(ctx, &application)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return &Response{
-		ID:                 newApplication.ID,
-		Name:               newApplication.Name,
-		Description:        newApplication.Description,
-		OrganizationID:     newApplication.OrganizationID,
-		PasswordHashSecret: newApplication.PasswordHashSecret,
-		Badges:             newApplication.Badges,
-		HasMfaEmail:        newApplication.HasMfaEmail,
-		HasMfaAuthApp:      newApplication.HasMfaAuthApp,
-		IsActive:           newApplication.IsActive,
+		ID:                 application.ID,
+		Name:               application.Name,
+		Description:        application.Description,
+		OrganizationID:     application.OrganizationID,
+		PasswordHashSecret: application.PasswordHashSecret,
+		Badges:             application.Badges,
+		HasMfaEmail:        application.HasMfaEmail,
+		HasMfaAuthApp:      application.HasMfaAuthApp,
+		IsActive:           application.IsActive,
 	}, nil
 }
