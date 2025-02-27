@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/infra/database/repositories"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -35,7 +36,7 @@ func (r ApplicationRoleRepository) RemoveRole(ctx context.Context, roleID uuid.U
 func (r ApplicationRoleRepository) ListRolesFromApplication(ctx context.Context, applicationID uuid.UUID) (*[]entities.ApplicationRole, error) {
 	roles, err := r.Store.ListRolesFromApplication(ctx, applicationID)
 
-	if err != nil {
+	if err != nil && err != repositories.ErrNoRows {
 		return nil, err
 	}
 

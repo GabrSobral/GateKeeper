@@ -54,7 +54,7 @@ func (s *CreateApplicationSecretService) Handler(ctx context.Context, request Re
 	}
 
 	if !isApplicationExists {
-		return nil, &errors.ErrAplicationNotFound
+		return nil, &errors.ErrApplicationNotFound
 	}
 
 	newSecret := entities.NewApplicationSecret(request.ApplicationID, request.Name, request.ExpiresAt)

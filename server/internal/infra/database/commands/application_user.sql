@@ -11,30 +11,25 @@ INSERT INTO
         updated_at,
         is_active,
         is_email_confirmed,
-        two_factor_enabled,
-        two_factor_secret
+        is_mfa_auth_app_enabled,
+        is_mfa_email_enabled,
+        two_factor_secret,
+        should_change_pass
     )
 VALUES
     (
         sqlc.arg('id'),
-        -- id
         sqlc.arg('email'),
-        -- email
         sqlc.narg('password_hash'),
-        -- password_hash
         sqlc.arg('application_id'),
-        -- application_id
         sqlc.arg('created_at'),
-        -- created_at
         sqlc.narg('updated_at'),
-        -- updated_at
         sqlc.arg('is_active'),
-        -- is_active
         sqlc.arg('is_email_confirmed'),
-        -- is_email_confirmed
-        sqlc.arg('two_factor_enabled'),
-        -- two_factor_enabled
-        sqlc.narg('two_factor_secret') -- two_factor_secret
+        sqlc.arg('is_mfa_auth_app_enabled'),
+        sqlc.arg('is_mfa_email_enabled'),
+        sqlc.narg('two_factor_secret'),
+        sqlc.arg('should_change_pass')
     );
 
 -- name: UpdateUser :exec
@@ -47,10 +42,19 @@ SET
     updated_at = sqlc.arg('updated_at'),
     is_active = sqlc.arg('is_active'),
     is_email_confirmed = sqlc.arg('is_email_confirmed'),
-    two_factor_enabled = sqlc.arg('two_factor_enabled'),
-    two_factor_secret = sqlc.narg('two_factor_secret')
+    is_mfa_auth_app_enabled = sqlc.arg('is_mfa_auth_app_enabled'),
+    is_mfa_email_enabled = sqlc.arg('is_mfa_email_enabled'),
+    two_factor_secret = sqlc.narg('two_factor_secret'),
+    should_change_pass = sqlc.arg('should_change_pass')
 WHERE
     id = sqlc.arg('id');
+
+-- name: DeleteApplicationUser :exec
+DELETE FROM
+    "application_user"
+WHERE
+    id = sqlc.arg('id')
+    AND application_id = sqlc.arg('application_id');
 
 ------------------------------------QUERIES--------------------------------------
 -- name: GetUserById :one
@@ -64,7 +68,9 @@ SELECT
     updated_at,
     is_active,
     is_email_confirmed,
-    two_factor_enabled,
+    is_mfa_auth_app_enabled,
+    is_mfa_email_enabled,
+    should_change_pass,
     two_factor_secret
 FROM
     "application_user"
@@ -82,7 +88,9 @@ SELECT
     updated_at,
     is_active,
     is_email_confirmed,
-    two_factor_enabled,
+    is_mfa_auth_app_enabled,
+    is_mfa_email_enabled,
+    should_change_pass,
     two_factor_secret
 FROM
     "application_user"
@@ -114,3 +122,46 @@ SELECT
         WHERE
             id = sqlc.arg('id')
     );
+
+-- name: GetUsersByApplicationID :many
+-- Get users by application id paged, and ordered by created_at, that includes the application roles
+SELECT
+    au.id,
+    au.email,
+    au.application_id,
+    up.display_name,
+    au.created_at,
+    au.updated_at,
+    au.is_active,
+    au.is_email_confirmed,
+    au.is_mfa_auth_app_enabled,
+    au.is_mfa_email_enabled,
+    COALESCE(r.roles, '[]' :: jsonb) AS roles,
+    COUNT(*) OVER () AS total_users
+FROM
+    "application_user" au
+    LEFT JOIN "user_profile" up ON up.user_id = au.id
+    LEFT JOIN LATERAL (
+        SELECT
+            jsonb_agg(
+                jsonb_build_object(
+                    'id',
+                    ar.id,
+                    'name',
+                    ar.name,
+                    'description',
+                    ar.description
+                )
+            ) AS roles
+        FROM
+            "user_role" ur
+            JOIN "application_role" ar ON ar.id = ur.role_id
+        WHERE
+            ur.user_id = au.id
+    ) r ON TRUE
+WHERE
+    au.application_id = sqlc.arg('application_id')
+ORDER BY
+    au.created_at
+LIMIT
+    sqlc.arg('limit') OFFSET sqlc.arg('offset');

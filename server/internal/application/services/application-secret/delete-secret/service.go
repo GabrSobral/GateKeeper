@@ -36,7 +36,7 @@ func (s *DeleteSecretService) Handler(ctx context.Context, request Request) erro
 	}
 
 	if !isApplicationExists {
-		return &errors.ErrAplicationNotFound
+		return &errors.ErrApplicationNotFound
 	}
 
 	if err := s.ApplicationSecretRepository.RemoveSecret(ctx, request.SecretID); err != nil {

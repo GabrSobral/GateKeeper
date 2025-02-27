@@ -15,6 +15,7 @@ type UserProfile struct {
 func NewUserProfile(userID uuid.UUID, firstName, lastName, displayName string, phoneNumber, address, photoURL *string) *UserProfile {
 	return &UserProfile{
 		UserID:      userID,
+		DisplayName: displayName,
 		FirstName:   firstName,
 		LastName:    lastName,
 		PhoneNumber: phoneNumber,

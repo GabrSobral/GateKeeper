@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gate-keeper/internal/domain/entities"
+	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	"github.com/google/uuid"
 )
 
@@ -19,6 +20,32 @@ func (r InMemoryApplicationUserRepository) AddUser(ctx context.Context, newUser 
 
 type GetUserByEmailParams struct {
 	Email string
+}
+
+func (r InMemoryApplicationUserRepository) DeleteApplicationUser(ctx context.Context, applicationID, userID uuid.UUID) error {
+	delete(r.Users, userID.String())
+
+	return nil
+}
+
+func (r InMemoryApplicationUserRepository) GetUsersByApplicationID(ctx context.Context, applicationID uuid.UUID, limit, offset int) (*repository_interfaces.ApplicationUsersData, error) {
+	users := []repository_interfaces.ApplicationUsers{}
+
+	for _, user := range r.Users {
+		if user.ApplicationID == applicationID {
+			// users = append(users, repository_interfaces.ApplicationUsers{
+			// 	ID:          user.ID,
+			// 	DisplayName: "",
+			// 	Email:       user.Email,
+			// 	Roles:       []repository_interfaces.ApplicationRolesData{},
+			// })
+		}
+	}
+
+	return &repository_interfaces.ApplicationUsersData{
+		Data:       users,
+		TotalCount: len(users),
+	}, nil
 }
 
 func (r InMemoryApplicationUserRepository) GetUserByEmail(ctx context.Context, email string, applicationID uuid.UUID) (*entities.ApplicationUser, error) {

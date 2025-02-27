@@ -1,5 +1,4 @@
 -- Write your migrate up statements here
-
 CREATE TABLE IF NOT EXISTS "application_user" (
     id UUID PRIMARY KEY,
     application_id UUID NOT NULL,
@@ -9,12 +8,13 @@ CREATE TABLE IF NOT EXISTS "application_user" (
     updated_at TIMESTAMP NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_email_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
-    two_factor_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    is_mfa_auth_app_enabled BOOLEAN NOT NULL DEFAULT FALSE,
+    should_change_pass BOOLEAN NOT NULL DEFAULT FALSE,
+    is_mfa_email_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     two_factor_secret VARCHAR(255) NULL
 );
 
 ---- create above / drop below ----
-
 DROP TABLE IF EXISTS application_user;
 
 -- Write your migrate down statements here. If this migration is irreversible

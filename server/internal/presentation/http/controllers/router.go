@@ -14,7 +14,7 @@ import (
 
 func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 	authController := AuthController{DbPool: pool}
-	userController := UserController{DbPool: pool}
+	applicationUserController := ApplicationUserController{DbPool: pool}
 	applicationController := ApplicationController{DbPool: pool}
 	organizationController := OrganizationController{DbPool: pool}
 	applicationRoleController := ApplicationRoleController{DbPool: pool}
@@ -58,13 +58,6 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 			r.Post("/confirm-email/resend", authController.ResendEmailConfirmationAuthController)
 		})
 
-		r.Route("/users", func(r chi.Router) {
-			// r.Use(http_middlewares.JwtHandler)
-
-			r.Get("/by-id/{userID}", userController.GetUserByIDController)
-			r.Get("/by-email/{email}", userController.GetUserByEmailController)
-		})
-
 		r.Route("/organizations", func(r chi.Router) {
 			// r.Use(http_middlewares.JwtHandler)
 
@@ -81,7 +74,13 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 					r.Delete("/{applicationID}", applicationController.RemoveApplication)
 					r.Put("/{applicationID}", applicationController.UpdateApplication)
 
+					r.Route("/{applicationID}/users", func(r chi.Router) {
+						r.Post("/", applicationUserController.CreateUser)
+						r.Delete("/{userID}", applicationUserController.DeleteUser)
+					})
+
 					r.Route("/{applicationID}/roles", func(r chi.Router) {
+						r.Get("/", applicationRoleController.ListRoles)
 						r.Post("/", applicationRoleController.CreateRole)
 						r.Delete("/{roleID}", applicationRoleController.RemoveRole)
 					})

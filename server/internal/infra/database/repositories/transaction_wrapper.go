@@ -5,6 +5,7 @@ import (
 	"log/slog"
 
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -28,6 +29,8 @@ type ParamsRs[TRequest any, TResponse any, TService any] struct {
 	Request TRequest
 }
 
+var ErrNoRows = pgx.ErrNoRows
+
 func WithTransaction[Request any, TService any](ctx context.Context, params Params[Request, TService]) error {
 	conn, err := params.DbPool.Acquire(ctx) // get the current connection from pool
 
@@ -47,9 +50,9 @@ func WithTransaction[Request any, TService any](ctx context.Context, params Para
 	instance := params.New(queries)
 	fn := instance
 
-	if err := fn.Handler(ctx, params.Request); err != nil {
+	if err := fn.Handler(ctx, params.Request); err != nil && err != ErrNoRows {
 		tx.Rollback(ctx)
-		slog.Error("Transaction error, rolling back...", err.Error(), "")
+		slog.Error("Transaction error, rolling back...", err.Error())
 
 		panic(err)
 	}
@@ -78,9 +81,9 @@ func WithTransactionRs[TRequest any, TResponse any, TService any](ctx context.Co
 
 	response, err := fn.Handler(ctx, params.Request)
 
-	if err != nil {
+	if err != nil && err != ErrNoRows {
 		tx.Rollback(ctx)
-		slog.Error("Transaction error, rolling back...", err.Error(), "")
+		slog.Error("Transaction error, rolling back...", err.Error())
 
 		panic(err)
 	}

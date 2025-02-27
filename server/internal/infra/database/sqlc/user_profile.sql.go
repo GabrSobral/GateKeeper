@@ -12,27 +12,37 @@ import (
 )
 
 const addUserProfile = `-- name: AddUserProfile :exec
-
-
-INSERT INTO user_profile (
-    user_id,
-    first_name,
-    last_name,
-    phone_number,
-    "address",
-    photo_url
-) VALUES (
-    $1, -- user_id
-    $2, -- first_name
-    $3, -- last_name
-    $4, -- phone_number
-    $5, -- address
-    $6 -- photo_url
-)
+INSERT INTO
+    user_profile (
+        user_id,
+        display_name,
+        first_name,
+        last_name,
+        phone_number,
+        "address",
+        photo_url
+    )
+VALUES
+    (
+        $1,
+        -- user_id
+        $2,
+        -- display_name
+        $3,
+        -- first_name
+        $4,
+        -- last_name
+        $5,
+        -- phone_number
+        $6,
+        -- address
+        $7 -- photo_url
+    )
 `
 
 type AddUserProfileParams struct {
 	UserID      uuid.UUID `db:"user_id"`
+	DisplayName string    `db:"display_name"`
 	FirstName   string    `db:"first_name"`
 	LastName    string    `db:"last_name"`
 	PhoneNumber *string   `db:"phone_number"`
@@ -44,6 +54,7 @@ type AddUserProfileParams struct {
 func (q *Queries) AddUserProfile(ctx context.Context, arg AddUserProfileParams) error {
 	_, err := q.db.Exec(ctx, addUserProfile,
 		arg.UserID,
+		arg.DisplayName,
 		arg.FirstName,
 		arg.LastName,
 		arg.PhoneNumber,
@@ -54,10 +65,9 @@ func (q *Queries) AddUserProfile(ctx context.Context, arg AddUserProfileParams) 
 }
 
 const getUserProfileByUserId = `-- name: GetUserProfileByUserId :one
-
-
 SELECT
     user_id,
+    display_name,
     first_name,
     last_name,
     phone_number,
@@ -75,6 +85,7 @@ func (q *Queries) GetUserProfileByUserId(ctx context.Context, userID uuid.UUID) 
 	var i UserProfile
 	err := row.Scan(
 		&i.UserID,
+		&i.DisplayName,
 		&i.FirstName,
 		&i.LastName,
 		&i.PhoneNumber,

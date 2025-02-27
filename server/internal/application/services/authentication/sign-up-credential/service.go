@@ -73,7 +73,7 @@ func (ss *SignUpService) Handler(ctx context.Context, request Request) error {
 		return err
 	}
 
-	user, err := entities.CreateUser(request.Email, &hashedPassword, request.ApplicationID)
+	user, err := entities.CreateApplicationUser(request.Email, &hashedPassword, request.ApplicationID, false)
 
 	if err != nil {
 		return err

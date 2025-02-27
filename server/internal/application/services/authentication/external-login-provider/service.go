@@ -98,15 +98,18 @@ func (elp *ExternalLoginProvider) Handler(ctx context.Context, request Request) 
 		}
 
 		user = &entities.ApplicationUser{
-			ID:               userID,
-			Email:            request.Email,
-			PasswordHash:     nil,
-			CreatedAt:        time.Now(),
-			UpdatedAt:        nil,
-			IsActive:         true,
-			IsEmailConfirmed: true,
-			TwoFactorEnabled: false,
-			TwoFactorSecret:  nil,
+			ID:                  userID,
+			Email:               request.Email,
+			PasswordHash:        nil,
+			CreatedAt:           time.Now(),
+			UpdatedAt:           nil,
+			IsActive:            true,
+			IsEmailConfirmed:    true,
+			IsMfaAuthAppEnabled: false,
+			IsMfaEmailEnabled:   false,
+			ApplicationID:       request.ApplicationID,
+			ShouldChangePass:    false,
+			TwoFactorSecret:     nil,
 		}
 
 		if err = elp.ApplicationUserRepository.AddUser(ctx, user); err != nil {

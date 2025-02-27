@@ -15,6 +15,7 @@ type UserProfileRepository struct {
 func (r UserProfileRepository) AddUserProfile(ctx context.Context, newUserProfile *entities.UserProfile) error {
 	err := r.Store.AddUserProfile(ctx, pgstore.AddUserProfileParams{
 		UserID:      newUserProfile.UserID,
+		DisplayName: newUserProfile.DisplayName,
 		FirstName:   newUserProfile.FirstName,
 		LastName:    newUserProfile.LastName,
 		Address:     newUserProfile.Address,
@@ -34,6 +35,7 @@ func (r UserProfileRepository) GetUserById(ctx context.Context, userID uuid.UUID
 
 	return &entities.UserProfile{
 		UserID:      userProfile.UserID,
+		DisplayName: userProfile.DisplayName,
 		FirstName:   userProfile.FirstName,
 		LastName:    userProfile.LastName,
 		Address:     userProfile.Address,

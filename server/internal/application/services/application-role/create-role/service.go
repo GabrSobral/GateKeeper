@@ -19,13 +19,18 @@ type Request struct {
 	Description   *string   `json:"description"`
 }
 
+type RequestBody struct {
+	Name        string  `json:"name" validate:"required"`
+	Description *string `json:"description"`
+}
+
 type Response struct {
-	ID            uuid.UUID
-	ApplicationID uuid.UUID
-	Name          string
-	Description   *string
-	CreatedAt     time.Time
-	UpdatedAt     *time.Time
+	ID            uuid.UUID  `json:"id"`
+	ApplicationID uuid.UUID  `json:"applicationId"`
+	Name          string     `json:"name"`
+	Description   *string    `json:"description"`
+	CreatedAt     time.Time  `json:"createdAt"`
+	UpdatedAt     *time.Time `json:"updatedAt"`
 }
 
 type CreateRoleService struct {
@@ -48,7 +53,7 @@ func (s *CreateRoleService) Handler(ctx context.Context, request Request) (*Resp
 	}
 
 	if !isApplicationExists {
-		return nil, &errors.ErrAplicationNotFound
+		return nil, &errors.ErrApplicationNotFound
 	}
 
 	newRole := entities.NewApplicationRole(request.ApplicationID, request.Name, request.Description)

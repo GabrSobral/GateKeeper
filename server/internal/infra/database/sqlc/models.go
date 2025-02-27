@@ -67,16 +67,18 @@ type ApplicationSecret struct {
 }
 
 type ApplicationUser struct {
-	ID               uuid.UUID        `db:"id"`
-	ApplicationID    uuid.UUID        `db:"application_id"`
-	Email            string           `db:"email"`
-	PasswordHash     *string          `db:"password_hash"`
-	CreatedAt        pgtype.Timestamp `db:"created_at"`
-	UpdatedAt        *time.Time       `db:"updated_at"`
-	IsActive         bool             `db:"is_active"`
-	IsEmailConfirmed bool             `db:"is_email_confirmed"`
-	TwoFactorEnabled bool             `db:"two_factor_enabled"`
-	TwoFactorSecret  *string          `db:"two_factor_secret"`
+	ID                  uuid.UUID        `db:"id"`
+	ApplicationID       uuid.UUID        `db:"application_id"`
+	Email               string           `db:"email"`
+	PasswordHash        *string          `db:"password_hash"`
+	CreatedAt           pgtype.Timestamp `db:"created_at"`
+	UpdatedAt           *time.Time       `db:"updated_at"`
+	IsActive            bool             `db:"is_active"`
+	IsEmailConfirmed    bool             `db:"is_email_confirmed"`
+	IsMfaAuthAppEnabled bool             `db:"is_mfa_auth_app_enabled"`
+	ShouldChangePass    bool             `db:"should_change_pass"`
+	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
+	TwoFactorSecret     *string          `db:"two_factor_secret"`
 }
 
 type EmailConfirmation struct {
@@ -123,6 +125,7 @@ type RefreshToken struct {
 
 type UserProfile struct {
 	UserID      uuid.UUID `db:"user_id"`
+	DisplayName string    `db:"display_name"`
 	FirstName   string    `db:"first_name"`
 	LastName    string    `db:"last_name"`
 	PhoneNumber *string   `db:"phone_number"`

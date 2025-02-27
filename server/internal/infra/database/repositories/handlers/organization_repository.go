@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/infra/database/repositories"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -15,6 +16,10 @@ type OrganizationRepository struct {
 
 func (r OrganizationRepository) GetOrganizationByID(ctx context.Context, organizationID uuid.UUID) (*entities.Organization, error) {
 	organization, err := r.Store.GetOrganizationByID(ctx, organizationID)
+
+	if err == repositories.ErrNoRows {
+		return nil, nil
+	}
 
 	if err != nil {
 		return nil, err
@@ -46,6 +51,7 @@ func (r OrganizationRepository) AddOrganization(ctx context.Context, organizatio
 
 func (r OrganizationRepository) RemoveOrganization(ctx context.Context, organizationID uuid.UUID) error {
 	err := r.Store.RemoveOrganization(ctx, organizationID)
+
 	if err != nil {
 		return err
 	}
@@ -71,11 +77,12 @@ func (r OrganizationRepository) UpdateOrganization(ctx context.Context, organiza
 func (r OrganizationRepository) ListOrganizations(ctx context.Context) (*[]entities.Organization, error) {
 	organizations, err := r.Store.ListOrganizations(ctx)
 
-	if err != nil {
+	if err != nil && err != repositories.ErrNoRows {
 		return nil, err
 	}
 
 	var organizationList []entities.Organization
+
 	for _, organization := range organizations {
 		organizationList = append(organizationList, entities.Organization{
 			ID:          organization.ID,

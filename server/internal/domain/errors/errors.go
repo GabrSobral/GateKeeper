@@ -37,7 +37,7 @@ var (
 	ErrInvalidHash         = CustomError{Name: "ErrInvalidHash", Code: http.StatusBadRequest, Message: "the encoded hash is invalid", Title: "Invalid hash"}
 	ErrIncompatibleVersion = CustomError{Name: "ErrIncompatibleVersion", Code: http.StatusBadRequest, Message: "incompatible version of the hash algorithm", Title: "Incompatible version"}
 
-	ErrAplicationNotFound       = CustomError{Name: "ErrAplicationNotFound", Code: http.StatusNotFound, Message: "application not found", Title: "Application not found"}
+	ErrApplicationNotFound      = CustomError{Name: "ErrApplicationNotFound", Code: http.StatusNotFound, Message: "application not found", Title: "Application not found"}
 	ErrAplicationSecretNotFound = CustomError{Name: "ErrAplicationSecretNotFound", Code: http.StatusNotFound, Message: "application secret not found", Title: "Application secret not found"}
 
 	ErrOrganizationNotFound = CustomError{Name: "ErrOrganizationNotFound", Code: http.StatusNotFound, Message: "organization not found", Title: "Organization not found"}
@@ -63,7 +63,7 @@ var ErrorsList = map[string]CustomError{
 	"ErrInvalidHash":                     ErrInvalidHash,
 	"ErrIncompatibleVersion":             ErrIncompatibleVersion,
 	"ErrUserSignUpWithSocial":            ErrUserSignUpWithSocial,
-	"ErrAplicationNotFound":              ErrAplicationNotFound,
+	"ErrApplicationNotFound":             ErrApplicationNotFound,
 	"ErrAplicationSecretNotFound":        ErrAplicationSecretNotFound,
 	"ErrOrganizationNotFound":            ErrOrganizationNotFound,
 	"ErrUserRoleNotFound":                ErrUserRoleNotFound,

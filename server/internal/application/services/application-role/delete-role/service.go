@@ -36,7 +36,7 @@ func (s *DeleteRoleService) Handler(ctx context.Context, request Request) error 
 	}
 
 	if !isApplicationExists {
-		return &errors.ErrAplicationNotFound
+		return &errors.ErrApplicationNotFound
 	}
 
 	if err := s.ApplicationRoleRepository.RemoveRole(ctx, request.RoleID); err != nil {

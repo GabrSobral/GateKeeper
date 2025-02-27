@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/infra/database/repositories"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -51,6 +52,10 @@ func (r ApplicationRepository) AddApplication(ctx context.Context, newApplicatio
 
 func (r ApplicationRepository) GetApplicationByID(ctx context.Context, applicationID uuid.UUID) (*entities.Application, error) {
 	application, err := r.Store.GetApplicationByID(ctx, applicationID)
+
+	if err == repositories.ErrNoRows {
+		return nil, nil
+	}
 
 	if err != nil {
 		return nil, err
@@ -106,7 +111,7 @@ func (r ApplicationRepository) UpdateApplication(ctx context.Context, newApplica
 func (r ApplicationRepository) ListApplicationsFromOrganization(ctx context.Context, organizationID uuid.UUID) (*[]entities.Application, error) {
 	applications, err := r.Store.ListApplicationsFromOrganization(ctx, organizationID)
 
-	if err != nil {
+	if err != nil && err != repositories.ErrNoRows {
 		return nil, err
 	}
 

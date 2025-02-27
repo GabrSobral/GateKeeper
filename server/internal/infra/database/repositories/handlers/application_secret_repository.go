@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/infra/database/repositories"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -36,7 +37,7 @@ func (r ApplicationSecretRepository) RemoveSecret(ctx context.Context, secretID 
 func (r ApplicationSecretRepository) ListSecretsFromApplication(ctx context.Context, applicationID uuid.UUID) (*[]entities.ApplicationSecret, error) {
 	secrets, err := r.Store.ListSecretsFromApplication(ctx, applicationID)
 
-	if err != nil {
+	if err != nil && err != repositories.ErrNoRows {
 		return nil, err
 	}
 
