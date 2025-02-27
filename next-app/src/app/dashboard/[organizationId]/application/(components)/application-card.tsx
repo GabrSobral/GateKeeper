@@ -1,6 +1,7 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import {
   Card,
@@ -13,21 +14,47 @@ import { Badge } from "@/components/ui/badge";
 
 import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
+import { APIError } from "@/types/service-options";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 export function ApplicationCard() {
-  const router = useRouter();
   const organizationId = useParams().organizationId as string;
-  const { data, isLoading } = useApplicationsSWR(
+  const { data, isLoading, error } = useApplicationsSWR(
     { organizationId },
     { accessToken: "" }
   );
+
+  const err = error as APIError;
 
   if (isLoading) {
     <>
       <Skeleton className="h-[133px] max-w-[400px] flex-1" />
       <Skeleton className="h-[133px] max-w-[400px] flex-1" />
     </>;
+  }
+
+  if (err) {
+    return (
+      <Alert variant="destructive" className="bg-red-500/10">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>An error occurred...</AlertTitle>
+        <AlertDescription>{err.response?.data.message}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (data?.length === 0) {
+    return (
+      <Alert variant="default" className="bg-yellow-500/10">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>No applications found...</AlertTitle>
+        <AlertDescription>
+          You don&apos;t have any application on this organization. Create one
+          to get started.
+        </AlertDescription>
+      </Alert>
+    );
   }
 
   return (

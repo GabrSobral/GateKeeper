@@ -16,7 +16,11 @@ export default async function CreateApplicationPage({ params }: Props) {
     <>
       <Breadcrumbs
         items={[
-          { name: "Dashboard", path: `/dashboard/${organizationId}` },
+          { name: "Dashboard", path: `/dashboard` },
+          {
+            name: organizationId,
+            path: `/dashboard/${organizationId}`,
+          },
           {
             name: "Applications",
             path: `/dashboard/${organizationId}/application`,

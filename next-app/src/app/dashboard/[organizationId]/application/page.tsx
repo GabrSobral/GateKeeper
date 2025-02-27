@@ -5,7 +5,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsTrigger, TabsList, TabsContent } from "@/components/ui/tabs";
 
 import { cn } from "@/lib/utils";
-import { ApplicationCard } from "./(components)/ApplicationCard";
+import { ApplicationCard } from "./(components)/application-card";
 
 type Props = {
   params: Promise<{
@@ -21,7 +21,14 @@ export default async function ApplicationsPage({ params }: Props) {
       <Breadcrumbs
         items={[
           { name: "Dashboard", path: "/dashboard" },
-          { name: "Applications", path: "/dashboard/application" },
+          {
+            name: organizationId,
+            path: `/dashboard/${organizationId}`,
+          },
+          {
+            name: "Applications",
+            path: `/dashboard/${organizationId}/application`,
+          },
         ]}
       />
 

@@ -10,7 +10,7 @@ export interface IApplication {
   badges: string[];
   createdAt: Date;
   updatedAt: Date;
-  deactivatedAt?: Date;
+  isActive: boolean;
   mfaEmailEnabled: boolean;
   mfaAuthAppEnabled: boolean;
   passwordHashingSecret: string;
@@ -31,7 +31,6 @@ export interface IApplication {
         name: string;
         description: string;
       }[];
-      deactivatedAt?: Date;
     }[];
   };
   roles: {
@@ -77,6 +76,6 @@ export async function getApplicationByIdService(
 
     return [data, null];
   } catch (error: unknown) {
-    return [null, error as AxiosError<{ message: string }>];
+    return [null, error as APIError];
   }
 }

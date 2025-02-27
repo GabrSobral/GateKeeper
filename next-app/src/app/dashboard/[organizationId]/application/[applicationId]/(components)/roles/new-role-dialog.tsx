@@ -1,3 +1,6 @@
+import { toast } from "sonner";
+import { useState } from "react";
+
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
@@ -11,20 +14,51 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { cn } from "@/lib/utils";
-import { useState } from "react";
 
-export function NewRoleDialog() {
+import { cn } from "@/lib/utils";
+import { createApplicationRoleApi } from "@/services/dashboard/create-application-role";
+import { useParams } from "next/navigation";
+import { IApplication } from "@/services/dashboard/get-application-by-id";
+
+type Props = {
+  addRole: (role: IApplication["roles"]["data"][number]) => void;
+};
+
+export function NewRoleDialog({ addRole }: Props) {
+  const [isOpened, setIsOpened] = useState(false);
+
+  const { organizationId, applicationId } = useParams() as {
+    organizationId: string;
+    applicationId: string;
+  };
+
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  function create() {
+  async function create() {
     setIsLoading(true);
 
-    clear();
+    const [response, err] = await createApplicationRoleApi(
+      { organizationId, applicationId, name, description },
+      { accessToken: "" }
+    );
 
+    if (err) {
+      console.error(err);
+      toast.error("An error occurred. Please try again later.");
+      setIsLoading(false);
+      return;
+    }
+
+    if (response) {
+      addRole(response);
+    }
+
+    setIsOpened(false);
     setIsLoading(false);
+
+    clear();
   }
 
   function clear() {
@@ -33,10 +67,17 @@ export function NewRoleDialog() {
   }
 
   return (
-    <Dialog onOpenChange={(isOpened) => isOpened && clear()}>
-      <DialogTrigger
-        className={cn(buttonVariants({ variant: "default" }), "ml-4")}
-      >
+    <Dialog
+      open={isOpened}
+      onOpenChange={(isOpenedState) => {
+        setIsOpened(isOpenedState);
+
+        if (!isOpenedState) {
+          clear();
+        }
+      }}
+    >
+      <DialogTrigger className={buttonVariants({ variant: "default" })}>
         Add Role
       </DialogTrigger>
 

@@ -40,11 +40,15 @@ export default async function ApplicationDetailPage({ params }: Props) {
     return <div>Failed to fetch application</div>;
   }
 
+  console.log(application?.users.data);
+
   return (
     <>
       <Breadcrumbs
         items={[
-          { name: "Dashboard", path: `/dashboard/${organizationId}` },
+          { name: "Dashboard", path: `/dashboard` },
+
+          { name: organizationId, path: `/dashboard/${organizationId}` },
           {
             name: "Applications",
             path: `/dashboard/${organizationId}/application`,

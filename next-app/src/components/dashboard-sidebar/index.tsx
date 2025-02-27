@@ -17,12 +17,13 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-
-import { OrganizationList } from "./OrganizationList";
-import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
+import { ThemeToggle } from "../ui/theme-togle";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
-import { ThemeToggle } from "../ui/theme-togle";
+import { OrganizationList } from "./organization-list";
+
+import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function DashboardSidebar() {
   const organizationId = useParams().organizationId as string;
@@ -73,6 +74,33 @@ export function DashboardSidebar() {
 
           <SidebarGroupContent>
             <SidebarMenu>
+              {data?.length === 0 && (
+                <SidebarMenuItem>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <SidebarMenuButton
+                        asChild
+                        className="font-semibold h-[3rem] flex justify-between gap-4 border-dashed border-1 border-gray-300 dark:border-gray-700"
+                      >
+                        <Link
+                          href={`/dashboard/${organizationId}/application/create-application`}
+                        >
+                          No applications found
+                          <div className="p-1 border-dashed border-1 border-gray-300 dark:border-gray-700 rounded-lg">
+                            <Plus />
+                          </div>
+                        </Link>
+                      </SidebarMenuButton>
+                    </TooltipTrigger>
+
+                    <TooltipContent className="text-center">
+                      You don&apos;t have any applications yet. <br /> Create
+                      one to get started.
+                    </TooltipContent>
+                  </Tooltip>
+                </SidebarMenuItem>
+              )}
+
               {data?.map((application) => (
                 <SidebarMenuItem key={application.id}>
                   <SidebarMenuButton asChild>

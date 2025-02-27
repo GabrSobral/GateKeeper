@@ -2,7 +2,7 @@ import { PropsWithChildren } from "react";
 
 import { Toaster } from "@/components/ui/sonner";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { DashboardSidebar } from "@/components/DashboardSidebar";
+import { DashboardSidebar } from "@/components/dashboard-sidebar";
 
 type Props = PropsWithChildren<object>;
 

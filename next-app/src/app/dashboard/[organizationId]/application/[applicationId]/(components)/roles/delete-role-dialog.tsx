@@ -13,18 +13,52 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { ApplicationRole } from ".";
+import { useParams } from "next/navigation";
+import { deleteApplicationRoleApi } from "@/services/dashboard/delete-application-role";
+import { toast } from "sonner";
 
 type Props = {
   isOpened: boolean;
-  onOpenChange: (value: boolean) => void;
+  onOpenChange: (isOpened: boolean) => void;
   role: ApplicationRole | null;
+  removeRole: (role: ApplicationRole) => void;
 };
 
-export function DeleteRoleDialog({ isOpened, onOpenChange }: Props) {
+export function DeleteRoleDialog({
+  role,
+  isOpened,
+  onOpenChange,
+  removeRole,
+}: Props) {
+  const { organizationId, applicationId } = useParams() as {
+    organizationId: string;
+    applicationId: string;
+  };
+
   const [isLoading, setIsLoading] = useState(false);
 
-  function handler() {
+  async function handler() {
+    if (!role) {
+      console.error("Role is not defined");
+      toast.error("Role is not defined");
+      return;
+    }
+
     setIsLoading(true);
+
+    const [err] = await deleteApplicationRoleApi(
+      { applicationId, organizationId, roleId: role?.id },
+      { accessToken: "" }
+    );
+
+    if (err) {
+      console.error(err);
+      toast.error("Failed to delete role");
+      setIsLoading(false);
+      return;
+    }
+
+    removeRole(role);
 
     // Logic here
     setIsLoading(false);
@@ -33,7 +67,7 @@ export function DeleteRoleDialog({ isOpened, onOpenChange }: Props) {
   }
 
   return (
-    <Dialog open={isOpened} onOpenChange={(value) => onOpenChange(value)}>
+    <Dialog open={isOpened} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
           <DialogTitle>Delete User</DialogTitle>

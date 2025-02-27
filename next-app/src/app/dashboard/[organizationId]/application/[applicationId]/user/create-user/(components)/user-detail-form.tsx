@@ -1,10 +1,11 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
 import { useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams, useRouter } from "next/navigation";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, UseFormReturn } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -17,27 +18,24 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
 
 import { formSchema } from "../schema";
 import { MultiFactorAuthForm } from "./multi-factor-auth-form";
 import { ApplicationRolesSection } from "./application-roles-section";
+import { createApplicationUserApi } from "@/services/dashboard/create-application-user";
 
 export type FormType = UseFormReturn<z.infer<typeof formSchema>>;
 
-const roles = [
-  { id: "id1", name: "User", description: "User role description" },
-  { id: "id2", name: "Admin", description: "Admin role description" },
-];
-
 export function UserDetailForm() {
-  const [isLoading, setIsLoading] = useState(false);
-
-  const router = useRouter();
   const { applicationId, organizationId } = useParams() as {
     organizationId: string;
     applicationId: string;
   };
+  const [isLoading, setIsLoading] = useState(false);
+
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -45,6 +43,7 @@ export function UserDetailForm() {
       displayName: "",
       email: "",
       firstName: "",
+      isEmailConfirmed: false,
       lastName: "",
       hasMfaAuthAppEnabled: false,
       hasMfaEmailEnabled: false,
@@ -52,21 +51,43 @@ export function UserDetailForm() {
     },
   });
 
-  function onSubmit() {
+  async function onSubmit() {
     setIsLoading(true);
-
-    // Logic here
-    setIsLoading(false);
-
-    console.log(organizationId, applicationId, router);
-
-    // const userId = "123";
 
     console.log(form.getValues());
 
-    // router.push(
-    //   `/dashboard/${organizationId}/application/${applicationId}/user/${userId}`
-    // );
+    const [response, err] = await createApplicationUserApi(
+      {
+        applicationId,
+        organizationId,
+        displayName: form.getValues("displayName"),
+        email: form.getValues("email"),
+        firstName: form.getValues("firstName"),
+        lastName: form.getValues("lastName"),
+        isEmailConfirmed: form.getValues("isEmailConfirmed"),
+        isMfaAuthAppEnabled: form.getValues("hasMfaAuthAppEnabled"),
+        isMfaEmailEnabled: form.getValues("hasMfaEmailEnabled"),
+        roles: form.getValues("roles"),
+        temporaryPasswordHash: form.getValues("temporaryPassword"),
+      },
+      { accessToken: "" }
+    );
+
+    if (err) {
+      console.error(err);
+      toast.error(
+        err.response?.data.message ||
+          "An error occurred while creating the user."
+      );
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
+
+    router.push(
+      `/dashboard/${organizationId}/application/${applicationId}/user/${response?.id}`
+    );
   }
 
   return (
@@ -200,6 +221,38 @@ export function UserDetailForm() {
 
           <FormField
             control={form.control}
+            name="isEmailConfirmed"
+            render={({ field }) => (
+              <FormItem className="w-full p-3 rounded-lg bg-gray-50 dark:bg-gray-900 shadow">
+                <div className="flex items-center space-x-2">
+                  <FormControl>
+                    <Checkbox
+                      checked={!!field.value}
+                      onCheckedChange={field.onChange}
+                      aria-labelledby="terms-label"
+                      id="is-email-confirmed"
+                      className="bg-background"
+                    />
+                  </FormControl>
+
+                  <FormLabel
+                    htmlFor="is-email-confirmed"
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Is e-mail already confirmed?
+                  </FormLabel>
+                </div>
+
+                <FormDescription>
+                  If the user e-mail is already confirmed, check this box.
+                </FormDescription>
+                <FormMessage></FormMessage>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
             name="temporaryPassword"
             render={({ field }) => (
               <FormItem className="w-full">
@@ -214,7 +267,7 @@ export function UserDetailForm() {
                       className="w-full"
                       placeholder="Type the user temporary password"
                       autoComplete="password"
-                      type="text"
+                      type="password"
                       {...field}
                     />
                   </FormControl>
@@ -235,7 +288,7 @@ export function UserDetailForm() {
 
           <Separator className="my-2" />
 
-          <ApplicationRolesSection form={form} roles={roles} />
+          <ApplicationRolesSection form={form} />
         </div>
 
         <Button type="submit" className="float-right mt-4" disabled={isLoading}>

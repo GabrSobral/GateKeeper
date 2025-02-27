@@ -13,4 +13,4 @@ export type FetchOptions<T> = {
 export type Result<T, E> = [T | null, E | null];
 export type ResultWithoutResponse<E> = [E | null];
 
-export type APIError = AxiosError<{ message: string }>;
+export type APIError = AxiosError<{ message: string; title: string }>;

@@ -36,13 +36,14 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
-import { cn, copy, formatDate } from "@/lib/utils";
+import { cn, copy } from "@/lib/utils";
 
 import { DeleteUserDialog } from "./delete-user-dialog";
 import { IApplication } from "@/services/dashboard/get-application-by-id";
-import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
+import { deleteApplicationUserApi } from "@/services/dashboard/delete-application-user";
 
 export type ApplicationUser = IApplication["users"]["data"][number];
 
@@ -60,10 +61,14 @@ export function Users({ application }: Props) {
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
+  const [users, setUsers] = useState<ApplicationUser[]>(
+    application?.users.data || []
+  );
 
-  const params = useParams();
-  const applicationId = params.applicationId;
-  const organizationId = params.organizationId;
+  const { applicationId, organizationId } = useParams() as {
+    applicationId: string;
+    organizationId: string;
+  };
 
   const columns: ColumnDef<ApplicationUser>[] = [
     {
@@ -118,38 +123,20 @@ export function Users({ application }: Props) {
     {
       accessorKey: "roles",
       header: "Roles",
-      cell: ({ row }) => (
-        <Badge variant="default" color="green">
-          {row.getValue("roles")}
-        </Badge>
-      ),
-    },
-
-    {
-      accessorKey: "deactivatedAt",
-      header: "Status",
       cell: ({ row }) => {
-        const deactivatedAt = row.getValue(
-          "deactivatedAt"
-        ) as ApplicationUser["deactivatedAt"];
+        const roles = row.getValue("roles") as ApplicationUser["roles"];
 
-        if (!deactivatedAt) {
-          return (
-            <Badge variant="default" color="green">
-              Active
-            </Badge>
-          );
-        } else {
-          return (
-            <Badge variant="secondary" className="flex gap-1" color="red">
-              Deactivated at{" "}
-              <span className="text-white">{formatDate(deactivatedAt)}</span>
-            </Badge>
-          );
-        }
+        return (
+          <div className="flex gap-1">
+            {roles?.map((role) => (
+              <Badge key={role.id} variant="default" color="green">
+                {role.name}
+              </Badge>
+            ))}
+          </div>
+        );
       },
     },
-
     {
       id: "actions",
       enableHiding: false,
@@ -191,7 +178,7 @@ export function Users({ application }: Props) {
   ];
 
   const table = useReactTable({
-    data: application?.users.data ?? [],
+    data: users,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -208,6 +195,25 @@ export function Users({ application }: Props) {
       rowSelection,
     },
   });
+
+  async function deleteSelection() {
+    const currentUsers = table
+      .getFilteredSelectedRowModel()
+      .rows.map((item) => item.original);
+
+    await Promise.all(
+      currentUsers.map(async (row) => {
+        await deleteApplicationUserApi(
+          { applicationId, organizationId, userId: row.id },
+          { accessToken: "" }
+        );
+      })
+    );
+
+    table.setRowSelection({}); // Clear selection
+
+    setUsers((state) => state.filter((role) => !currentUsers.includes(role)));
+  }
 
   return (
     <>
@@ -232,6 +238,17 @@ export function Users({ application }: Props) {
             >
               Add User
             </Link>
+
+            {table.getFilteredSelectedRowModel().rows.length !== 0 && (
+              <Button
+                type="button"
+                variant="destructive"
+                onClick={deleteSelection}
+                className="ml-4"
+              >
+                Delete Selection
+              </Button>
+            )}
 
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
@@ -345,6 +362,9 @@ export function Users({ application }: Props) {
         isOpened={isDeleteModalOpened}
         onOpenChange={setIsDeleteModalOpened}
         user={selectedUser}
+        removeUser={(user) =>
+          setUsers((state) => state.filter((item) => item.id !== user.id))
+        }
       />
     </>
   );

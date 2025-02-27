@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useParams } from "next/navigation";
 import { ChevronDown, MoreHorizontal } from "lucide-react";
 import {
   ColumnDef,
@@ -34,13 +35,15 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 
 import { copy } from "@/lib/utils";
 
-import { DeleteRoleDialog } from "./delete-role-dialog";
-import { IApplication } from "@/services/dashboard/get-application-by-id";
-import { Checkbox } from "@/components/ui/checkbox";
 import { NewRoleDialog } from "./new-role-dialog";
+import { DeleteRoleDialog } from "./delete-role-dialog";
+
+import { IApplication } from "@/services/dashboard/get-application-by-id";
+import { deleteApplicationRoleApi } from "@/services/dashboard/delete-application-role";
 
 export type ApplicationRole = IApplication["roles"]["data"][number];
 
@@ -49,6 +52,10 @@ type Props = {
 };
 
 export function Roles({ application }: Props) {
+  const { organizationId, applicationId } = useParams() as {
+    organizationId: string;
+    applicationId: string;
+  };
   const [selectedRole, setSelectedRole] = useState<ApplicationRole | null>(
     null
   );
@@ -56,6 +63,10 @@ export function Roles({ application }: Props) {
 
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [roles, setRoles] = useState<ApplicationRole[]>(
+    application?.roles.data || []
+  );
+
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = useState({});
 
@@ -122,7 +133,6 @@ export function Roles({ application }: Props) {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>Update User</DropdownMenuItem>
               <DropdownMenuItem
                 className="text-red-500 font-bold"
                 onClick={() => {
@@ -130,7 +140,7 @@ export function Roles({ application }: Props) {
                   setIsDeleteModalOpened(true);
                 }}
               >
-                Remove User
+                Remove Role
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -140,7 +150,7 @@ export function Roles({ application }: Props) {
   ];
 
   const table = useReactTable({
-    data: application?.roles.data ?? [],
+    data: roles,
     columns,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -158,10 +168,29 @@ export function Roles({ application }: Props) {
     },
   });
 
+  async function deleteSelection() {
+    const currentRoles = table
+      .getFilteredSelectedRowModel()
+      .rows.map((item) => item.original);
+
+    await Promise.all(
+      currentRoles.map(async (row) => {
+        await deleteApplicationRoleApi(
+          { applicationId, organizationId, roleId: row.id },
+          { accessToken: "" }
+        );
+      })
+    );
+
+    table.setRowSelection({}); // Clear selection
+
+    setRoles((state) => state.filter((role) => !currentRoles.includes(role)));
+  }
+
   return (
     <>
       <div className="mx-auto w-full">
-        <div className="flex items-center py-4">
+        <div className="flex items-center py-4 gap-2 flex-wrap w-full">
           <Input
             placeholder="Filter roles..."
             value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -173,10 +202,21 @@ export function Roles({ application }: Props) {
             }}
             className="max-w-sm"
           />
+          <NewRoleDialog
+            addRole={(newRole) => setRoles((state) => [newRole, ...state])}
+          />
+
+          {table.getFilteredSelectedRowModel().rows.length !== 0 && (
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={deleteSelection}
+            >
+              Delete Selection
+            </Button>
+          )}
 
           <DropdownMenu>
-            <NewRoleDialog />
-
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto">
                 Columns <ChevronDown />
@@ -289,6 +329,9 @@ export function Roles({ application }: Props) {
         isOpened={isDeleteModalOpened}
         onOpenChange={setIsDeleteModalOpened}
         role={selectedRole}
+        removeRole={(role) =>
+          setRoles((state) => state.filter((r) => r !== role))
+        }
       />
     </>
   );

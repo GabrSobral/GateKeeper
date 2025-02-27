@@ -1,9 +1,11 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams, useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -25,9 +27,7 @@ import { formSchema } from "../schema";
 
 import { StrongPasswordDialog } from "./strong-password-dialog";
 import { createApplicationApi } from "@/services/dashboard/create-application";
-import { toast } from "sonner";
 import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
-import { useParams, useRouter } from "next/navigation";
 
 export function CreateApplicationForm() {
   const router = useRouter();
@@ -84,7 +84,7 @@ export function CreateApplicationForm() {
             hasMfaEmail: response.hasMfaEmail,
             createdAt: new Date(),
             updatedAt: null,
-            deactivatedAt: null,
+            isActive: true,
           },
         ];
       }
