@@ -1,6 +1,5 @@
-import type { AxiosError } from "axios";
 import { api } from "../base/gatekeeper-api";
-import { IServiceOptions, Result } from "@/types/service-options";
+import { APIError, IServiceOptions, Result } from "@/types/service-options";
 
 type Request = {
   name: string;
@@ -20,7 +19,7 @@ type Response = {
 export async function createApplicationSecretApi(
   { name, expiresAt, applicationId, organizationId }: Request,
   { accessToken }: IServiceOptions
-): Promise<Result<Response, AxiosError<{ message: string }>>> {
+): Promise<Result<Response, APIError>> {
   try {
     const { data } = await api.post<Response>(
       `/v1/organizations/${organizationId}/applications/${applicationId}/secrets`,
@@ -36,6 +35,6 @@ export async function createApplicationSecretApi(
     );
     return [data, null];
   } catch (error: unknown) {
-    return [null, error as AxiosError<{ message: string }>];
+    return [null, error as APIError];
   }
 }

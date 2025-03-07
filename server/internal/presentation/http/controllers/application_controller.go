@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	createapplication "github.com/gate-keeper/internal/application/services/application/create-application"
+	getapplicationauthdata "github.com/gate-keeper/internal/application/services/application/get-application-auth-data"
 	getapplicationbyid "github.com/gate-keeper/internal/application/services/application/get-application-by-id"
 	listapplications "github.com/gate-keeper/internal/application/services/application/list-applications"
 	removeapplication "github.com/gate-keeper/internal/application/services/application/remove-application"
@@ -38,6 +39,33 @@ func (c *ApplicationController) GetApplicationByID(writter http.ResponseWriter, 
 	params := repositories.ParamsRs[getapplicationbyid.Request, *getapplicationbyid.Response, getapplicationbyid.GetApplicationByIDService]{
 		DbPool:  c.DbPool,
 		New:     getapplicationbyid.New,
+		Request: requestSchema,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+func (c *ApplicationController) GetApplicationAuthData(writter http.ResponseWriter, request *http.Request) {
+	applicationIDString := chi.URLParam(request, "applicationID")
+	applicationnIdUUID, err := uuid.Parse(applicationIDString)
+
+	if err != nil {
+		panic(err)
+	}
+
+	requestSchema := getapplicationauthdata.Request{
+		ApplicationID: applicationnIdUUID,
+	}
+
+	params := repositories.ParamsRs[getapplicationauthdata.Request, *getapplicationauthdata.Response, getapplicationauthdata.GetApplicationAuthDataService]{
+		DbPool:  c.DbPool,
+		New:     getapplicationauthdata.New,
 		Request: requestSchema,
 	}
 

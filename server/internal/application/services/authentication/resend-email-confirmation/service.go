@@ -53,22 +53,24 @@ func (cm *ResendEmailConfirmation) Handler(ctx context.Context, request Request)
 		return err
 	}
 
-	if emailConfirmation.CoolDown.After(time.Now().UTC()) {
+	if emailConfirmation != nil && emailConfirmation.CoolDown.After(time.Now().UTC()) {
 		return &errors.ErrEmailConfirmationIsInCoolDown
+	}
+
+	if emailConfirmation != nil {
+		cm.EmailConfirmationRepository.DeleteEmailConfirmation(ctx, emailConfirmation.ID)
+	}
+
+	expiresAt := time.Now().UTC().Add(20 * time.Minute) // 20 minutes
+	newEmailConfirmation := entities.NewEmailConfirmation(user.ID, user.Email, expiresAt)
+
+	if err := cm.EmailConfirmationRepository.AddEmailConfirmation(ctx, newEmailConfirmation); err != nil {
+		return err
 	}
 
 	userProfile, err := cm.UserProfileRepository.GetUserById(ctx, user.ID)
 
 	if err != nil {
-		return err
-	}
-
-	cm.EmailConfirmationRepository.DeleteEmailConfirmation(ctx, emailConfirmation.ID)
-
-	expiresAt := time.Now().UTC().Add(20 * time.Minute)
-	newEmailConfirmation := entities.NewEmailConfirmation(user.ID, user.Email, expiresAt)
-
-	if err := cm.EmailConfirmationRepository.AddEmailConfirmation(ctx, newEmailConfirmation); err != nil {
 		return err
 	}
 

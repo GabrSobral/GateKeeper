@@ -27,12 +27,12 @@ func NewPasswordResetToken(userID uuid.UUID) (*PasswordResetToken, error) {
 		UserID:    userID,
 		Token:     GenerateRandomString(128),
 		CreatedAt: time.Now().UTC(),
-		ExpiresAt: time.Now().Add(time.Minute * 15).UTC(),
+		ExpiresAt: time.Now().UTC().Add(time.Minute * 15),
 	}, nil
 }
 
 func GenerateRandomString(length int16) string {
-	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789?!@#$%^&*()_+"
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 
 	b := make([]byte, length)
 

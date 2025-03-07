@@ -1,5 +1,5 @@
 import { Separator } from "@/components/ui/separator";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Breadcrumbs } from "@/components/bread-crumbs";
 
 import { OrganizationsList } from "./(components)/organizations-list";
 

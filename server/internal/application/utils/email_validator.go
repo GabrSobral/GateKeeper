@@ -2,6 +2,9 @@ package application_utils
 
 import (
 	"regexp"
+
+	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/domain/errors"
 )
 
 // EmailValidator validates the given email string using a regex pattern
@@ -14,4 +17,21 @@ func EmailValidator(email string) bool {
 
 	// Validate the email string
 	return re.MatchString(email)
+}
+
+func VerifyClientSecret(clientSecret string, secrets *[]entities.ApplicationSecret) (bool, error) {
+	for _, secret := range *secrets {
+		if secret.Value == clientSecret {
+
+			if secret.ExpiresAt != nil {
+				if secret.ExpiresAt.Before(secret.CreatedAt) {
+					return false, &errors.ErrClientSecretExpired
+				}
+			}
+
+			return true, nil
+		}
+	}
+
+	return false, nil
 }

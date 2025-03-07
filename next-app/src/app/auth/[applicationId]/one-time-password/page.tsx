@@ -1,18 +1,25 @@
 import Link from "next/link";
-import { Fragment } from "react";
 import { ArrowLeftIcon } from "lucide-react";
 
 import { AuthForm } from "./(components)/AuthForm";
+import { Background } from "../(components)/background";
+import { ErrorAlert } from "@/components/error-alert";
+
+import { getApplicationAuthDataService } from "@/services/auth/get-application-auth-data";
 
 type Props = {
   params: Promise<{ applicationId: string }>;
 };
 
-export default async function SignInPage({ params }: Props) {
+export default async function OneTimePasswordPage({ params }: Props) {
   const { applicationId } = await params;
 
+  const [application, err] = await getApplicationAuthDataService({
+    applicationId,
+  });
+
   return (
-    <Fragment>
+    <Background application={application} page="one-time-password">
       <Link
         href={`/auth/${applicationId}/sign-in`}
         className="text-primary flex items-center gap-3 hover:underline absolute top-4 left-4"
@@ -30,7 +37,11 @@ export default async function SignInPage({ params }: Props) {
         </p>
       </div>
 
-      <AuthForm />
-    </Fragment>
+      {err ? (
+        <ErrorAlert message={err.message} title="An error occurred..." />
+      ) : (
+        <AuthForm />
+      )}
+    </Background>
   );
 }

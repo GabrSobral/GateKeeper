@@ -15,7 +15,7 @@ import (
 type IMailService interface {
 	sendMail(ctx context.Context, params SendMailParams) error
 	SendEmailConfirmationEmail(ctx context.Context, to, userName, token string) error
-	SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID uuid.UUID) error
+	SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID, applicationID uuid.UUID) error
 }
 
 type MailService struct{}
@@ -77,14 +77,14 @@ func (ms *MailService) SendEmailConfirmationEmail(ctx context.Context, to, userN
 	return nil
 }
 
-func (ms *MailService) SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID uuid.UUID) error {
+func (ms *MailService) SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID, applicationID uuid.UUID) error {
 	emailConfirmationTemplate, err := readFileAsString("./internal/infra/mail-service/forgot-password-template.html")
 
 	if err != nil {
 		return err
 	}
 
-	url := os.Getenv("CLIENT_APPLICATION_URL") + "/reset-password?token=" + token + "&id=" + passwordResetID.String()
+	url := os.Getenv("CLIENT_APPLICATION_URL") + "/auth/" + applicationID.String() + "/change-password?token=" + token + "&id=" + passwordResetID.String()
 
 	replacedString := strings.Replace(emailConfirmationTemplate, "{{$name}}", userName, -1)
 	replacedString = strings.Replace(replacedString, "{{$confirmation-url}}", url, -1)

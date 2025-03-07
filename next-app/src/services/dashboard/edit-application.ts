@@ -1,6 +1,5 @@
-import type { AxiosError } from "axios";
 import { api } from "../base/gatekeeper-api";
-import { IServiceOptions, Result } from "@/types/service-options";
+import { APIError, IServiceOptions, Result } from "@/types/service-options";
 
 type Request = {
   id: string;
@@ -12,6 +11,8 @@ type Request = {
   hasMfaAuthApp: boolean;
   organizationId: string;
   isActive: boolean;
+  canSelfSignUp: boolean;
+  canSelfForgotPass: boolean;
 };
 
 type Response = {
@@ -23,6 +24,8 @@ type Response = {
   hasMfaEmail: boolean;
   hasMfaAuthApp: boolean;
   isActive: boolean;
+  canSelfSignUp: boolean;
+  canSelfForgotPass: boolean;
 };
 
 export async function editApplicationApi(
@@ -36,9 +39,11 @@ export async function editApplicationApi(
     passwordHashSecret,
     organizationId,
     isActive,
+    canSelfForgotPass,
+    canSelfSignUp,
   }: Request,
   { accessToken }: IServiceOptions
-): Promise<Result<Response, AxiosError<{ message: string }>>> {
+): Promise<Result<Response, APIError>> {
   try {
     const { data } = await api.put<Response>(
       `/v1/organizations/${organizationId}/applications/${id}`,
@@ -52,6 +57,8 @@ export async function editApplicationApi(
         passwordHashSecret,
         organizationId,
         isActive,
+        canSelfForgotPass,
+        canSelfSignUp,
       },
       {
         headers: {
@@ -61,6 +68,6 @@ export async function editApplicationApi(
     );
     return [data, null];
   } catch (error: unknown) {
-    return [null, error as AxiosError<{ message: string }>];
+    return [null, error as APIError];
   }
 }

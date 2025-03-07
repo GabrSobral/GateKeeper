@@ -21,7 +21,7 @@ type ForgotPasswordService struct {
 }
 
 type Request struct {
-	ApplicationID uuid.UUID `json:"application_id" validate:"required,uuid"`
+	ApplicationID uuid.UUID `json:"applicationId" validate:"required,uuid"`
 	Email         string    `json:"email" validate:"required,email"`
 }
 
@@ -68,7 +68,7 @@ func (fp *ForgotPasswordService) Handler(ctx context.Context, request Request) e
 	}
 
 	go func() {
-		if err := fp.MailService.SendForgotPasswordEmail(ctx, user.Email, userProfile.FirstName, passwordResetToken.Token, passwordResetToken.ID); err != nil {
+		if err := fp.MailService.SendForgotPasswordEmail(ctx, user.Email, userProfile.FirstName, passwordResetToken.Token, passwordResetToken.ID, request.ApplicationID); err != nil {
 			panic(err)
 		}
 	}()

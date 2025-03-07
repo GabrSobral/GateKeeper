@@ -23,6 +23,18 @@ ALTER TABLE
 ADD
     CONSTRAINT fk_user_external_login FOREIGN KEY (user_id) REFERENCES "application_user" (id) ON DELETE CASCADE;
 
+/* authorization_code >- application_user */
+ALTER TABLE
+    application_authorization_code
+ADD
+    CONSTRAINT fk_application_authorization_code_user FOREIGN KEY (user_id) REFERENCES "application_user" (id) ON DELETE CASCADE;
+
+/* application_authorization_code >- application */
+ALTER TABLE
+    application_authorization_code
+ADD
+    CONSTRAINT fk_application_authorization_code_application FOREIGN KEY (application_id) REFERENCES "application" (id) ON DELETE CASCADE;
+
 /* password_reset_token >- application_user */
 ALTER TABLE
     password_reset_token

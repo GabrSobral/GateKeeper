@@ -12,7 +12,9 @@ INSERT INTO
         badges,
         description,
         created_at,
-        updated_at
+        updated_at,
+        can_self_sign_up,
+        can_self_forgot_pass
     )
 VALUES
     (
@@ -26,7 +28,9 @@ VALUES
         sqlc.narg('badges'),
         sqlc.narg('description'),
         sqlc.arg('created_at'),
-        sqlc.arg('updated_at')
+        sqlc.arg('updated_at'),
+        sqlc.arg('can_self_sign_up'),
+        sqlc.arg('can_self_forgot_pass')
     );
 
 -- name: UpdateApplication :exec
@@ -40,7 +44,9 @@ SET
     is_active = sqlc.arg('is_active'),
     has_mfa_email = sqlc.arg('has_mfa_email'),
     password_hash_secret = sqlc.arg('password_hash_secret'),
-    updated_at = sqlc.arg('updated_at')
+    updated_at = sqlc.arg('updated_at'),
+    can_self_sign_up = sqlc.arg('can_self_sign_up'),
+    can_self_forgot_pass = sqlc.arg('can_self_forgot_pass')
 WHERE
     id = sqlc.arg('id');
 
@@ -74,7 +80,9 @@ SELECT
     has_mfa_email,
     password_hash_secret,
     created_at,
-    updated_at
+    updated_at,
+    can_self_sign_up,
+    can_self_forgot_pass
 FROM
     "application"
 WHERE

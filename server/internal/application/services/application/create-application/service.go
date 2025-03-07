@@ -19,6 +19,8 @@ type Request struct {
 	HasMfaEmail        bool      `json:"hasMfaEmail" validate:"boolean"`
 	HasMfaAuthApp      bool      `json:"hasMfaAuthApp" validate:"boolean"`
 	OrganizationID     uuid.UUID `json:"organizationId" validate:"required"`
+	CanSelfSignUp      bool      `json:"canSelfSignUp" validate:"boolean"`
+	CanSelfForgotPass  bool      `json:"canSelfForgotPass" validate:"boolean"`
 }
 
 type Response struct {
@@ -31,6 +33,8 @@ type Response struct {
 	HasMfaAuthApp      bool      `json:"hasMfaAuthApp"`
 	OrganizationID     uuid.UUID `json:"organizationId"`
 	IsActive           bool      `json:"isActive"`
+	CanSelfSignUp      bool      `json:"canSelfSignUp"`
+	CanSelfForgotPass  bool      `json:"canSelfForgotPass"`
 }
 
 type CreateApplicationService struct {
@@ -54,6 +58,8 @@ func (s *CreateApplicationService) Handler(ctx context.Context, request Request)
 		request.HasMfaAuthApp,
 		true, // IsActive
 		nil,  // UpdatedAt
+		request.CanSelfSignUp,
+		request.CanSelfForgotPass,
 	)
 
 	err := s.ApplicationRepository.AddApplication(ctx, newApplication)
@@ -72,5 +78,7 @@ func (s *CreateApplicationService) Handler(ctx context.Context, request Request)
 		HasMfaEmail:        newApplication.HasMfaEmail,
 		HasMfaAuthApp:      newApplication.HasMfaAuthApp,
 		IsActive:           newApplication.IsActive,
+		CanSelfSignUp:      newApplication.CanSelfSignUp,
+		CanSelfForgotPass:  newApplication.CanSelfForgotPass,
 	}, nil
 }

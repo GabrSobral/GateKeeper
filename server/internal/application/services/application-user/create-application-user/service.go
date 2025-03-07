@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	application_utils "github.com/gate-keeper/internal/application/utils"
 	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/gate-keeper/internal/infra/database/repositories"
@@ -70,13 +71,13 @@ func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 }
 
 func (s *CreateApplicationUserService) Handler(ctx context.Context, request Request) (*Response, error) {
-	isApplicationExists, err := s.ApplicationRepository.CheckIfApplicationExists(ctx, request.ApplicationID)
+	application, err := s.ApplicationRepository.GetApplicationByID(ctx, request.ApplicationID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if !isApplicationExists {
+	if application == nil {
 		return nil, &errors.ErrApplicationNotFound
 	}
 
@@ -90,9 +91,15 @@ func (s *CreateApplicationUserService) Handler(ctx context.Context, request Requ
 		return nil, &errors.ErrUserAlreadyExists
 	}
 
+	hashedPassword, err := application_utils.HashPassword(*request.TemporaryPasswordHash, application.PasswordHashSecret)
+
+	if err != nil {
+		return nil, err
+	}
+
 	applicationUser, err := entities.CreateApplicationUser(
 		request.Email,
-		request.TemporaryPasswordHash,
+		&hashedPassword,
 		request.ApplicationID,
 		true, // shouldChangePass
 	)

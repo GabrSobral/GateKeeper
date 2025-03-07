@@ -25,7 +25,7 @@ func (ms *MailServiceMock) SendEmailConfirmationEmail(ctx context.Context, to, u
 	return nil
 }
 
-func (ms *MailServiceMock) SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID uuid.UUID) error {
+func (ms *MailServiceMock) SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID, applicationID uuid.UUID) error {
 	fmt.Printf("Mail sent successfully to: %v, from: %v, subject: %v", to, ms.From, ms.Subject)
 
 	return nil

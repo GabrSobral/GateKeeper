@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Breadcrumbs } from "@/components/bread-crumbs";
 import { buttonVariants } from "@/components/ui/button";
 import { Tabs, TabsTrigger, TabsList, TabsContent } from "@/components/ui/tabs";
 

@@ -22,6 +22,8 @@ type Request struct {
 	HasMfaAuthApp      bool      `json:"hasMfaAuthApp" validate:"boolean"`
 	OrganizationID     uuid.UUID `json:"organizationId" validate:"required"`
 	IsActive           bool      `json:"isActive" validate:"required"`
+	CanSelfSignUp      bool      `json:"canSelfSignUp" validate:"boolean"`
+	CanSelfForgotPass  bool      `json:"canSelfForgotPass" validate:"boolean"`
 }
 
 type Response struct {
@@ -34,6 +36,8 @@ type Response struct {
 	HasMfaAuthApp      bool      `json:"hasMfaAuthApp"`
 	OrganizationID     uuid.UUID `json:"organizationId"`
 	IsActive           bool      `json:"isActive"`
+	CanSelfSignUp      bool      `json:"canSelfSignUp"`
+	CanSelfForgotPass  bool      `json:"canSelfForgotPass"`
 }
 
 type UpdateApplicationService struct {
@@ -61,6 +65,8 @@ func (s *UpdateApplicationService) Handler(ctx context.Context, request Request)
 		Badges:             request.Badges,
 		CreatedAt:          now,
 		UpdatedAt:          &now,
+		CanSelfSignUp:      request.CanSelfSignUp,
+		CanSelfForgotPass:  request.CanSelfForgotPass,
 	}
 
 	err := s.ApplicationRepository.UpdateApplication(ctx, &application)
@@ -79,5 +85,7 @@ func (s *UpdateApplicationService) Handler(ctx context.Context, request Request)
 		HasMfaEmail:        application.HasMfaEmail,
 		HasMfaAuthApp:      application.HasMfaAuthApp,
 		IsActive:           application.IsActive,
+		CanSelfSignUp:      application.CanSelfSignUp,
+		CanSelfForgotPass:  application.CanSelfForgotPass,
 	}, nil
 }

@@ -2,7 +2,6 @@ package resetpassword
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	application_utils "github.com/gate-keeper/internal/application/utils"
@@ -22,9 +21,10 @@ type ResetPasswordService struct {
 }
 
 type Request struct {
-	PasswordResetToken string    `json:"password_reset_token" validate:"required"`
-	PasswordResetId    uuid.UUID `json:"password_reset_id" validate:"required"`
-	NewPassword        string    `json:"new_password" validate:"required"`
+	PasswordResetToken string    `json:"passwordResetToken" validate:"required"`
+	PasswordResetId    uuid.UUID `json:"passwordResetId" validate:"required"`
+	NewPassword        string    `json:"newPassword" validate:"required"`
+	ApplicationID      uuid.UUID `json:"applicationId" validate:"required"`
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandler[Request] {
@@ -51,7 +51,7 @@ func (fp *ResetPasswordService) Handler(ctx context.Context, request Request) er
 		return &errors.ErrPasswordResetTokenExpired
 	}
 
-	if strings.Trim(passwordResetToken.Token, " ") != strings.Trim(request.PasswordResetToken, " ") {
+	if passwordResetToken.Token != request.PasswordResetToken {
 		return &errors.ErrPasswordResetTokenMismatch
 	}
 
@@ -65,10 +65,14 @@ func (fp *ResetPasswordService) Handler(ctx context.Context, request Request) er
 		return &errors.ErrUserNotFound
 	}
 
-	application, err := fp.ApplicationRepository.GetApplicationByID(ctx, user.ApplicationID)
+	application, err := fp.ApplicationRepository.GetApplicationByID(ctx, request.ApplicationID)
 
 	if err != nil {
 		return err
+	}
+
+	if application == nil {
+		return &errors.ErrApplicationNotFound
 	}
 
 	hashedPassword, err := application_utils.HashPassword(request.NewPassword, application.PasswordHashSecret)

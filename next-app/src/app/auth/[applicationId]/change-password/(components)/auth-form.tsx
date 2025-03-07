@@ -1,8 +1,10 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -18,9 +20,16 @@ import { Button } from "@/components/ui/button";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { resetPasswordApi } from "@/services/auth/reset-password";
 
 export function AuthForm() {
-  const applicationId = useParams().applicationId;
+  const applicationId = useParams().applicationId as string;
+  const searchParams = useSearchParams();
+
+  const passwordResetToken = searchParams.get("token");
+  const passwordResetId = searchParams.get("id");
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -30,14 +39,44 @@ export function AuthForm() {
     },
   });
 
-  const isLoading = false;
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!applicationId) {
+      console.error("Application ID is required");
+      toast.error("Application ID is required");
+      return;
+    }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
+    if (!passwordResetToken) {
+      console.error("Password reset token is required");
+      toast.error("Password reset token is required");
+      return;
+    }
 
-    console.log(applicationId);
-    console.log(values);
+    if (!passwordResetId) {
+      console.error("Password reset ID is required");
+      toast.error("Password reset ID is required");
+      return;
+    }
+
+    setIsLoading(true);
+
+    const [err] = await resetPasswordApi({
+      applicationId,
+      newPassword: values.password,
+      passwordResetToken,
+      passwordResetId,
+    });
+
+    if (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || err.message);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
+
+    toast.success("Password reset successfully");
   }
 
   return (
@@ -53,7 +92,7 @@ export function AuthForm() {
                 <FormControl>
                   <Input
                     placeholder="********"
-                    autoComplete=""
+                    autoComplete="new-password"
                     type="password"
                     {...field}
                   />
@@ -72,12 +111,7 @@ export function AuthForm() {
               <FormItem>
                 <FormLabel>Confirm Password</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="********"
-                    autoComplete=""
-                    type="password"
-                    {...field}
-                  />
+                  <Input placeholder="********" type="password" {...field} />
                 </FormControl>
 
                 <FormDescription></FormDescription>

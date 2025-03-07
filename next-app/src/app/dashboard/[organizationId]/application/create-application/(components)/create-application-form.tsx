@@ -267,6 +267,72 @@ export function CreateApplicationForm() {
             />
           </div>
 
+          <Separator className="my-2" />
+
+          <div className="flex flex-col gap-3">
+            <span className="text-sm font-medium">Authentication Page</span>
+
+            <span className="text-muted-foreground text-sm">
+              Set the settings that will be enabled for the authentication page.
+            </span>
+
+            <FormField
+              control={form.control}
+              name="canSelfSignUp"
+              render={({ field }) => (
+                <FormItem className="flex flex-col bg-gray-50 dark:bg-gray-900 p-2 rounded-sm">
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={!!field.value}
+                        onCheckedChange={field.onChange}
+                        aria-labelledby="terms-label"
+                      />
+                    </FormControl>
+
+                    <FormLabel className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      User can self sign up
+                    </FormLabel>
+                  </div>
+
+                  <FormDescription>
+                    If this option is enabled, the user will be able to sign up
+                    by himself.
+                  </FormDescription>
+                  <FormMessage></FormMessage>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="canSelfForgotPass"
+              render={({ field }) => (
+                <FormItem className="flex flex-col bg-gray-50 dark:bg-gray-900 p-2 rounded-sm">
+                  <div className="flex items-center space-x-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={!!field.value}
+                        onCheckedChange={field.onChange}
+                        aria-labelledby="terms-label"
+                      />
+                    </FormControl>
+
+                    <FormLabel className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      User can self forgot password
+                    </FormLabel>
+                  </div>
+
+                  <FormDescription>
+                    If this option is enabled, the user will be able to reset
+                    his password by himself.
+                  </FormDescription>
+                  <FormMessage></FormMessage>
+                </FormItem>
+              )}
+            />
+          </div>
+
           <Button type="submit" disabled={isLoading} className="ml-auto w-fit">
             {isLoading ? "Creating Application..." : "Create Application"}
           </Button>

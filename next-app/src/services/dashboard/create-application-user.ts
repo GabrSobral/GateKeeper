@@ -1,7 +1,5 @@
-import type { AxiosError } from "axios";
-
 import { api } from "../base/gatekeeper-api";
-import { IServiceOptions, Result } from "@/types/service-options";
+import { APIError, IServiceOptions, Result } from "@/types/service-options";
 
 type Request = {
   displayName: string;
@@ -39,7 +37,7 @@ export async function createApplicationUserApi(
     organizationId,
   }: Request,
   { accessToken }: IServiceOptions
-): Promise<Result<Response, AxiosError<{ message: string }>>> {
+): Promise<Result<Response, APIError>> {
   try {
     const { data } = await api.post<Response>(
       `/v1/organizations/${organizationId}/applications/${applicationId}/users`,
@@ -62,6 +60,6 @@ export async function createApplicationUserApi(
     );
     return [data, null];
   } catch (error: unknown) {
-    return [null, error as AxiosError<{ message: string }>];
+    return [null, error as APIError];
   }
 }

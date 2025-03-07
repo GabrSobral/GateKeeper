@@ -1,5 +1,6 @@
 import { toast } from "sonner";
 import { useState } from "react";
+import { useParams } from "next/navigation";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -15,10 +16,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
-import { cn } from "@/lib/utils";
-import { createApplicationRoleApi } from "@/services/dashboard/create-application-role";
-import { useParams } from "next/navigation";
 import { IApplication } from "@/services/dashboard/get-application-by-id";
+import { createApplicationRoleApi } from "@/services/dashboard/create-application-role";
 
 type Props = {
   addRole: (role: IApplication["roles"]["data"][number]) => void;

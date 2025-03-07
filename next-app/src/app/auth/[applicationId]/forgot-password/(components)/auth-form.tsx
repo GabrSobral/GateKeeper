@@ -1,8 +1,10 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Fragment, useState } from "react";
+import { useParams } from "next/navigation";
 
 import {
   Form,
@@ -18,11 +20,13 @@ import { Button } from "@/components/ui/button";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { forgotPasswordApi } from "@/services/auth/forgot-password";
 
 export function AuthForm() {
   const [isSent, setIsSent] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // const applicationId = useParams().applicationId;
+  const applicationId = useParams().applicationId as string;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -31,12 +35,28 @@ export function AuthForm() {
     },
   });
 
-  const isLoading = false;
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!applicationId) {
+      toast.error("Application ID is required");
+      console.error("Application ID is required");
+      return;
+    }
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+    setIsLoading(true);
+
+    const [err] = await forgotPasswordApi({
+      applicationId: applicationId,
+      email: values.email,
+    });
+
+    if (err) {
+      toast.error(err.response?.data?.message || err.message);
+      console.error(err);
+      setIsLoading(false);
+      return;
+    }
+
+    setIsLoading(false);
     setIsSent(true);
   }
 
@@ -44,7 +64,7 @@ export function AuthForm() {
     return (
       <Fragment>
         <div className="grid gap-6">
-          <p className="text-center text-md bg-green-100 p-4 rounded-lg">
+          <p className="text-center text-md bg-green-100 dark:bg-green-700 p-4 rounded-lg">
             Check your email for a link to reset your password. If it
             doesn&apos;t appear within a few minutes, check your spam folder.
           </p>

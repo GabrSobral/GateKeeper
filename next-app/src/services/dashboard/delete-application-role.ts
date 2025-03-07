@@ -1,6 +1,6 @@
-import type { AxiosError } from "axios";
 import { api } from "../base/gatekeeper-api";
 import {
+  APIError,
   IServiceOptions,
   ResultWithoutResponse,
 } from "@/types/service-options";
@@ -14,7 +14,7 @@ type Request = {
 export async function deleteApplicationRoleApi(
   { applicationId, organizationId, roleId }: Request,
   { accessToken }: IServiceOptions
-): Promise<ResultWithoutResponse<AxiosError<{ message: string }>>> {
+): Promise<ResultWithoutResponse<APIError>> {
   try {
     await api.delete<Response>(
       `/v1/organizations/${organizationId}/applications/${applicationId}/roles/${roleId}`,
@@ -26,6 +26,6 @@ export async function deleteApplicationRoleApi(
     );
     return [null];
   } catch (error: unknown) {
-    return [error as AxiosError<{ message: string }>];
+    return [error as APIError];
   }
 }

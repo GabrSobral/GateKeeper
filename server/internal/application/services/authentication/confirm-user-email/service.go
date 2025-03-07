@@ -4,8 +4,6 @@ import (
 	"context"
 	"time"
 
-	signin "github.com/gate-keeper/internal/application/services/authentication/sign-in-credential"
-	application_utils "github.com/gate-keeper/internal/application/utils"
 	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/gate-keeper/internal/infra/database/repositories"
@@ -16,9 +14,24 @@ import (
 )
 
 type Request struct {
-	Token         string    `json:"token" validate:"required"`
-	Email         string    `json:"email" validate:"required,email"`
-	ApplicationID uuid.UUID `json:"application_id" validate:"required"`
+	Token               string    `json:"token" validate:"required"`
+	Email               string    `json:"email" validate:"required,email"`
+	ApplicationID       uuid.UUID `json:"applicationId" validate:"required"`
+	CodeChallengeMethod string    `json:"codeChallengeMethod" validate:"required"`
+	ResponseType        string    `json:"responseType" validate:"required"`
+	Scope               string    `json:"scope" validate:"required"`
+	State               string    `json:"state" validate:"required"`
+	CodeChallenge       string    `json:"codeChallenge" validate:"required"`
+	RedirectUri         string    `json:"redirectUri" validate:"required"`
+}
+
+type Response struct {
+	AuthorizationCode   string `json:"authorizationCode"`
+	RedirectUri         string `json:"redirectUri"`
+	State               string `json:"state"`
+	CodeChallenge       string `json:"codeChallenge"`
+	CodeChallengeMethod string `json:"codeChallengeMethod"`
+	ResponseType        string `json:"responseType"`
 }
 
 type ConfirmUserEmail struct {
@@ -26,18 +39,20 @@ type ConfirmUserEmail struct {
 	UserProfileRepository       repository_interfaces.IUserProfileRepository
 	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
 	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
+	AuthozationCodeRepository   repository_interfaces.IApplicationAuthorizationCodeRepository
 }
 
-func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *signin.Response] {
+func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &ConfirmUserEmail{
 		ApplicationUserRepository:   repository_handlers.ApplicationUserRepository{Store: q},
 		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
 		RefreshTokenRepository:      repository_handlers.RefreshTokenRepository{Store: q},
 		EmailConfirmationRepository: repository_handlers.EmailConfirmationRepository{Store: q},
+		AuthozationCodeRepository:   repository_handlers.ApplicationAuthorizationCodeRepository{Store: q},
 	}
 }
 
-func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*signin.Response, error) {
+func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*Response, error) {
 	user, err := cm.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
@@ -46,6 +61,22 @@ func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*sign
 
 	if user == nil {
 		return nil, &errors.ErrUserNotFound
+	}
+
+	authorizationCode, err := entities.CreateApplicationAuthorizationCode(
+		request.ApplicationID,
+		user.ID,
+		request.RedirectUri,
+		request.CodeChallenge,
+		request.CodeChallengeMethod,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if err := cm.AuthozationCodeRepository.AddAuthorizationCode(ctx, authorizationCode); err != nil {
+		return nil, err
 	}
 
 	emailConfirmation, err := cm.EmailConfirmationRepository.GetByEmail(ctx, request.Email, user.ID)
@@ -66,53 +97,27 @@ func (cm *ConfirmUserEmail) Handler(ctx context.Context, request Request) (*sign
 		return nil, &errors.ErrConfirmationTokenAlreadyUsed
 	}
 
-	if emailConfirmation.ExpiresAt.Before(time.Now()) {
+	if emailConfirmation.ExpiresAt.Before(time.Now().UTC()) {
 		return nil, &errors.ErrConfirmationTokenAlreadyExpired
 	}
 
 	user.IsEmailConfirmed = true
 	emailConfirmation.IsUsed = true
 
-	cm.ApplicationUserRepository.UpdateUser(ctx, user)
-	cm.EmailConfirmationRepository.UpdateEmailConfirmation(ctx, emailConfirmation)
-
-	userProfile, err := cm.UserProfileRepository.GetUserById(ctx, user.ID)
-
-	if err != nil {
+	if _, err := cm.ApplicationUserRepository.UpdateUser(ctx, user); err != nil {
 		return nil, err
 	}
 
-	jwtToken, err := application_utils.CreateToken(application_utils.JWTClaims{
-		UserID:    user.ID,
-		FirstName: userProfile.FirstName,
-		LastName:  userProfile.LastName,
-		Email:     user.Email,
-	})
-
-	if err != nil {
+	if err := cm.EmailConfirmationRepository.UpdateEmailConfirmation(ctx, emailConfirmation); err != nil {
 		return nil, err
 	}
 
-	currentDate := time.Now().UTC()
-	futureDate := currentDate.Add(time.Hour * 24 * 7).UTC() // 7 days from now
-
-	cm.RefreshTokenRepository.RevokeRefreshTokenFromUser(ctx, user.ID)
-	refreshToken, err := entities.CreateRefreshToken(user.ID, 5, futureDate)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &signin.Response{
-		User: signin.UserResponse{
-			ID:        user.ID,
-			FirstName: userProfile.FirstName,
-			LastName:  userProfile.LastName,
-			Email:     user.Email,
-			PhotoURL:  userProfile.PhotoURL,
-			CreatedAt: user.CreatedAt,
-		},
-		AccessToken:  jwtToken,
-		RefreshToken: refreshToken.ID,
+	return &Response{
+		AuthorizationCode:   authorizationCode.ID.String(),
+		RedirectUri:         request.RedirectUri,
+		State:               request.State,
+		CodeChallenge:       request.CodeChallenge,
+		CodeChallengeMethod: request.CodeChallengeMethod,
+		ResponseType:        request.ResponseType,
 	}, nil
 }

@@ -1,5 +1,5 @@
 import { z } from "zod";
 
 export const formSchema = z.object({
-  email: z.string().email("Invalid e-mail address"),
+  code: z.string({ message: "Code must contain 6 characters" }).min(6).max(6),
 });

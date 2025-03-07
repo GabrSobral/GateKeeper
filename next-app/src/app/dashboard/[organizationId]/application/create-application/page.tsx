@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Breadcrumbs } from "@/components/bread-crumbs";
 import { CreateApplicationForm } from "./(components)/create-application-form";
 
 type Props = {

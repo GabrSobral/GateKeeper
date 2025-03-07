@@ -27,6 +27,8 @@ type Response struct {
 	IsActive              bool                                       `json:"isActive"`
 	MfaAuthAppEnabled     bool                                       `json:"mfaAuthAppEnabled"`
 	MfaEmailEnabled       bool                                       `json:"mfaEmailEnabled"`
+	CanSelfSignUp         bool                                       `json:"canSelfSignUp"`
+	CanSelfForgotPass     bool                                       `json:"canSelfForgotPass"`
 	PasswordHashingSecret string                                     `json:"passwordHashingSecret"`
 	Secrets               []ApplicationSecrets                       `json:"secrets"`
 	Users                 repository_interfaces.ApplicationUsersData `json:"users"`
@@ -135,7 +137,9 @@ func (s *GetApplicationByIDService) Handler(ctx context.Context, request Request
 		Badges:                application.Badges,
 		CreatedAt:             application.CreatedAt,
 		UpdatedAt:             application.UpdatedAt,
-		IsActive:              application.IsActive, // to do later
+		CanSelfSignUp:         application.CanSelfSignUp,
+		CanSelfForgotPass:     application.CanSelfForgotPass,
+		IsActive:              application.IsActive,
 		MfaAuthAppEnabled:     application.HasMfaAuthApp,
 		MfaEmailEnabled:       application.HasMfaEmail,
 		PasswordHashingSecret: application.PasswordHashSecret,

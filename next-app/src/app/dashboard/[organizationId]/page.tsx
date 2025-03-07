@@ -1,4 +1,4 @@
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Breadcrumbs } from "@/components/bread-crumbs";
 
 type Props = {
   params: Promise<{

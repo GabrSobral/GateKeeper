@@ -1,9 +1,34 @@
-import { Fragment } from "react";
-import { AuthForm } from "./(components)/AuthForm";
+import { Metadata } from "next";
+import { redirect } from "next/navigation";
 
-export default function SignInPage() {
+import { AuthForm } from "./(components)/AuthForm";
+import { Background } from "../(components)/background";
+import { ErrorAlert } from "@/components/error-alert";
+
+import { getApplicationAuthDataService } from "@/services/auth/get-application-auth-data";
+
+type Props = {
+  params: Promise<{ applicationId: string }>;
+};
+
+export const metadata: Metadata = {
+  title: "Sign Up - GateKeeper",
+  description: "Sign up for an account",
+};
+
+export default async function SignInPage({ params }: Props) {
+  const { applicationId } = await params;
+
+  const [application, err] = await getApplicationAuthDataService({
+    applicationId,
+  });
+
+  if (!application?.canSelfSignUp) {
+    return redirect(`/auth/${applicationId}/sign-in`);
+  }
+
   return (
-    <Fragment>
+    <Background application={application} page="sign-up">
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Create an account
@@ -14,7 +39,11 @@ export default function SignInPage() {
         </p>
       </div>
 
-      <AuthForm />
-    </Fragment>
+      {err ? (
+        <ErrorAlert message={err.message} title="An error occurred..." />
+      ) : (
+        <AuthForm application={application} />
+      )}
+    </Background>
   );
 }

@@ -39,6 +39,8 @@ func (r ApplicationRepository) AddApplication(ctx context.Context, newApplicatio
 		PasswordHashSecret: newApplication.PasswordHashSecret,
 		Badges:             &badges,
 		UpdatedAt:          newApplication.UpdatedAt,
+		CanSelfSignUp:      newApplication.CanSelfSignUp,
+		CanSelfForgotPass:  newApplication.CanSelfForgotPass,
 
 		CreatedAt: pgtype.Timestamp{Time: newApplication.CreatedAt, Valid: true},
 	})
@@ -73,6 +75,8 @@ func (r ApplicationRepository) GetApplicationByID(ctx context.Context, applicati
 		PasswordHashSecret: application.PasswordHashSecret,
 		UpdatedAt:          application.UpdatedAt,
 		Badges:             strings.Split(*application.Badges, ","),
+		CanSelfSignUp:      application.CanSelfSignUp,
+		CanSelfForgotPass:  application.CanSelfForgotPass,
 	}, nil
 }
 
@@ -99,6 +103,8 @@ func (r ApplicationRepository) UpdateApplication(ctx context.Context, newApplica
 		HasMfaEmail:        newApplication.HasMfaEmail,
 		PasswordHashSecret: newApplication.PasswordHashSecret,
 		UpdatedAt:          newApplication.UpdatedAt,
+		CanSelfSignUp:      newApplication.CanSelfSignUp,
+		CanSelfForgotPass:  newApplication.CanSelfForgotPass,
 	})
 
 	if err != nil {
@@ -129,6 +135,7 @@ func (r ApplicationRepository) ListApplicationsFromOrganization(ctx context.Cont
 			OrganizationID: application.OrganizationID,
 			CreatedAt:      application.CreatedAt.Time,
 			Badges:         strings.Split(*application.Badges, ","),
+			UpdatedAt:      application.UpdatedAt,
 		})
 	}
 

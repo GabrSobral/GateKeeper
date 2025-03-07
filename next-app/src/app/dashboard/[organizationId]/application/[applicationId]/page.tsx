@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ChevronLeft, Pencil } from "lucide-react";
 
-import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Breadcrumbs } from "@/components/bread-crumbs";
 import { buttonVariants } from "@/components/ui/button";
 import {
   Tooltip,
@@ -39,8 +39,6 @@ export default async function ApplicationDetailPage({ params }: Props) {
   if (err) {
     return <div>Failed to fetch application</div>;
   }
-
-  console.log(application?.users.data);
 
   return (
     <>

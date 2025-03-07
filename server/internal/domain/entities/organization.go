@@ -15,11 +15,7 @@ type Organization struct {
 }
 
 func NewOrganization(name string, description *string) *Organization {
-	newId, err := uuid.NewV7()
-
-	if err != nil {
-		panic(err)
-	}
+	newId := uuid.New()
 
 	return &Organization{
 		ID:          newId,

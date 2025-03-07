@@ -49,6 +49,13 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 	// Routes v1
 	r.Route("/v1", func(r chi.Router) {
 		r.Route("/auth", func(r chi.Router) {
+			r.Route("/session", func(r chi.Router) {
+				r.Use(http_middlewares.JwtHandler)
+
+				r.Get("/", authController.GetSessionAuthController)
+			})
+
+			r.Post("/authorize", authController.AuthorizeController)
 			r.Post("/sign-in", authController.SignInAuthController)
 			r.Post("/sign-up", authController.SignUpAuthController)
 			r.Post("/confirm-email", authController.ConfirmEmailAuthController)
@@ -56,6 +63,7 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 			r.Post("/forgot-password", authController.ForgotPasswordAuthController)
 			r.Post("/external-provider", authController.ExternalLoginAuthController)
 			r.Post("/confirm-email/resend", authController.ResendEmailConfirmationAuthController)
+			r.Get("/application/{applicationID}/auth-data", applicationController.GetApplicationAuthData)
 		})
 
 		r.Route("/organizations", func(r chi.Router) {
@@ -70,9 +78,9 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 				r.Route("/applications", func(r chi.Router) {
 					r.Get("/", applicationController.ListApplications)
 					r.Post("/", applicationController.CreateApplication)
+					r.Put("/{applicationID}", applicationController.UpdateApplication)
 					r.Get("/{applicationID}", applicationController.GetApplicationByID)
 					r.Delete("/{applicationID}", applicationController.RemoveApplication)
-					r.Put("/{applicationID}", applicationController.UpdateApplication)
 
 					r.Route("/{applicationID}/users", func(r chi.Router) {
 						r.Post("/", applicationUserController.CreateUser)

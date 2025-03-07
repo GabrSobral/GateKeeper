@@ -106,7 +106,7 @@ export function NewSecretDialog({ addSecret }: Props) {
               </AlertDescription>
             </Alert>
 
-            <div className="relative flex items-center justify-between gap-4 rounded-md bg-gray-100 p-4">
+            <div className="relative flex items-center justify-between gap-4 rounded-md bg-gray-100 dark:bg-gray-900 p-4">
               <span className="w-full text-center text-lg font-bold">
                 {secret}
               </span>
@@ -119,7 +119,7 @@ export function NewSecretDialog({ addSecret }: Props) {
               </Button>
             </div>
 
-            <div className="relative flex items-center text-lg justify-center gap-4 rounded-md bg-gray-100 p-4">
+            <div className="relative flex items-center text-lg justify-center gap-4 rounded-md bg-gray-100 dark:bg-gray-900 p-4">
               Expire at:
               <span className="text-primary font-medium">
                 {expiresAt ? formatDate(expiresAt) : "Lifetime"}

@@ -1,9 +1,22 @@
-import { Fragment } from "react";
-import { AuthForm } from "./(components)/AuthForm";
+import { AuthForm } from "./(components)/auth-form";
+import { Background } from "../(components)/background";
+import { ErrorAlert } from "@/components/error-alert";
 
-export default function SignInPage() {
+import { getApplicationAuthDataService } from "@/services/auth/get-application-auth-data";
+
+type Props = {
+  params: Promise<{ applicationId: string }>;
+};
+
+export default async function ChangePasswordPage({ params }: Props) {
+  const { applicationId } = await params;
+
+  const [application, err] = await getApplicationAuthDataService({
+    applicationId,
+  });
+
   return (
-    <Fragment>
+    <Background application={application} page="change-password">
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Change your password
@@ -14,7 +27,11 @@ export default function SignInPage() {
         </p>
       </div>
 
-      <AuthForm />
-    </Fragment>
+      {err ? (
+        <ErrorAlert message={err.message} title="An error occurred..." />
+      ) : (
+        <AuthForm />
+      )}
+    </Background>
   );
 }

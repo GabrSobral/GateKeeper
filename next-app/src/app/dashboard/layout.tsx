@@ -13,7 +13,7 @@ export default function Layout({ children }: Props) {
         <DashboardSidebar />
 
         <div className="flex-1">
-          <Toaster />
+          <Toaster richColors />
 
           {children}
         </div>

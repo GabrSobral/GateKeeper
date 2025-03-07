@@ -10,7 +10,9 @@ CREATE TABLE IF NOT EXISTS "application" (
     password_hash_secret VARCHAR(255) NOT NULL,
     badges TEXT NULL,
     created_at TIMESTAMP NOT NULL,
-    updated_at TIMESTAMP NULL
+    updated_at TIMESTAMP NULL,
+    can_self_sign_up BOOLEAN NOT NULL DEFAULT FALSE,
+    can_self_forgot_pass BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 ---- create above / drop below ----

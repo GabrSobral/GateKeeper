@@ -6,7 +6,6 @@ import (
 	"time"
 
 	application_utils "github.com/gate-keeper/internal/application/utils"
-	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/gate-keeper/internal/infra/database/repositories"
 	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
@@ -16,9 +15,11 @@ import (
 )
 
 type Request struct {
-	ApplicationID uuid.UUID `json:"applicationId" validate:"required"`
-	Email         string    `json:"email" validate:"required,email"`
-	Password      string    `json:"password" validate:"required"`
+	AuthorizationCode uuid.UUID `json:"authorizationCode"`
+	ClientSecret      string    `json:"clientSecret"`
+	ClientID          uuid.UUID `json:"clientId"`
+	CodeVerifier      string    `json:"codeVerifier"`
+	RedirectURI       string    `json:"redirectUri"`
 }
 
 type Response struct {
@@ -28,74 +29,71 @@ type Response struct {
 }
 
 type UserResponse struct {
-	ID        uuid.UUID `json:"id"`
-	FirstName string    `json:"firstName"`
-	LastName  string    `json:"lastName"`
-	Email     string    `json:"email"`
-	PhotoURL  *string   `json:"photoUrl"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID          uuid.UUID `json:"id"`
+	DisplayName string    `json:"displayName"`
+	FirstName   string    `json:"firstName"`
+	LastName    string    `json:"lastName"`
+	Email       string    `json:"email"`
+	PhotoURL    *string   `json:"photoUrl"`
+	CreatedAt   time.Time `json:"createdAt"`
 }
 
 type SignInService struct {
-	ApplicationUserRepository repository_interfaces.IApplicationUserRepository
-	UserProfileRepository     repository_interfaces.IUserProfileRepository
-	RefreshTokenRepository    repository_interfaces.IRefreshTokenRepository
+	ApplicationUserRepository   repository_interfaces.IApplicationUserRepository
+	UserProfileRepository       repository_interfaces.IUserProfileRepository
+	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
+	AuthozationCodeRepository   repository_interfaces.IApplicationAuthorizationCodeRepository
+	ApplicationSecretRepository repository_interfaces.IApplicationSecretRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &SignInService{
-		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
-		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
-		RefreshTokenRepository:    repository_handlers.RefreshTokenRepository{Store: q},
+		ApplicationUserRepository:   repository_handlers.ApplicationUserRepository{Store: q},
+		UserProfileRepository:       repository_handlers.UserProfileRepository{Store: q},
+		RefreshTokenRepository:      repository_handlers.RefreshTokenRepository{Store: q},
+		AuthozationCodeRepository:   repository_handlers.ApplicationAuthorizationCodeRepository{Store: q},
+		ApplicationSecretRepository: repository_handlers.ApplicationSecretRepository{Store: q},
 	}
 }
 
 func (ss *SignInService) Handler(ctx context.Context, request Request) (*Response, error) {
-	slog.InfoContext(ctx, "Trying to sign in user with email: %s", request.Email, nil)
-
-	user, err := ss.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
+	authorizationCode, err := handleAuthorizationCode(ctx, ss, request)
 
 	if err != nil {
-		return nil, &errors.ErrUserNotFound
+		return nil, err
+	}
+
+	secrets, err := ss.ApplicationSecretRepository.ListSecretsFromApplication(ctx, authorizationCode.ApplicationID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	isClientSecretValid, err := application_utils.VerifyClientSecret(request.ClientSecret, secrets)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !isClientSecretValid {
+		return nil, &errors.ErrInvalidClientSecret
+	}
+
+	if err := ss.AuthozationCodeRepository.RemoveAuthorizationCode(ctx, authorizationCode.ApplicationUserId, authorizationCode.ApplicationID); err != nil {
+		return nil, err
+	}
+
+	user, err := ss.ApplicationUserRepository.GetUserByID(ctx, authorizationCode.ApplicationUserId)
+
+	if err != nil {
+		return nil, err
 	}
 
 	if user == nil {
 		return nil, &errors.ErrUserNotFound
 	}
 
-	if !user.IsActive {
-		return nil, &errors.ErrUserNotActive
-	}
-
-	if !user.IsEmailConfirmed {
-		return nil, &errors.ErrEmailNotConfirmed
-	}
-
-	if user.PasswordHash == nil {
-		return nil, &errors.ErrUserSignUpWithSocial
-	}
-
-	isPasswordCorrect, err := application_utils.ComparePassword(*user.PasswordHash, request.Password)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !isPasswordCorrect {
-		return nil, &errors.ErrEmailOrPasswordInvalid
-	}
-
-	currentDate := time.Now().UTC()
-	futureDate := currentDate.Add(time.Hour * 24 * 7).UTC() // 7 days from now
-
-	ss.RefreshTokenRepository.RevokeRefreshTokenFromUser(ctx, user.ID)
-	refreshToken, err := entities.CreateRefreshToken(user.ID, 5, futureDate)
-
-	ss.RefreshTokenRepository.AddRefreshToken(ctx, refreshToken)
-
-	if err != nil {
-		return nil, err
-	}
+	refreshToken, err := assignRefreshToken(ctx, ss, *user)
 
 	userProfile, err := ss.UserProfileRepository.GetUserById(ctx, user.ID)
 
@@ -103,14 +101,7 @@ func (ss *SignInService) Handler(ctx context.Context, request Request) (*Respons
 		return nil, err
 	}
 
-	jwtToken, err := application_utils.CreateToken(
-		application_utils.JWTClaims{
-			UserID:    user.ID,
-			Email:     user.Email,
-			FirstName: userProfile.FirstName,
-			LastName:  userProfile.LastName,
-		},
-	)
+	jwtToken, err := assignTokenParams(*userProfile, *user)
 
 	if err != nil {
 		return nil, err
@@ -120,12 +111,13 @@ func (ss *SignInService) Handler(ctx context.Context, request Request) (*Respons
 
 	return &Response{
 		User: UserResponse{
-			ID:        user.ID,
-			FirstName: userProfile.FirstName,
-			LastName:  userProfile.LastName,
-			Email:     user.Email,
-			PhotoURL:  userProfile.PhotoURL,
-			CreatedAt: user.CreatedAt,
+			ID:          user.ID,
+			DisplayName: userProfile.DisplayName,
+			FirstName:   userProfile.FirstName,
+			LastName:    userProfile.LastName,
+			Email:       user.Email,
+			PhotoURL:    userProfile.PhotoURL,
+			CreatedAt:   user.CreatedAt,
 		},
 		AccessToken:  jwtToken,
 		RefreshToken: refreshToken.ID,

@@ -23,6 +23,19 @@ type Application struct {
 	Badges             *string          `db:"badges"`
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
 	UpdatedAt          *time.Time       `db:"updated_at"`
+	CanSelfSignUp      bool             `db:"can_self_sign_up"`
+	CanSelfForgotPass  bool             `db:"can_self_forgot_pass"`
+}
+
+type ApplicationAuthorizationCode struct {
+	ID                  uuid.UUID        `db:"id"`
+	ApplicationID       uuid.UUID        `db:"application_id"`
+	UserID              uuid.UUID        `db:"user_id"`
+	ExpiredAt           pgtype.Timestamp `db:"expired_at"`
+	Code                string           `db:"code"`
+	RedirectUri         string           `db:"redirect_uri"`
+	CodeChallenge       string           `db:"code_challenge"`
+	CodeChallengeMethod string           `db:"code_challenge_method"`
 }
 
 type ApplicationMailConfig struct {

@@ -1,5 +1,3 @@
-import { AxiosError } from "axios";
-
 import { api } from "../base/gatekeeper-api";
 import { APIError, IServiceOptions, Result } from "@/types/service-options";
 
@@ -12,6 +10,8 @@ export interface IApplication {
   updatedAt: Date;
   isActive: boolean;
   mfaEmailEnabled: boolean;
+  canSelfSignUp: boolean;
+  canSelfForgotPass: boolean;
   mfaAuthAppEnabled: boolean;
   passwordHashingSecret: string;
   secrets: {

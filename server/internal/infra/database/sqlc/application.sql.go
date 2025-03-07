@@ -26,7 +26,9 @@ INSERT INTO
         badges,
         description,
         created_at,
-        updated_at
+        updated_at,
+        can_self_sign_up,
+        can_self_forgot_pass
     )
 VALUES
     (
@@ -40,7 +42,9 @@ VALUES
         $8,
         $9,
         $10,
-        $11
+        $11,
+        $12,
+        $13
     )
 `
 
@@ -56,6 +60,8 @@ type AddApplicationParams struct {
 	Description        *string          `db:"description"`
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
 	UpdatedAt          *time.Time       `db:"updated_at"`
+	CanSelfSignUp      bool             `db:"can_self_sign_up"`
+	CanSelfForgotPass  bool             `db:"can_self_forgot_pass"`
 }
 
 // ----------------------------------COMMANDS--------------------------------------
@@ -72,6 +78,8 @@ func (q *Queries) AddApplication(ctx context.Context, arg AddApplicationParams) 
 		arg.Description,
 		arg.CreatedAt,
 		arg.UpdatedAt,
+		arg.CanSelfSignUp,
+		arg.CanSelfForgotPass,
 	)
 	return err
 }
@@ -120,7 +128,9 @@ SELECT
     has_mfa_email,
     password_hash_secret,
     created_at,
-    updated_at
+    updated_at,
+    can_self_sign_up,
+    can_self_forgot_pass
 FROM
     "application"
 WHERE
@@ -139,6 +149,8 @@ type GetApplicationByIDRow struct {
 	PasswordHashSecret string           `db:"password_hash_secret"`
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
 	UpdatedAt          *time.Time       `db:"updated_at"`
+	CanSelfSignUp      bool             `db:"can_self_sign_up"`
+	CanSelfForgotPass  bool             `db:"can_self_forgot_pass"`
 }
 
 func (q *Queries) GetApplicationByID(ctx context.Context, id uuid.UUID) (GetApplicationByIDRow, error) {
@@ -156,6 +168,8 @@ func (q *Queries) GetApplicationByID(ctx context.Context, id uuid.UUID) (GetAppl
 		&i.PasswordHashSecret,
 		&i.CreatedAt,
 		&i.UpdatedAt,
+		&i.CanSelfSignUp,
+		&i.CanSelfForgotPass,
 	)
 	return i, err
 }
@@ -224,9 +238,11 @@ SET
     is_active = $5,
     has_mfa_email = $6,
     password_hash_secret = $7,
-    updated_at = $8
+    updated_at = $8,
+    can_self_sign_up = $9,
+    can_self_forgot_pass = $10
 WHERE
-    id = $9
+    id = $11
 `
 
 type UpdateApplicationParams struct {
@@ -238,6 +254,8 @@ type UpdateApplicationParams struct {
 	HasMfaEmail        bool       `db:"has_mfa_email"`
 	PasswordHashSecret string     `db:"password_hash_secret"`
 	UpdatedAt          *time.Time `db:"updated_at"`
+	CanSelfSignUp      bool       `db:"can_self_sign_up"`
+	CanSelfForgotPass  bool       `db:"can_self_forgot_pass"`
 	ID                 uuid.UUID  `db:"id"`
 }
 
@@ -251,6 +269,8 @@ func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationPa
 		arg.HasMfaEmail,
 		arg.PasswordHashSecret,
 		arg.UpdatedAt,
+		arg.CanSelfSignUp,
+		arg.CanSelfForgotPass,
 		arg.ID,
 	)
 	return err

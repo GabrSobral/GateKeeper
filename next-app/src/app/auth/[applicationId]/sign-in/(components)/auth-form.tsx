@@ -2,8 +2,9 @@
 
 import { z } from "zod";
 import Link from "next/link";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams } from "next/navigation";
+import { useParams, useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -19,10 +20,25 @@ import { Button } from "@/components/ui/button";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useState } from "react";
 
-export function AuthForm() {
-  const applicationId = useParams().applicationId;
+import { authorizeApi } from "@/services/auth/authorize";
+import { ApplicationAuthData } from "@/services/auth/get-application-auth-data";
+import { ErrorAlert } from "@/components/error-alert";
+
+type Props = {
+  application: ApplicationAuthData | null;
+};
+
+export function AuthForm({ application }: Props) {
+  const applicationId = useParams().applicationId as string;
+  const searchParams = useSearchParams();
+
+  const redirectUri = searchParams.get("redirect_uri") || "/";
+  const codeChallengeMethod = searchParams.get("code_challenge_method") || "";
+  const responseType = searchParams.get("response_type") || "";
+  const scope = searchParams.get("scope") || "";
+  const state = searchParams.get("state") || "";
+  const codeChallenge = searchParams.get("code_challenge") || "";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -32,16 +48,64 @@ export function AuthForm() {
     },
   });
 
-  const [isLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  const urlParams = new URLSearchParams({
+    redirect_uri: redirectUri,
+    response_type: responseType,
+    scope,
+    code_challenge_method: codeChallengeMethod,
+    code_challenge: codeChallenge,
+    state,
+  });
+
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+
+    const [data, err] = await authorizeApi({
+      email: values.email.trim(),
+      password: values.password.trim(),
+      applicationId,
+      redirectUri,
+      responseType,
+      scope,
+      codeChallengeMethod,
+      codeChallenge,
+      state,
+    });
+
+    if (err && err.response?.data.title === "E-mail not confirmed") {
+      window.location.href = `/auth/${applicationId}/confirm-email?${urlParams.toString()}&email=${
+        values.email
+      }&trying_to_sign_in=true`;
+      return;
+    }
+
+    if (err) {
+      console.error(err);
+      setError(err?.response?.data.message || "An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    if (!data) {
+      setError("An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    setIsLoading(false);
+
+    window.location.href = `${redirectUri}?code=${data.authorizationCode}&state=${state}&redirect_uri=${redirectUri}&client_id=${applicationId}`;
   }
 
   return (
     <div className="grid gap-4">
+      {error && <ErrorAlert message={error} title="An error occurred..." />}
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3">
           <FormField
@@ -86,21 +150,27 @@ export function AuthForm() {
             )}
           />
 
-          <div className="flex items-center justify-between gap-2">
-            <Link
-              href={`/auth/${applicationId}/forgot-password`}
-              className="text-md mb-2 text-center hover:underline"
-            >
-              Forgot password
-            </Link>
+          {(application?.canSelfSignUp || application?.canSelfForgotPass) && (
+            <div className="flex items-center justify-between gap-2">
+              {application?.canSelfForgotPass && (
+                <Link
+                  href={`/auth/${applicationId}/forgot-password?${urlParams.toString()}`}
+                  className="text-md text-center hover:underline mx-auto"
+                >
+                  Forgot password?
+                </Link>
+              )}
 
-            <Link
-              href={`/auth/${applicationId}/sign-up`}
-              className="font-semibold text-md text-center hover:underline"
-            >
-              Create an account
-            </Link>
-          </div>
+              {application?.canSelfSignUp && (
+                <Link
+                  href={`/auth/${applicationId}/sign-up?${urlParams.toString()}`}
+                  className="font-semibold text-md text-center hover:underline mx-auto"
+                >
+                  Create an account
+                </Link>
+              )}
+            </div>
+          )}
 
           <Button type="submit" disabled={isLoading} className="w-full">
             Sign In with Email
@@ -108,24 +178,28 @@ export function AuthForm() {
         </form>
       </Form>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t"></span>
-        </div>
+      {application && application.oauthProviders.length > 0 && (
+        <>
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t"></span>
+            </div>
 
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background text-muted-foreground px-2">
-            {" "}
-            Or continue with{" "}
-          </span>
-        </div>
-      </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-background text-muted-foreground px-2">
+                {" "}
+                Or continue with{" "}
+              </span>
+            </div>
+          </div>
 
-      <div className="flex flex-col gap-1">
-        <Button variant="outline" type="button" disabled={isLoading}>
-          GitHub
-        </Button>
-      </div>
+          <div className="flex flex-col gap-1">
+            <Button variant="outline" type="button" disabled={isLoading}>
+              GitHub
+            </Button>
+          </div>
+        </>
+      )}
     </div>
   );
 }

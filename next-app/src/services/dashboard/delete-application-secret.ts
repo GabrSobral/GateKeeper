@@ -1,5 +1,5 @@
-import type { AxiosError } from "axios";
 import {
+  APIError,
   IServiceOptions,
   ResultWithoutResponse,
 } from "@/types/service-options";
@@ -14,7 +14,7 @@ type Request = {
 export async function deleteApplicationSecretApi(
   { secretId, applicationId, organizationId }: Request,
   { accessToken }: IServiceOptions
-): Promise<ResultWithoutResponse<AxiosError<{ message: string }>>> {
+): Promise<ResultWithoutResponse<APIError>> {
   try {
     await api.delete(
       `/v1/organizations/${organizationId}/applications/${applicationId}/secrets/${secretId}`,
@@ -26,6 +26,6 @@ export async function deleteApplicationSecretApi(
     );
     return [null];
   } catch (error: unknown) {
-    return [error as AxiosError<{ message: string }>];
+    return [error as APIError];
   }
 }

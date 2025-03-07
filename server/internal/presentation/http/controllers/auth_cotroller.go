@@ -7,11 +7,13 @@ import (
 	http_router "github.com/gate-keeper/internal/presentation/http"
 	"github.com/jackc/pgx/v5/pgxpool"
 
+	"github.com/gate-keeper/internal/application/services/authentication/authorize"
 	confirmuseremail "github.com/gate-keeper/internal/application/services/authentication/confirm-user-email"
 	externalloginprovider "github.com/gate-keeper/internal/application/services/authentication/external-login-provider"
 	forgotpassword "github.com/gate-keeper/internal/application/services/authentication/forgot-password"
 	resendemailconfirmation "github.com/gate-keeper/internal/application/services/authentication/resend-email-confirmation"
 	resetpassword "github.com/gate-keeper/internal/application/services/authentication/reset-password"
+	"github.com/gate-keeper/internal/application/services/authentication/session"
 	signin "github.com/gate-keeper/internal/application/services/authentication/sign-in-credential"
 	signup "github.com/gate-keeper/internal/application/services/authentication/sign-up-credential"
 )
@@ -35,6 +37,46 @@ func (ac *AuthController) SignInAuthController(writter http.ResponseWriter, requ
 	}
 
 	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+// Sign In with credentials controller
+func (ac *AuthController) AuthorizeController(writter http.ResponseWriter, request *http.Request) {
+	var authorizeRequest authorize.Request
+
+	if err := http_router.ParseBodyToSchema(&authorizeRequest, request); err != nil {
+		panic(err)
+	}
+
+	params := repositories.ParamsRs[authorize.Request, *authorize.Response, authorize.AuthorizeService]{
+		DbPool:  ac.DbPool,
+		New:     authorize.New,
+		Request: authorizeRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+func (ac *AuthController) GetSessionAuthController(writter http.ResponseWriter, request *http.Request) {
+	authorizationHeader := request.Header.Get("Authorization")
+	accessToken := authorizationHeader[len("Bearer "):]
+
+	service := session.SessionService{}
+
+	response, err := service.Handler(request.Context(), session.Request{
+		AccessToken: accessToken,
+	})
 
 	if err != nil {
 		panic(err)
@@ -72,7 +114,7 @@ func (ac *AuthController) ConfirmEmailAuthController(writter http.ResponseWriter
 		panic(err)
 	}
 
-	params := repositories.ParamsRs[confirmuseremail.Request, *signin.Response, confirmuseremail.ConfirmUserEmail]{
+	params := repositories.ParamsRs[confirmuseremail.Request, *confirmuseremail.Response, confirmuseremail.ConfirmUserEmail]{
 		DbPool:  ac.DbPool,
 		New:     confirmuseremail.New,
 		Request: confirmEmailRequest,

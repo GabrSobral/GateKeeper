@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/gate-keeper/internal/domain/entities"
+	"github.com/gate-keeper/internal/infra/database/repositories"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -33,6 +34,10 @@ func (r EmailConfirmationRepository) GetByEmail(ctx context.Context, email strin
 		Email:  email,
 		UserID: userID,
 	})
+
+	if err == repositories.ErrNoRows {
+		return nil, nil
+	}
 
 	if err != nil {
 		return nil, err
