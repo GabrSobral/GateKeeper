@@ -4,7 +4,8 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams, useSearchParams } from "next/navigation";
+import { CheckCircle } from "lucide-react";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -17,6 +18,8 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,8 +29,11 @@ export function AuthForm() {
   const applicationId = useParams().applicationId as string;
   const searchParams = useSearchParams();
 
+  const router = useRouter();
+
   const passwordResetToken = searchParams.get("token");
   const passwordResetId = searchParams.get("id");
+  const alreadyChanged = searchParams.get("changed");
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -77,6 +83,27 @@ export function AuthForm() {
     setIsLoading(false);
 
     toast.success("Password reset successfully");
+
+    router.push(`/auth/${applicationId}/change-password?changed=true`);
+  }
+
+  if (alreadyChanged === "true") {
+    return (
+      <div className="grid gap-4">
+        <Alert variant="default" className="bg-green-100 dark:bg-green-700">
+          <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+
+          <AlertTitle>Success</AlertTitle>
+          <AlertDescription>
+            Your password has been changed successfully <br />
+          </AlertDescription>
+        </Alert>
+
+        <span className="mt-1 font-semibold text-center">
+          You can close this page and try logging in with your new password!
+        </span>
+      </div>
+    );
   }
 
   return (
@@ -120,7 +147,12 @@ export function AuthForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full relative"
+          >
+            {isLoading && <LoadingSpinner className="absolute left-4" />}
             Save Password
           </Button>
         </form>

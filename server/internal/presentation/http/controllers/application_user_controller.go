@@ -1,13 +1,13 @@
 package http_controllers
 
 import (
-	"log"
+	"fmt"
 	"net/http"
 
 	createapplicationuser "github.com/gate-keeper/internal/application/services/application-user/create-application-user"
 	deleteapplicationuser "github.com/gate-keeper/internal/application/services/application-user/delete-application-user"
+	getapplicationuserbyid "github.com/gate-keeper/internal/application/services/application-user/get-application-user-by-id"
 	getuserbyemail "github.com/gate-keeper/internal/application/services/user/get-user-by-email"
-	getuserbyid "github.com/gate-keeper/internal/application/services/user/get-user-by-id"
 	"github.com/gate-keeper/internal/infra/database/repositories"
 	http_router "github.com/gate-keeper/internal/presentation/http"
 	"github.com/go-chi/chi"
@@ -114,23 +114,18 @@ func (c *ApplicationUserController) GetUserByEmailController(writter http.Respon
 }
 
 func (c *ApplicationUserController) GetUserByIDController(writter http.ResponseWriter, request *http.Request) {
-	log.Printf("asd;askdl;as")
-
 	userIDString := chi.URLParam(request, "userID")
-
-	log.Printf("UUID here: %v", userIDString)
-
 	userIdUUID, err := uuid.Parse(userIDString)
 
 	if err != nil {
 		panic(err)
 	}
 
-	getUserByIDRequest := getuserbyid.Request{UserID: userIdUUID}
+	getUserByIDRequest := getapplicationuserbyid.Request{UserID: userIdUUID}
 
-	params := repositories.ParamsRs[getuserbyid.Request, *getuserbyid.Response, getuserbyid.GetUserByID]{
+	params := repositories.ParamsRs[getapplicationuserbyid.Request, *getapplicationuserbyid.Response, getapplicationuserbyid.GetApplicationUserByID]{
 		DbPool:  c.DbPool,
-		New:     getuserbyid.New,
+		New:     getapplicationuserbyid.New,
 		Request: getUserByIDRequest,
 	}
 
@@ -139,6 +134,9 @@ func (c *ApplicationUserController) GetUserByIDController(writter http.ResponseW
 	if err != nil {
 		panic(err)
 	}
+
+	fmt.Println("asdasd askd alks jal jlaksj lkajs lkaj lkasd")
+	fmt.Println(response)
 
 	http_router.SendJson(writter, response, 200)
 }

@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/bread-crumbs";
 import { UserDetailForm } from "./(components)/user-detail-form";
+import { getApplicationUserByIdService } from "@/services/dashboard/get-application-user-by-id";
 
 type Props = {
   params: Promise<{
@@ -14,6 +15,15 @@ type Props = {
 
 export default async function UserDetailAndEditPage({ params }: Props) {
   const { organizationId, applicationId, userId } = await params;
+
+  const [data] = await getApplicationUserByIdService(
+    {
+      applicationId,
+      organizationId,
+      userId,
+    },
+    { accessToken: "" }
+  );
 
   return (
     <>
@@ -41,7 +51,7 @@ export default async function UserDetailAndEditPage({ params }: Props) {
           Go back to application detail
         </Link>
 
-        <UserDetailForm />
+        <UserDetailForm user={data} />
       </main>
     </>
   );

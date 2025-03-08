@@ -160,7 +160,14 @@ export function Users({ application }: Props) {
 
               <DropdownMenuSeparator />
 
-              <DropdownMenuItem>Update User</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link
+                  href={`/dashboard/${organizationId}/application/${applicationId}/user/${user.id}?edit=true`}
+                >
+                  Update User
+                </Link>
+              </DropdownMenuItem>
+
               <DropdownMenuItem
                 className="text-red-500 font-bold"
                 onClick={() => {

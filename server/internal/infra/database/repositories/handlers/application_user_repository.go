@@ -112,6 +112,8 @@ func (r ApplicationUserRepository) GetUserByEmail(ctx context.Context, email str
 		IsActive:            user.IsActive,
 		IsEmailConfirmed:    user.IsEmailConfirmed,
 		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
+		ApplicationID:       user.ApplicationID,
+		ShouldChangePass:    user.ShouldChangePass,
 		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
 		TwoFactorSecret:     user.TwoFactorSecret,
 	}, nil
@@ -134,6 +136,8 @@ func (r ApplicationUserRepository) GetUserByID(ctx context.Context, id uuid.UUID
 		IsEmailConfirmed:    user.IsEmailConfirmed,
 		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
 		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
+		ApplicationID:       user.ApplicationID,
+		ShouldChangePass:    user.ShouldChangePass,
 		TwoFactorSecret:     user.TwoFactorSecret,
 	}, nil
 }

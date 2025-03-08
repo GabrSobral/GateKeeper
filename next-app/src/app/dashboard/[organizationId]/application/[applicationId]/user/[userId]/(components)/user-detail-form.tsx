@@ -2,10 +2,10 @@
 
 import { z } from "zod";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, UseFormReturn } from "react-hook-form";
 import { Copy, Pencil } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -32,15 +32,27 @@ import { cn, copy } from "@/lib/utils";
 
 import { formSchema } from "../schema";
 import { DeleteUserDialog } from "./delete-user-dialog";
-import { MultiFactorAuthForm } from "./multi-factor-auth-form";
-import { ApplicationRolesSection } from "./application-roles-section";
 import { ResetPasswordDialog } from "./reset-password-dialog";
+import { ApplicationRolesSection } from "./application-roles-section";
 
-export function UserDetailForm() {
+import { UserByIdResponse } from "@/services/dashboard/get-application-user-by-id";
+import { MultiFactorAuthForm } from "./multi-factor-auth-form";
+
+type Props = {
+  user: UserByIdResponse | null;
+};
+
+export type FormType = UseFormReturn<z.infer<typeof formSchema>>;
+
+export function UserDetailForm({ user }: Props) {
+  const searchParams = useSearchParams();
+  const isEditable = searchParams.get("edit") === "true";
+
   const [isLoading, setIsLoading] = useState(false);
-  const [isEditEnabled, setIsEditEnabled] = useState(false);
+  const [isEditEnabled, setIsEditEnabled] = useState(isEditable);
 
   const router = useRouter();
+
   const { applicationId, organizationId, userId } = useParams() as {
     organizationId: string;
     applicationId: string;
@@ -50,12 +62,14 @@ export function UserDetailForm() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      displayName: "",
-      email: "",
-      firstName: "",
-      lastName: "",
-      multiFactorAuth: [],
-      roles: [],
+      displayName: user?.displayName || "",
+      email: user?.email || "",
+      firstName: user?.firstName || "",
+      lastName: user?.lastName || "",
+      hasMfaAuthAppEnabled: user?.isMfaAuthAppEnabled || false,
+      hasMfaEmailEnabled: user?.isMfaEmailEnabled || false,
+      roles: user?.badges.map((role) => role.id) || [],
+      temporaryPassword: "",
     },
   });
 
@@ -324,7 +338,7 @@ export function UserDetailForm() {
 
             <Separator className="my-2" />
 
-            <MultiFactorAuthForm isEditEnabled={isEditEnabled} />
+            <MultiFactorAuthForm isEditEnabled={isEditEnabled} form={form} />
 
             <Separator className="my-2" />
 

@@ -5,6 +5,7 @@ import (
 
 	"github.com/gate-keeper/internal/domain/entities"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -29,4 +30,23 @@ func (r UserRoleRepository) RemoveUserRole(ctx context.Context, userRole *entiti
 	})
 
 	return err
+}
+
+func (r UserRoleRepository) GetRolesByUserID(ctx context.Context, userID uuid.UUID) ([]entities.ApplicationRole, error) {
+	roles, err := r.Store.GetUserRoles(ctx, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var applicationRoles []entities.ApplicationRole
+
+	for _, role := range roles {
+		applicationRoles = append(applicationRoles, entities.ApplicationRole{
+			ID:   role.ID,
+			Name: role.Name,
+		})
+	}
+
+	return applicationRoles, nil
 }

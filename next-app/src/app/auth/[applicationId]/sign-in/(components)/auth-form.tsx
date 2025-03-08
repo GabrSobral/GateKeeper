@@ -24,6 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { authorizeApi } from "@/services/auth/authorize";
 import { ApplicationAuthData } from "@/services/auth/get-application-auth-data";
 import { ErrorAlert } from "@/components/error-alert";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 type Props = {
   application: ApplicationAuthData | null;
@@ -172,7 +173,12 @@ export function AuthForm({ application }: Props) {
             </div>
           )}
 
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full relative"
+          >
+            {isLoading && <LoadingSpinner className="absolute left-4" />}
             Sign In with Email
           </Button>
         </form>

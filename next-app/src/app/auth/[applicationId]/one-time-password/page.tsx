@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ArrowLeftIcon } from "lucide-react";
 
-import { AuthForm } from "./(components)/AuthForm";
+import { AuthForm } from "./(components)/auth-form";
 import { Background } from "../(components)/background";
 import { ErrorAlert } from "@/components/error-alert";
 

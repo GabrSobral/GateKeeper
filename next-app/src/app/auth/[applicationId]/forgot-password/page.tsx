@@ -40,7 +40,11 @@ export default async function ForgotPasswordPage({
   }
 
   return (
-    <Background application={application} page="forgot-password">
+    <Background
+      application={application}
+      page="forgot-password"
+      termsAndConditionsEnabled={false}
+    >
       <Link
         href={`/auth/${applicationId}/sign-in?${urlParams.toString()}`}
         className="text-primary flex items-center gap-3 hover:underline absolute top-4 left-4"

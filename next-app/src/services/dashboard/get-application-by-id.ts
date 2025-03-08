@@ -72,8 +72,6 @@ export async function getApplicationByIdService(
       }
     );
 
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
     return [data, null];
   } catch (error: unknown) {
     return [null, error as APIError];

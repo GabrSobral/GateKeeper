@@ -22,11 +22,12 @@ import {
   InputOTPSeparator,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
+import { ErrorAlert } from "@/components/error-alert";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { confirmEmailApi } from "@/services/auth/confirm-email";
-import { ErrorAlert } from "@/components/error-alert";
 
 export function AuthForm() {
   const applicationId = useParams().applicationId;
@@ -129,7 +130,12 @@ export function AuthForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full relative"
+          >
+            {isLoading && <LoadingSpinner className="absolute left-4" />}
             Confirm Code
           </Button>
         </form>

@@ -13,9 +13,14 @@ type Props = {
     | "one-time-password"
     | "change-password";
   application: ApplicationAuthData | null;
+  termsAndConditionsEnabled?: boolean;
 };
 
-export function Background({ children, application }: Props) {
+export function Background({
+  children,
+  application,
+  termsAndConditionsEnabled = true,
+}: Props) {
   return (
     <>
       <div className="container relative hidden h-screen flex-col items-center justify-center md:grid lg:max-w-none lg:grid-cols-2 lg:px-0">
@@ -50,23 +55,25 @@ export function Background({ children, application }: Props) {
             <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
               {children}
 
-              <p className="text-muted-foreground px-8 text-center text-sm">
-                By clicking continue, you agree to our
-                <a
-                  href="/terms"
-                  className="hover:text-primary underline underline-offset-4 mx-1"
-                >
-                  Terms of Service
-                </a>
-                and
-                <a
-                  href="/privacy"
-                  className="hover:text-primary underline underline-offset-4 ml-1"
-                >
-                  Privacy Policy
-                </a>
-                .
-              </p>
+              {termsAndConditionsEnabled && (
+                <p className="text-muted-foreground px-8 text-center text-sm">
+                  By clicking continue, you agree to our
+                  <a
+                    href="/terms"
+                    className="hover:text-primary underline underline-offset-4 mx-1"
+                  >
+                    Terms of Service
+                  </a>
+                  and
+                  <a
+                    href="/privacy"
+                    className="hover:text-primary underline underline-offset-4 ml-1"
+                  >
+                    Privacy Policy
+                  </a>
+                  .
+                </p>
+              )}
             </div>
           </div>
         </div>

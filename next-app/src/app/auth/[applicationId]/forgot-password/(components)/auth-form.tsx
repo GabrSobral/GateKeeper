@@ -4,6 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { Fragment, useState } from "react";
+import { CheckCircle } from "lucide-react";
 import { useParams } from "next/navigation";
 
 import {
@@ -17,10 +18,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { forgotPasswordApi } from "@/services/auth/forgot-password";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function AuthForm() {
   const [isSent, setIsSent] = useState(false);
@@ -64,10 +67,15 @@ export function AuthForm() {
     return (
       <Fragment>
         <div className="grid gap-6">
-          <p className="text-center text-md bg-green-100 dark:bg-green-700 p-4 rounded-lg">
-            Check your email for a link to reset your password. If it
-            doesn&apos;t appear within a few minutes, check your spam folder.
-          </p>
+          <Alert variant="default" className="bg-green-100 dark:bg-green-700">
+            <CheckCircle className="w-5 h-5 text-green-500 dark:text-green-400" />
+            <AlertTitle>E-mail sent</AlertTitle>
+
+            <AlertDescription>
+              Check your email for a link to reset your password. If it
+              doesn&apos;t appear within a few minutes, check your spam folder.
+            </AlertDescription>
+          </Alert>
         </div>
 
         <Button onClick={() => setIsSent(false)} className="mt-4">
@@ -102,7 +110,12 @@ export function AuthForm() {
             )}
           />
 
-          <Button type="submit" disabled={isLoading} className="w-full">
+          <Button
+            type="submit"
+            disabled={isLoading}
+            className="w-full relative"
+          >
+            {isLoading && <LoadingSpinner className="absolute left-4" />}
             Send Mail
           </Button>
         </form>

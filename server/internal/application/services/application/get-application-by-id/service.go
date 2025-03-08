@@ -130,6 +130,10 @@ func (s *GetApplicationByIDService) Handler(ctx context.Context, request Request
 		return nil, err
 	}
 
+	if len(application.Badges) == 1 && application.Badges[0] == "" {
+		application.Badges = make([]string, 0)
+	}
+
 	return &Response{
 		ID:                    application.ID,
 		Name:                  application.Name,

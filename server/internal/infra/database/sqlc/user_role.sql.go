@@ -37,6 +37,43 @@ func (q *Queries) AddUserRole(ctx context.Context, arg AddUserRoleParams) error 
 	return err
 }
 
+const getUserRoles = `-- name: GetUserRoles :many
+SELECT
+    r.id AS id,
+    r.name AS name
+FROM
+    user_role AS ur
+    INNER JOIN application_role AS r ON ur.role_id = r.id
+WHERE
+    user_id = $1
+`
+
+type GetUserRolesRow struct {
+	ID   uuid.UUID `db:"id"`
+	Name string    `db:"name"`
+}
+
+// ----------------------------------QUERIES--------------------------------------
+func (q *Queries) GetUserRoles(ctx context.Context, userID uuid.UUID) ([]GetUserRolesRow, error) {
+	rows, err := q.db.Query(ctx, getUserRoles, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetUserRolesRow
+	for rows.Next() {
+		var i GetUserRolesRow
+		if err := rows.Scan(&i.ID, &i.Name); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const removeUserRole = `-- name: RemoveUserRole :exec
 DELETE FROM
     user_role

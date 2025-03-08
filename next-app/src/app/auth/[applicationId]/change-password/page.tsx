@@ -16,7 +16,11 @@ export default async function ChangePasswordPage({ params }: Props) {
   });
 
   return (
-    <Background application={application} page="change-password">
+    <Background
+      application={application}
+      page="change-password"
+      termsAndConditionsEnabled={false}
+    >
       <div className="flex flex-col space-y-2 text-center">
         <h1 className="text-2xl font-semibold tracking-tight">
           Change your password

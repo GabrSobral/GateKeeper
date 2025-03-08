@@ -54,6 +54,10 @@ func (s *ListApplicationsService) Handler(ctx context.Context, request Request) 
 	response := make([]Response, 0)
 
 	for _, application := range *applications {
+		if len(application.Badges) == 1 && application.Badges[0] == "" {
+			application.Badges = make([]string, 0)
+		}
+
 		response = append(response, Response{
 			ID:          application.ID,
 			Name:        application.Name,
