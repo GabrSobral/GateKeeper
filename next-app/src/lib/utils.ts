@@ -7,7 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function copy(value: string) {
-  navigator.clipboard.writeText("Hello, world!");
+  navigator.clipboard.writeText(value);
   toast.success(`"${value}" was copied to clipboard!`);
 }
 

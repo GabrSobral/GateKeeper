@@ -6,6 +6,7 @@ import (
 
 	createapplicationuser "github.com/gate-keeper/internal/application/services/application-user/create-application-user"
 	deleteapplicationuser "github.com/gate-keeper/internal/application/services/application-user/delete-application-user"
+	editapplicationuser "github.com/gate-keeper/internal/application/services/application-user/edit-application-user"
 	getapplicationuserbyid "github.com/gate-keeper/internal/application/services/application-user/get-application-user-by-id"
 	getuserbyemail "github.com/gate-keeper/internal/application/services/user/get-user-by-email"
 	"github.com/gate-keeper/internal/infra/database/repositories"
@@ -17,6 +18,57 @@ import (
 
 type ApplicationUserController struct {
 	DbPool *pgxpool.Pool
+}
+
+func (c *ApplicationUserController) UpdateUser(writter http.ResponseWriter, request *http.Request) {
+	applicationIDString := chi.URLParam(request, "applicationID")
+	applicationIdUUID, err := uuid.Parse(applicationIDString)
+
+	if err != nil {
+		panic(err)
+	}
+
+	userIDString := chi.URLParam(request, "userID")
+	userIdUUID, err := uuid.Parse(userIDString)
+
+	if err != nil {
+		panic(err)
+	}
+
+	var editApplicationUserRequest editapplicationuser.RequestBody
+
+	if err := http_router.ParseBodyToSchema(&editApplicationUserRequest, request); err != nil {
+		panic(err)
+	}
+
+	schema := editapplicationuser.Request{
+		UserID:                userIdUUID,
+		ApplicationID:         applicationIdUUID,
+		DisplayName:           editApplicationUserRequest.DisplayName,
+		FirstName:             editApplicationUserRequest.FirstName,
+		LastName:              editApplicationUserRequest.LastName,
+		Email:                 editApplicationUserRequest.Email,
+		IsEmailConfirmed:      editApplicationUserRequest.IsEmailConfirmed,
+		TemporaryPasswordHash: editApplicationUserRequest.TemporaryPasswordHash,
+		IsMfaAuthAppEnabled:   editApplicationUserRequest.IsMfaAuthAppEnabled,
+		IsMfaEmailEnabled:     editApplicationUserRequest.IsMfaEmailEnabled,
+		Roles:                 editApplicationUserRequest.Roles,
+		IsActive:              editApplicationUserRequest.IsActive,
+	}
+
+	params := repositories.ParamsRs[editapplicationuser.Request, *editapplicationuser.Response, editapplicationuser.CreateApplicationUserService]{
+		DbPool:  c.DbPool,
+		New:     editapplicationuser.New,
+		Request: schema,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusCreated)
 }
 
 func (c *ApplicationUserController) CreateUser(writter http.ResponseWriter, request *http.Request) {

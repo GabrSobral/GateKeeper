@@ -94,3 +94,40 @@ func (q *Queries) GetUserProfileByUserId(ctx context.Context, userID uuid.UUID) 
 	)
 	return i, err
 }
+
+const updateUserProfile = `-- name: UpdateUserProfile :exec
+UPDATE
+    user_profile
+SET
+    display_name = $1,
+    first_name = $2,
+    last_name = $3,
+    phone_number = $4,
+    "address" = $5,
+    photo_url = $6
+WHERE
+    user_id = $7
+`
+
+type UpdateUserProfileParams struct {
+	DisplayName string    `db:"display_name"`
+	FirstName   string    `db:"first_name"`
+	LastName    string    `db:"last_name"`
+	PhoneNumber *string   `db:"phone_number"`
+	Address     *string   `db:"address"`
+	PhotoUrl    *string   `db:"photo_url"`
+	UserID      uuid.UUID `db:"user_id"`
+}
+
+func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) error {
+	_, err := q.db.Exec(ctx, updateUserProfile,
+		arg.DisplayName,
+		arg.FirstName,
+		arg.LastName,
+		arg.PhoneNumber,
+		arg.Address,
+		arg.PhotoUrl,
+		arg.UserID,
+	)
+	return err
+}

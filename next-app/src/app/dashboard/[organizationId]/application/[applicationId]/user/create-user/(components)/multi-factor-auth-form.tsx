@@ -8,11 +8,9 @@ import {
 } from "@/components/ui/tooltip";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 
 import { FormType } from "./user-detail-form";
@@ -46,7 +44,7 @@ export function MultiFactorAuthForm({ form }: Props) {
               </FormControl>
 
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger type="button">
                   <FormLabel
                     htmlFor="e-mail-mfa"
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -59,9 +57,6 @@ export function MultiFactorAuthForm({ form }: Props) {
                   Send a verification code to the user&apos;s email address.
                 </TooltipContent>
               </Tooltip>
-
-              <FormDescription></FormDescription>
-              <FormMessage></FormMessage>
             </FormItem>
           )}
         />
@@ -83,7 +78,7 @@ export function MultiFactorAuthForm({ form }: Props) {
               </FormControl>
 
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger type="button">
                   <FormLabel
                     htmlFor="auth-app-mfa-2"
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -96,9 +91,6 @@ export function MultiFactorAuthForm({ form }: Props) {
                   Use an authenticator app to generate a verification code.
                 </TooltipContent>
               </Tooltip>
-
-              <FormDescription></FormDescription>
-              <FormMessage></FormMessage>
             </FormItem>
           )}
         />

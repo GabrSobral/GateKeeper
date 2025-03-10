@@ -26,6 +26,20 @@ func (r UserProfileRepository) AddUserProfile(ctx context.Context, newUserProfil
 	return err
 }
 
+func (r UserProfileRepository) EditUserProfile(ctx context.Context, newUserProfile *entities.UserProfile) error {
+	err := r.Store.UpdateUserProfile(ctx, pgstore.UpdateUserProfileParams{
+		UserID:      newUserProfile.UserID,
+		DisplayName: newUserProfile.DisplayName,
+		FirstName:   newUserProfile.FirstName,
+		LastName:    newUserProfile.LastName,
+		Address:     newUserProfile.Address,
+		PhoneNumber: newUserProfile.PhoneNumber,
+		PhotoUrl:    newUserProfile.PhotoURL,
+	})
+
+	return err
+}
+
 func (r UserProfileRepository) GetUserById(ctx context.Context, userID uuid.UUID) (*entities.UserProfile, error) {
 	userProfile, err := r.Store.GetUserProfileByUserId(ctx, userID)
 

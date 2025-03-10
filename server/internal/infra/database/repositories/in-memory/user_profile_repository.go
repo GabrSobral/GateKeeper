@@ -18,6 +18,12 @@ func (r InMemoryUserProfileRepository) AddUserProfile(ctx context.Context, newUs
 	return nil
 }
 
+func (r InMemoryUserProfileRepository) EditUserProfile(ctx context.Context, updatedUserProfile *entities.UserProfile) error {
+	r.Users[updatedUserProfile.UserID.String()] = updatedUserProfile
+
+	return nil
+}
+
 func (r InMemoryUserProfileRepository) GetUserById(ctx context.Context, userID uuid.UUID) (*entities.UserProfile, error) {
 	userProfile, ok := r.Users[userID.String()]
 

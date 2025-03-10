@@ -8,17 +8,12 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 import { cn } from "@/lib/utils";
 import { getApplicationByIdService } from "@/services/dashboard/get-application-by-id";
 
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-
-import { Overview } from "./(components)/overview";
-import { Users } from "./(components)/users";
-import { Roles } from "./(components)/roles";
-import { Providers } from "./(components)/providers";
+import { ApplicationTabs } from "./(components)/application-tabs";
 import { DeleteApplicationDialog } from "./(components)/delete-application-dialog";
 
 type Props = {
@@ -114,30 +109,10 @@ export default async function ApplicationDetailPage({ params }: Props) {
           ))}
         </div>
 
-        <Tabs className="mt-4" defaultValue="overview">
-          <TabsList>
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="users">Users</TabsTrigger>
-            <TabsTrigger value="roles">Roles</TabsTrigger>
-            <TabsTrigger value="providers">Providers</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="overview">
-            <Overview application={application} />
-          </TabsContent>
-
-          <TabsContent value="users">
-            <Users application={application} />
-          </TabsContent>
-
-          <TabsContent value="roles">
-            <Roles application={application} />
-          </TabsContent>
-
-          <TabsContent value="providers">
-            <Providers application={application} />
-          </TabsContent>
-        </Tabs>
+        <ApplicationTabs
+          application={application}
+          organizationId={organizationId}
+        />
       </main>
     </>
   );

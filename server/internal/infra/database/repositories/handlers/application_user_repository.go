@@ -178,6 +178,7 @@ func (r ApplicationUserRepository) UpdateUser(ctx context.Context, user *entitie
 		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
 		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
 		TwoFactorSecret:     user.TwoFactorSecret,
+		ShouldChangePass:    user.ShouldChangePass,
 	})
 
 	return user, err

@@ -84,6 +84,7 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 
 					r.Route("/{applicationID}/users", func(r chi.Router) {
 						r.Post("/", applicationUserController.CreateUser)
+						r.Put("/{userID}", applicationUserController.UpdateUser)
 						r.Delete("/{userID}", applicationUserController.DeleteUser)
 						r.Get("/{userID}", applicationUserController.GetUserByIDController)
 					})

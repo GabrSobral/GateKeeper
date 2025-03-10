@@ -9,5 +9,6 @@ export const formSchema = z.object({
   hasMfaEmailEnabled: z.boolean(),
   hasMfaAuthAppEnabled: z.boolean(),
   roles: z.array(z.string()),
-  temporaryPassword: z.string().min(8).max(50),
+  temporaryPassword: z.string(),
+  isActive: z.boolean(),
 });

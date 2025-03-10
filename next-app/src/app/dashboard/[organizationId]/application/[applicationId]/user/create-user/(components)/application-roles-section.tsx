@@ -89,7 +89,7 @@ export function ApplicationRolesSection({ form }: Props) {
               </FormControl>
 
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger type="button">
                   <FormLabel
                     htmlFor={role.id}
                     className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -105,40 +105,6 @@ export function ApplicationRolesSection({ form }: Props) {
             </FormItem>
           )}
         />
-
-        // <div className="flex items-center space-x-2" key={role.id}>
-        //   <Checkbox
-        //     id={role.id}
-        //     checked={form.getValues("roles").includes(role.id)}
-        //     onCheckedChange={(checked) => {
-        //       const currentRoles = form.getValues("roles");
-
-        //       if (checked) {
-        //         form.setValue("roles", [...currentRoles, role.id]);
-        //       } else {
-        //         form.setValue(
-        //           "roles",
-        //           currentRoles.filter((r) => r !== role.id)
-        //         );
-        //       }
-
-        //       console.log(form.getValues("roles"), { checked });
-        //     }}
-        //   />
-
-        //   <Tooltip>
-        //     <TooltipTrigger>
-        //       <Label
-        //         htmlFor={role.id}
-        //         className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-        //       >
-        //         {role.name}
-        //       </Label>
-        //     </TooltipTrigger>
-
-        //     <TooltipContent>{role.description}</TooltipContent>
-        //   </Tooltip>
-        // </div>
       ))}
     </div>
   );

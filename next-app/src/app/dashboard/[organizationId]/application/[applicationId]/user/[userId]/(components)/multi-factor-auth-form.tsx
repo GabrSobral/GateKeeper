@@ -8,11 +8,9 @@ import {
 } from "@/components/ui/tooltip";
 import {
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "@/components/ui/form";
 import { FormType } from "./user-detail-form";
 
@@ -34,23 +32,26 @@ export function MultiFactorAuthForm({ isEditEnabled, form }: Props) {
         <FormField
           control={form.control}
           name="hasMfaEmailEnabled"
+          disabled={!isEditEnabled}
           render={({ field }) => (
             <FormItem className="flex items-center space-x-2">
               <FormControl>
                 <Checkbox
+                  id="e-mail-mfa"
+                  type="button"
                   checked={!!field.value}
-                  disabled={!isEditEnabled}
+                  disabled={field.disabled}
                   onCheckedChange={field.onChange}
                   aria-labelledby="terms-label"
-                  id="e-mail-mfa"
                 />
               </FormControl>
 
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger type="button">
                   <FormLabel
+                    data-disabled={!isEditEnabled}
                     htmlFor="e-mail-mfa"
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    className="text-sm leading-none data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     E-mail
                   </FormLabel>
@@ -60,9 +61,6 @@ export function MultiFactorAuthForm({ isEditEnabled, form }: Props) {
                   Send a verification code to the user&apos;s email address.
                 </TooltipContent>
               </Tooltip>
-
-              <FormDescription></FormDescription>
-              <FormMessage></FormMessage>
             </FormItem>
           )}
         />
@@ -71,24 +69,27 @@ export function MultiFactorAuthForm({ isEditEnabled, form }: Props) {
       <div className="flex items-center space-x-2">
         <FormField
           control={form.control}
+          disabled={!isEditEnabled}
           name="hasMfaAuthAppEnabled"
           render={({ field }) => (
             <FormItem className="flex items-center space-x-2">
               <FormControl>
                 <Checkbox
                   checked={!!field.value}
-                  disabled={!isEditEnabled}
+                  disabled={field.disabled}
                   onCheckedChange={field.onChange}
                   aria-labelledby="terms-label"
                   id="auth-app-mfa-2"
+                  type="button"
                 />
               </FormControl>
 
               <Tooltip>
-                <TooltipTrigger>
+                <TooltipTrigger type="button">
                   <FormLabel
                     htmlFor="auth-app-mfa-2"
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    data-disabled={!isEditEnabled}
+                    className="text-sm leading-none data-[disabled=true]:pointer-events-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                   >
                     Authenticator App (Microsoft, Google, etc)
                   </FormLabel>
@@ -98,9 +99,6 @@ export function MultiFactorAuthForm({ isEditEnabled, form }: Props) {
                   Use an authenticator app to generate a verification code.
                 </TooltipContent>
               </Tooltip>
-
-              <FormDescription></FormDescription>
-              <FormMessage></FormMessage>
             </FormItem>
           )}
         />

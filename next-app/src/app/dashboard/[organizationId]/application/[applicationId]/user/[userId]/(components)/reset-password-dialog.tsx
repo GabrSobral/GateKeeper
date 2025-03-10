@@ -1,4 +1,3 @@
-import { toast } from "sonner";
 import { useState } from "react";
 
 import { Input } from "@/components/ui/input";
@@ -16,21 +15,29 @@ import {
 } from "@/components/ui/dialog";
 
 import { cn } from "@/lib/utils";
+import { FormType } from "./user-detail-form";
 
-export function ResetPasswordDialog() {
-  const [isLoading, setIsLoading] = useState(false);
+type Props = {
+  form: FormType;
+};
+
+export function ResetPasswordDialog({ form }: Props) {
+  const [draftTemporaryPassword, setDraftTemporaryPassword] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   function handler() {
-    setIsLoading(true);
+    form.setValue("temporaryPassword", draftTemporaryPassword);
+    setIsDialogOpen(false);
+  }
 
-    // Logic here
-    setIsLoading(false);
-
-    toast.success("Password reset successfully");
+  function clear() {
+    form.setValue("temporaryPassword", "");
+    setDraftTemporaryPassword("");
+    setIsDialogOpen(false);
   }
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger
         className={cn(buttonVariants({ variant: "secondary" }), "w-fit")}
       >
@@ -48,11 +55,19 @@ export function ResetPasswordDialog() {
 
         <div className="flex flex-col gap-3">
           <Label htmlFor="temp-password-input">Temporary Password</Label>
-          <Input
-            id="temp-password-input"
-            type="password"
-            placeholder="Type the temporary password"
-          />
+          <div className="flex gap-4">
+            <Input
+              id="temp-password-input"
+              type="password"
+              placeholder="Type the temporary password"
+              value={draftTemporaryPassword}
+              onChange={(e) => setDraftTemporaryPassword(e.target.value)}
+            />
+
+            <Button type="button" onClick={clear}>
+              Clear
+            </Button>
+          </div>
         </div>
 
         <DialogFooter>
@@ -60,8 +75,8 @@ export function ResetPasswordDialog() {
             Cancel
           </DialogClose>
 
-          <Button type="submit" onClick={handler}>
-            {isLoading ? "Resetting..." : "Confirm"}
+          <Button type="button" onClick={handler}>
+            Confirm
           </Button>
         </DialogFooter>
       </DialogContent>

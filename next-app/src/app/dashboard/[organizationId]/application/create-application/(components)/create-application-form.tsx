@@ -51,14 +51,16 @@ export function CreateApplicationForm() {
       badges: [],
       hasMfaAuthApp: false,
       hasMfaEmail: false,
+      canSelfForgotPass: false,
+      canSelfSignUp: false,
     },
   });
 
-  async function onSubmit() {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
     const [response, err] = await createApplicationApi(
-      { ...form.getValues(), organizationId },
+      { ...values, organizationId },
       {
         accessToken: "fake-access",
       }

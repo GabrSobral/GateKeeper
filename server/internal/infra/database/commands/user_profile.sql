@@ -27,6 +27,19 @@ VALUES
         sqlc.narg('photo_url') -- photo_url
     );
 
+-- name: UpdateUserProfile :exec
+UPDATE
+    user_profile
+SET
+    display_name = sqlc.arg('display_name'),
+    first_name = sqlc.arg('first_name'),
+    last_name = sqlc.arg('last_name'),
+    phone_number = sqlc.narg('phone_number'),
+    "address" = sqlc.narg('address'),
+    photo_url = sqlc.narg('photo_url')
+WHERE
+    user_id = sqlc.arg('user_id');
+
 ------------------------------------QUERIES--------------------------------------
 -- name: GetUserProfileByUserId :one
 SELECT

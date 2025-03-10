@@ -9,5 +9,6 @@ import (
 
 type IUserProfileRepository interface {
 	AddUserProfile(ctx context.Context, newUser *entities.UserProfile) error
+	EditUserProfile(ctx context.Context, updatedUser *entities.UserProfile) error
 	GetUserById(ctx context.Context, userID uuid.UUID) (*entities.UserProfile, error)
 }

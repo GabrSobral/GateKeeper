@@ -162,6 +162,14 @@ export function Users({ application }: Props) {
 
               <DropdownMenuItem asChild>
                 <Link
+                  href={`/dashboard/${organizationId}/application/${applicationId}/user/${user.id}`}
+                >
+                  View User
+                </Link>
+              </DropdownMenuItem>
+
+              <DropdownMenuItem asChild>
+                <Link
                   href={`/dashboard/${organizationId}/application/${applicationId}/user/${user.id}?edit=true`}
                 >
                   Update User

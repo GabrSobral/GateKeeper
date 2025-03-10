@@ -8,19 +8,7 @@ import (
 	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
 	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
-	"github.com/google/uuid"
 )
-
-type Request struct {
-	ApplicationID uuid.UUID
-	UserID        uuid.UUID
-}
-
-type applicationRoles struct {
-	ID          uuid.UUID `json:"id"`
-	Name        string    `json:"name"`
-	Description *string   `json:"description"`
-}
 
 type DeleteApplicationUserService struct {
 	ApplicationRepository     repository_interfaces.IApplicationRepository

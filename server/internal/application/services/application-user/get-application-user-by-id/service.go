@@ -8,32 +8,7 @@ import (
 	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
 	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
-	"github.com/google/uuid"
 )
-
-type Request struct {
-	UserID uuid.UUID `json:"userId"` // This is the user ID
-}
-
-type Response struct {
-	ID                  uuid.UUID          `json:"id"`
-	Email               string             `json:"email"`
-	DisplayName         string             `json:"displayName"`
-	IsActive            bool               `json:"isActive"`
-	FirstName           string             `json:"firstName"`
-	Lastname            string             `json:"lastName"`
-	Address             *string            `json:"address"`
-	PhotoURL            *string            `json:"photoUrl"`
-	IsMfaEmailEnabled   bool               `json:"isMfaEmailEnabled"`
-	IsMfaAuthAppEnabled bool               `json:"isMfaAuthAppEnabled"`
-	IsEmailVerified     bool               `json:"isEmailVerified"`
-	Badges              []UserRoleResponse `json:"badges"`
-}
-
-type UserRoleResponse struct {
-	ID   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-}
 
 type GetApplicationUserByID struct {
 	ApplicationUserRepository repository_interfaces.IApplicationUserRepository

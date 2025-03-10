@@ -1,10 +1,11 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
 import { useState } from "react";
-import { useForm, UseFormReturn } from "react-hook-form";
 import { Copy, Pencil } from "lucide-react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm, UseFormReturn, useWatch } from "react-hook-form";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import { Badge } from "@/components/ui/badge";
@@ -19,9 +20,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Separator } from "@/components/ui/separator";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import {
   Tooltip,
   TooltipContent,
@@ -33,10 +35,11 @@ import { cn, copy } from "@/lib/utils";
 import { formSchema } from "../schema";
 import { DeleteUserDialog } from "./delete-user-dialog";
 import { ResetPasswordDialog } from "./reset-password-dialog";
+import { MultiFactorAuthForm } from "./multi-factor-auth-form";
 import { ApplicationRolesSection } from "./application-roles-section";
 
 import { UserByIdResponse } from "@/services/dashboard/get-application-user-by-id";
-import { MultiFactorAuthForm } from "./multi-factor-auth-form";
+import { editApplicationUserApi } from "@/services/dashboard/edit-application-user";
 
 type Props = {
   user: UserByIdResponse | null;
@@ -70,14 +73,74 @@ export function UserDetailForm({ user }: Props) {
       hasMfaEmailEnabled: user?.isMfaEmailEnabled || false,
       roles: user?.badges.map((role) => role.id) || [],
       temporaryPassword: "",
+      isEmailConfirmed: user?.isEmailVerified || false,
+      isActive: user?.isActive || false,
     },
   });
 
-  function onSubmit() {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    // Logic here
+    const [, err] = await editApplicationUserApi(
+      {
+        applicationId: applicationId,
+        organizationId: organizationId,
+        userId: userId,
+        displayName: values.displayName,
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        isEmailConfirmed: values.isEmailConfirmed,
+        roles: values.roles,
+        isMfaAuthAppEnabled: values.hasMfaAuthAppEnabled,
+        isMfaEmailEnabled: values.hasMfaEmailEnabled,
+        temporaryPasswordHash: values.temporaryPassword || null,
+        isActive: values.isActive,
+      },
+      { accessToken: "" }
+    );
+
+    if (err) {
+      console.error(err);
+      toast.error(err.response?.data.message || err.message);
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(false);
+
+    toast.success("User updated successfully.");
+
+    router.push(
+      `/dashboard/${organizationId}/application/${applicationId}/user/${userId}`
+    );
+
+    setIsEditEnabled(false);
+  }
+
+  const temporaryPassword = useWatch({
+    control: form.control,
+    name: "temporaryPassword",
+    defaultValue: "",
+  });
+
+  const isActive = useWatch({
+    control: form.control,
+    name: "isActive",
+    defaultValue: user?.isActive || false,
+  });
+
+  function reset() {
+    form.setValue("temporaryPassword", "");
+    form.setValue("isEmailConfirmed", user?.isEmailVerified || false);
+    form.setValue("isActive", user?.isActive || false);
+    form.setValue("roles", user?.badges.map((role) => role.id) || []);
+    form.setValue("hasMfaAuthAppEnabled", user?.isMfaAuthAppEnabled || false);
+    form.setValue("hasMfaEmailEnabled", user?.isMfaEmailEnabled || false);
+    form.setValue("displayName", user?.displayName || "");
+    form.setValue("email", user?.email || "");
+    form.setValue("firstName", user?.firstName || "");
+    form.setValue("lastName", user?.lastName || "");
   }
 
   return (
@@ -128,7 +191,9 @@ export function UserDetailForm({ user }: Props) {
             />
           ) : (
             <div className="flex gap-4">
-              <h2 className="text-3xl font-bold tracking-tight">Ken OConner</h2>
+              <h2 className="text-3xl font-bold tracking-tight">
+                {user?.displayName}
+              </h2>
 
               <Tooltip delayDuration={0}>
                 <TooltipTrigger
@@ -153,17 +218,16 @@ export function UserDetailForm({ user }: Props) {
                   "mb-[6px]"
                 )}
                 onClick={() => {
-                  setIsEditEnabled((state) => !state);
+                  router.push(
+                    `/dashboard/${organizationId}/application/${applicationId}/user/${userId}?edit=${!isEditEnabled}`,
+                    { scroll: false }
+                  );
 
                   if (isEditEnabled) {
-                    router.push(
-                      `/dashboard/${organizationId}/application/${applicationId}/user/${userId}?edit=${isEditEnabled}`
-                    );
-                  } else {
-                    router.push(
-                      `/dashboard/${organizationId}/application/${applicationId}/user/${userId}`
-                    );
+                    reset();
                   }
+
+                  setIsEditEnabled((state) => !state);
                 }}
               >
                 <Pencil />
@@ -175,25 +239,39 @@ export function UserDetailForm({ user }: Props) {
         </div>
 
         <div className="mt-4 flex flex-col gap-1">
-          <Label
-            className="text-foreground text-sm font-semibold"
-            htmlFor="user-status-switch"
-          >
-            Status
-          </Label>
+          <FormField
+            control={form.control}
+            name="isActive"
+            render={({ field }) => (
+              <FormItem className="w-full">
+                <FormLabel className="flex gap-1">Status</FormLabel>
 
-          <div className="flex items-center gap-2">
-            <Switch
-              checked={true}
-              aria-labelledby="status-label"
-              id="user-status-switch"
-              disabled={!isEditEnabled}
-            />
-            <span className="text-muted-foreground text-xs">Enabled</span>
-          </div>
+                <div className="w-full flex gap-2">
+                  <FormControl>
+                    <Switch
+                      checked={!!field.value}
+                      aria-labelledby="status-label"
+                      disabled={!isEditEnabled}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+
+                  <span
+                    className="text-muted-foreground font-semibold text-xs data-[isactive=true]:text-green-500 data-[isactive=false]:text-red-500"
+                    data-isactive={isActive}
+                  >
+                    {isActive ? "Enabled" : "Disabled"}
+                  </span>
+                </div>
+              </FormItem>
+            )}
+          />
         </div>
 
-        <form onSubmit={onSubmit} className="mt-4 max-w-[700px]">
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="mt-4 max-w-[700px]"
+        >
           <div className="grid gap-4">
             <fieldset className="flex gap-2">
               <FormField
@@ -274,8 +352,6 @@ export function UserDetailForm({ user }: Props) {
                         </Tooltip>
                       )}
                     </div>
-
-                    <FormMessage></FormMessage>
                   </FormItem>
                 )}
               />
@@ -319,22 +395,76 @@ export function UserDetailForm({ user }: Props) {
                       </Tooltip>
                     )}
                   </div>
-                  <FormMessage></FormMessage>
                 </FormItem>
               )}
             />
 
-            <div className="flex flex-col gap-1">
-              <span className="text-sm font-medium"> Reset User Password</span>
+            {isEditEnabled ? (
+              <FormField
+                control={form.control}
+                name="isEmailConfirmed"
+                render={({ field }) => (
+                  <FormItem className="w-full p-3 rounded-lg bg-gray-50 dark:bg-gray-900 shadow">
+                    <div className="flex items-center space-x-2">
+                      <FormControl>
+                        <Checkbox
+                          checked={!!field.value}
+                          onCheckedChange={field.onChange}
+                          aria-labelledby="terms-label"
+                          id="is-email-confirmed"
+                          className="bg-background"
+                        />
+                      </FormControl>
 
-              <span className="text-muted-foreground my-2 text-sm">
-                Reset the user password. On click, the user will receive an
-                e-mail with the new password, and the user will be required to
-                change it on the next login.
-              </span>
+                      <FormLabel
+                        htmlFor="is-email-confirmed"
+                        className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
+                        Is e-mail already confirmed?
+                      </FormLabel>
+                    </div>
 
-              <ResetPasswordDialog />
-            </div>
+                    <FormDescription>
+                      If the user e-mail is already confirmed, check this box.
+                    </FormDescription>
+                    <FormMessage></FormMessage>
+                  </FormItem>
+                )}
+              />
+            ) : (
+              <div className="w-full p-3 rounded-lg bg-gray-50 items-center dark:bg-gray-900 shadow flex gap-2">
+                <span className="text-primary-background text-sm">
+                  Is e-mail already confirmed?
+                </span>
+
+                {user?.isEmailVerified ? (
+                  <span className="text-green-500 font-semibold">Yes</span>
+                ) : (
+                  <span className="text-red-500 font-semibold">No</span>
+                )}
+              </div>
+            )}
+
+            {isEditEnabled && (
+              <div className="flex flex-col gap-1">
+                <span className="text-sm font-medium">Reset User Password</span>
+
+                <span className="text-muted-foreground my-2 text-sm">
+                  Reset the user password. On click, the user will receive an
+                  e-mail with the new password, and the user will be required to
+                  change it on the next login.
+                </span>
+
+                <ResetPasswordDialog form={form} />
+
+                {temporaryPassword && (
+                  <span className="text-orange-500 font-semibold text-sm">
+                    The user password was changed! The user will be required to
+                    set a new password on the next login.
+                  </span>
+                )}
+              </div>
+            )}
 
             <Separator className="my-2" />
 
@@ -342,16 +472,22 @@ export function UserDetailForm({ user }: Props) {
 
             <Separator className="my-2" />
 
-            <ApplicationRolesSection isEditEnabled={isEditEnabled} />
+            <ApplicationRolesSection
+              isEditEnabled={isEditEnabled}
+              form={form}
+            />
           </div>
 
-          <Button
-            type="submit"
-            className="float-right mt-4"
-            disabled={isLoading}
-          >
-            Apply Changes
-          </Button>
+          {isEditEnabled && (
+            <Button
+              type="submit"
+              className="float-right mt-4"
+              disabled={isLoading}
+            >
+              {isLoading && <LoadingSpinner />}
+              Apply Changes
+            </Button>
+          )}
         </form>
       </Form>
     </>

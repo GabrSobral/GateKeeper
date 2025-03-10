@@ -51,24 +51,22 @@ export function UserDetailForm() {
     },
   });
 
-  async function onSubmit() {
+  async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-
-    console.log(form.getValues());
 
     const [response, err] = await createApplicationUserApi(
       {
         applicationId,
         organizationId,
-        displayName: form.getValues("displayName"),
-        email: form.getValues("email"),
-        firstName: form.getValues("firstName"),
-        lastName: form.getValues("lastName"),
-        isEmailConfirmed: form.getValues("isEmailConfirmed"),
-        isMfaAuthAppEnabled: form.getValues("hasMfaAuthAppEnabled"),
-        isMfaEmailEnabled: form.getValues("hasMfaEmailEnabled"),
-        roles: form.getValues("roles"),
-        temporaryPasswordHash: form.getValues("temporaryPassword"),
+        displayName: values.displayName,
+        email: values.email,
+        firstName: values.firstName,
+        lastName: values.lastName,
+        isEmailConfirmed: values.isEmailConfirmed,
+        isMfaAuthAppEnabled: values.hasMfaAuthAppEnabled,
+        isMfaEmailEnabled: values.hasMfaEmailEnabled,
+        roles: values.roles,
+        temporaryPasswordHash: values.temporaryPassword,
       },
       { accessToken: "" }
     );
