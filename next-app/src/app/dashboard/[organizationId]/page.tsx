@@ -1,9 +1,14 @@
 import { Breadcrumbs } from "@/components/bread-crumbs";
+import { Metadata } from "next";
 
 type Props = {
   params: Promise<{
     organizationId: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Organizations - GateKeeper",
 };
 
 export default async function OrganizationPage({ params }: Props) {

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { ChevronLeft } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/bread-crumbs";
@@ -10,6 +11,10 @@ type Props = {
     applicationId: string;
     userId: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Add User - GateKeeper",
 };
 
 export default async function CreateUserPage({ params }: Props) {

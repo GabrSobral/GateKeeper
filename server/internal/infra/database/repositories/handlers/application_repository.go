@@ -94,17 +94,16 @@ func (r ApplicationRepository) UpdateApplication(ctx context.Context, newApplica
 	badges := strings.Join(newApplication.Badges, ",")
 
 	err := r.Store.UpdateApplication(ctx, pgstore.UpdateApplicationParams{
-		ID:                 newApplication.ID,
-		Name:               newApplication.Name,
-		Description:        newApplication.Description,
-		HasMfaAuthApp:      newApplication.HasMfaAuthApp,
-		Badges:             &badges,
-		IsActive:           newApplication.IsActive,
-		HasMfaEmail:        newApplication.HasMfaEmail,
-		PasswordHashSecret: newApplication.PasswordHashSecret,
-		UpdatedAt:          newApplication.UpdatedAt,
-		CanSelfSignUp:      newApplication.CanSelfSignUp,
-		CanSelfForgotPass:  newApplication.CanSelfForgotPass,
+		ID:                newApplication.ID,
+		Name:              newApplication.Name,
+		Description:       newApplication.Description,
+		HasMfaAuthApp:     newApplication.HasMfaAuthApp,
+		Badges:            &badges,
+		IsActive:          newApplication.IsActive,
+		HasMfaEmail:       newApplication.HasMfaEmail,
+		UpdatedAt:         newApplication.UpdatedAt,
+		CanSelfSignUp:     newApplication.CanSelfSignUp,
+		CanSelfForgotPass: newApplication.CanSelfForgotPass,
 	})
 
 	if err != nil {

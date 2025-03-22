@@ -237,26 +237,24 @@ SET
     badges = $4,
     is_active = $5,
     has_mfa_email = $6,
-    password_hash_secret = $7,
-    updated_at = $8,
-    can_self_sign_up = $9,
-    can_self_forgot_pass = $10
+    updated_at = $7,
+    can_self_sign_up = $8,
+    can_self_forgot_pass = $9
 WHERE
-    id = $11
+    id = $10
 `
 
 type UpdateApplicationParams struct {
-	Name               string     `db:"name"`
-	Description        *string    `db:"description"`
-	HasMfaAuthApp      bool       `db:"has_mfa_auth_app"`
-	Badges             *string    `db:"badges"`
-	IsActive           bool       `db:"is_active"`
-	HasMfaEmail        bool       `db:"has_mfa_email"`
-	PasswordHashSecret string     `db:"password_hash_secret"`
-	UpdatedAt          *time.Time `db:"updated_at"`
-	CanSelfSignUp      bool       `db:"can_self_sign_up"`
-	CanSelfForgotPass  bool       `db:"can_self_forgot_pass"`
-	ID                 uuid.UUID  `db:"id"`
+	Name              string     `db:"name"`
+	Description       *string    `db:"description"`
+	HasMfaAuthApp     bool       `db:"has_mfa_auth_app"`
+	Badges            *string    `db:"badges"`
+	IsActive          bool       `db:"is_active"`
+	HasMfaEmail       bool       `db:"has_mfa_email"`
+	UpdatedAt         *time.Time `db:"updated_at"`
+	CanSelfSignUp     bool       `db:"can_self_sign_up"`
+	CanSelfForgotPass bool       `db:"can_self_forgot_pass"`
+	ID                uuid.UUID  `db:"id"`
 }
 
 func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationParams) error {
@@ -267,7 +265,6 @@ func (q *Queries) UpdateApplication(ctx context.Context, arg UpdateApplicationPa
 		arg.Badges,
 		arg.IsActive,
 		arg.HasMfaEmail,
-		arg.PasswordHashSecret,
 		arg.UpdatedAt,
 		arg.CanSelfSignUp,
 		arg.CanSelfForgotPass,

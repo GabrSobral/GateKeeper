@@ -3,6 +3,7 @@ import { ChevronLeft } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/bread-crumbs";
 import { UserDetailForm } from "./(components)/user-detail-form";
+
 import { getApplicationUserByIdService } from "@/services/dashboard/get-application-user-by-id";
 
 type Props = {
@@ -12,6 +13,25 @@ type Props = {
     userId: string;
   }>;
 };
+
+export async function generateMetadata({ params }: Props) {
+  const { applicationId, organizationId, userId } = await params;
+
+  const [user, err] = await getApplicationUserByIdService(
+    { applicationId, userId, organizationId },
+    { accessToken: "" }
+  );
+
+  if (err) {
+    return {
+      title: "User - GateKeeper",
+    };
+  }
+
+  return {
+    title: `${user?.displayName} - User - GateKeeper`,
+  };
+}
 
 export default async function UserDetailAndEditPage({ params }: Props) {
   const { organizationId, applicationId, userId } = await params;

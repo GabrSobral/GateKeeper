@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Metadata } from "next";
 import { ChevronLeft } from "lucide-react";
 
 import { Breadcrumbs } from "@/components/bread-crumbs";
@@ -9,6 +10,11 @@ type Props = {
     organizationId: string;
   }>;
 };
+
+export const metadata: Metadata = {
+  title: "Create Application - Application - GateKeeper",
+};
+
 export default async function CreateApplicationPage({ params }: Props) {
   const { organizationId } = await params;
 

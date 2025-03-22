@@ -22,5 +22,7 @@ const fetcher = (url: string, options: IServiceOptions) =>
     .then((res) => res.data);
 
 export function useOrganizationsSWR(options: IServiceOptions) {
-  return useSWR("/v1/organizations", (url) => fetcher(url, options));
+  return useSWR("/v1/organizations", (url) => fetcher(url, options), {
+    revalidateOnFocus: false,
+  });
 }

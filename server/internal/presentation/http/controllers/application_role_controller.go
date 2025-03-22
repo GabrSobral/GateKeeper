@@ -1,7 +1,6 @@
 package http_controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	createrole "github.com/gate-keeper/internal/application/services/application-role/create-role"
@@ -74,8 +73,6 @@ func (c *ApplicationRoleController) RemoveRole(writter http.ResponseWriter, requ
 		RoleID:        roleIdUUID,
 		ApplicationID: applicationIdUUID,
 	}
-
-	fmt.Println(schema)
 
 	params := repositories.Params[deleterole.Request, deleterole.DeleteRoleService]{
 		DbPool:  c.DbPool,

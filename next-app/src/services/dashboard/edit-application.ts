@@ -5,7 +5,6 @@ type Request = {
   id: string;
   name: string;
   description?: string;
-  passwordHashSecret: string;
   badges: string[];
   hasMfaEmail: boolean;
   hasMfaAuthApp: boolean;
@@ -19,7 +18,6 @@ type Response = {
   id: string;
   name: string;
   description?: string;
-  passwordHashSecret: string;
   badges: string[];
   hasMfaEmail: boolean;
   hasMfaAuthApp: boolean;
@@ -36,7 +34,6 @@ export async function editApplicationApi(
     badges,
     hasMfaAuthApp,
     hasMfaEmail,
-    passwordHashSecret,
     organizationId,
     isActive,
     canSelfForgotPass,
@@ -54,7 +51,6 @@ export async function editApplicationApi(
         badges,
         hasMfaAuthApp,
         hasMfaEmail,
-        passwordHashSecret,
         organizationId,
         isActive,
         canSelfForgotPass,

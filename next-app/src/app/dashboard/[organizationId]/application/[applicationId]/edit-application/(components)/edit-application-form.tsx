@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useParams, useRouter } from "next/navigation";
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,12 +23,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 
-import { StrongPasswordDialog } from "../../../create-application/(components)/strong-password-dialog";
-
 import { formSchema } from "../schema";
+
 import { IApplication } from "@/services/dashboard/get-application-by-id";
 import { editApplicationApi } from "@/services/dashboard/edit-application";
-import { useParams, useRouter } from "next/navigation";
 import { useApplicationsSWR } from "@/services/dashboard/use-applications-swr";
 
 type Props = {
@@ -39,14 +38,11 @@ export function EditApplicationForm({ application }: Props) {
   const { organizationId } = useParams() as { organizationId: string };
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isStrongPasswordModalOpened, setIsStrongPasswordModalOpened] =
-    useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: application?.name ?? "",
-      passwordHashSecret: application?.passwordHashingSecret ?? "",
       description: application?.description ?? "",
       badges: application?.badges ?? [],
       hasMfaAuthApp: application?.mfaEmailEnabled ?? false,
@@ -194,40 +190,29 @@ export function EditApplicationForm({ application }: Props) {
 
           <Separator className="my-2" />
 
-          <FormField
-            control={form.control}
-            name="passwordHashSecret"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="flex gap-1">
-                  Password Hash Secret
-                  <span className="text-red-500">*</span>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="Type the application password hash"
-                    autoComplete="name"
-                    type="password"
-                    {...field}
-                  />
-                </FormControl>
+          <FormItem>
+            <FormLabel className="flex gap-1">Password Hash Secret</FormLabel>
 
-                <StrongPasswordDialog
-                  setPassword={(value) =>
-                    form.setValue("passwordHashSecret", value)
-                  }
-                  isModalOpened={isStrongPasswordModalOpened}
-                  onOpenChange={setIsStrongPasswordModalOpened}
-                />
+            <FormControl>
+              <Input
+                placeholder="Type the application password hash"
+                autoComplete="name"
+                type="password"
+                value="**********************"
+                disabled
+                readOnly
+              />
+            </FormControl>
 
-                <FormDescription>
-                  This is the secret that will be used to hash all the passwords
-                  from users that are registered to this application.
-                </FormDescription>
-                <FormMessage></FormMessage>
-              </FormItem>
-            )}
-          />
+            <FormDescription>
+              This is the secret that will be used to hash all the passwords
+              from users that are registered to this application.
+            </FormDescription>
+
+            <FormMessage className="dark:text-orange-400 text-orange-500">
+              This value can only be set at creation time.
+            </FormMessage>
+          </FormItem>
 
           <Separator className="my-2" />
 

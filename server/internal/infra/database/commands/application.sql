@@ -43,7 +43,6 @@ SET
     badges = sqlc.narg('badges'),
     is_active = sqlc.arg('is_active'),
     has_mfa_email = sqlc.arg('has_mfa_email'),
-    password_hash_secret = sqlc.arg('password_hash_secret'),
     updated_at = sqlc.arg('updated_at'),
     can_self_sign_up = sqlc.arg('can_self_sign_up'),
     can_self_forgot_pass = sqlc.arg('can_self_forgot_pass')

@@ -8,11 +8,6 @@ export const formSchema = z.object({
 
   description: z.string().optional(),
 
-  passwordHashSecret: z
-    .string()
-    .min(32, "Password hash secret must have at least 32 characters.")
-    .max(128, "Password hash secret must have at most 128 characters."),
-
   badges: z.array(z.string()),
   hasMfaAuthApp: z.boolean(),
   hasMfaEmail: z.boolean(),

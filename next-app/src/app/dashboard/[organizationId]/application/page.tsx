@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Metadata } from "next";
 
 import { Breadcrumbs } from "@/components/bread-crumbs";
 import { buttonVariants } from "@/components/ui/button";
@@ -11,6 +12,10 @@ type Props = {
   params: Promise<{
     organizationId: string;
   }>;
+};
+
+export const metadata: Metadata = {
+  title: "Applications - GateKeeper",
 };
 
 export default async function ApplicationsPage({ params }: Props) {

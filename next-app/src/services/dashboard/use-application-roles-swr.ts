@@ -32,6 +32,7 @@ export function useApplicationRolesSWR(
     request?.organizationId
       ? `/v1/organizations/${request?.organizationId}/applications/${request?.applicationId}/roles`
       : null,
-    (url) => fetcher(url, options)
+    (url) => fetcher(url, options),
+    { revalidateOnFocus: false }
   );
 }

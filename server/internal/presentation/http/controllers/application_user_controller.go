@@ -1,7 +1,6 @@
 package http_controllers
 
 import (
-	"fmt"
 	"net/http"
 
 	createapplicationuser "github.com/gate-keeper/internal/application/services/application-user/create-application-user"
@@ -186,9 +185,6 @@ func (c *ApplicationUserController) GetUserByIDController(writter http.ResponseW
 	if err != nil {
 		panic(err)
 	}
-
-	fmt.Println("asdasd askd alks jal jlaksj lkajs lkaj lkasd")
-	fmt.Println(response)
 
 	http_router.SendJson(writter, response, 200)
 }

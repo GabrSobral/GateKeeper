@@ -12,6 +12,25 @@ type Props = {
   }>;
 };
 
+export async function generateMetadata({ params }: Props) {
+  const { applicationId, organizationId } = await params;
+
+  const [application, err] = await getApplicationByIdService(
+    { applicationId, organizationId },
+    { accessToken: "" }
+  );
+
+  if (err) {
+    return {
+      title: "Application - GateKeeper",
+    };
+  }
+
+  return {
+    title: `${application?.name} - GateKeeper`,
+  };
+}
+
 export default async function EditApplicationPage({ params }: Props) {
   const { applicationId, organizationId } = await params;
 

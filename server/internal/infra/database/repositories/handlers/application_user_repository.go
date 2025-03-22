@@ -3,7 +3,6 @@ package repository_handlers
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"time"
 
 	"github.com/gate-keeper/internal/domain/entities"
@@ -50,8 +49,6 @@ func (r ApplicationUserRepository) GetUsersByApplicationID(ctx context.Context, 
 
 	for _, user := range users {
 		roles := []repository_interfaces.ApplicationRoles{}
-
-		fmt.Println(string(user.Roles))
 
 		err := json.Unmarshal(user.Roles, &roles)
 

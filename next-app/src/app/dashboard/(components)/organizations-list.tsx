@@ -48,7 +48,7 @@ export function OrganizationsList() {
   return (
     data?.map((organization) => (
       <Link
-        className="min-w-[400px] flex-1"
+        className="min-w-[400px] flex-1 max-w-[400px]"
         key={organization.id}
         href={`/dashboard/${organization.id}/application`}
       >
