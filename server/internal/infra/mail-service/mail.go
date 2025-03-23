@@ -15,6 +15,7 @@ import (
 type IMailService interface {
 	sendMail(ctx context.Context, params SendMailParams) error
 	SendEmailConfirmationEmail(ctx context.Context, to, userName, token string) error
+	SendMfaEmail(ctx context.Context, to, userName, token string) error
 	SendForgotPasswordEmail(ctx context.Context, to, userName, token string, passwordResetID, applicationID uuid.UUID) error
 }
 
@@ -92,6 +93,25 @@ func (ms *MailService) SendForgotPasswordEmail(ctx context.Context, to, userName
 	ms.sendMail(ctx, SendMailParams{
 		To:      to,
 		Subject: "E-mail Confirmation",
+		Body:    replacedString,
+	})
+
+	return nil
+}
+
+func (ms *MailService) SendMfaEmail(ctx context.Context, to, userName, token string) error {
+	emailConfirmationTemplate, err := readFileAsString("./internal/infra/mail-service/mfa-email-template.html")
+
+	if err != nil {
+		return err
+	}
+
+	replacedString := strings.Replace(emailConfirmationTemplate, "{{$name}}", userName, -1)
+	replacedString = strings.Replace(replacedString, "{{$confirmation-token}}", token, -1)
+
+	ms.sendMail(ctx, SendMailParams{
+		To:      to,
+		Subject: "Multi Factor Authentication",
 		Body:    replacedString,
 	})
 

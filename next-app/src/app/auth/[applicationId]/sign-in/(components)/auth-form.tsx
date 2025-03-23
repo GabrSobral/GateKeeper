@@ -2,9 +2,10 @@
 
 import { z } from "zod";
 import Link from "next/link";
+import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import {
   Form,
@@ -17,14 +18,16 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 import { formSchema } from "./auth-schema";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 import { authorizeApi } from "@/services/auth/authorize";
 import { ApplicationAuthData } from "@/services/auth/get-application-auth-data";
+
 import { ErrorAlert } from "@/components/error-alert";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { loginApi } from "@/services/auth/login";
 
 type Props = {
   application: ApplicationAuthData | null;
@@ -33,6 +36,7 @@ type Props = {
 export function AuthForm({ application }: Props) {
   const applicationId = useParams().applicationId as string;
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const redirectUri = searchParams.get("redirect_uri") || "/";
   const codeChallengeMethod = searchParams.get("code_challenge_method") || "";
@@ -64,7 +68,7 @@ export function AuthForm({ application }: Props) {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
 
-    const [data, err] = await authorizeApi({
+    const [loginData, loginErr] = await loginApi({
       email: values.email.trim(),
       password: values.password.trim(),
       applicationId,
@@ -76,22 +80,22 @@ export function AuthForm({ application }: Props) {
       state,
     });
 
-    if (err && err.response?.data.title === "E-mail not confirmed") {
+    if (loginErr && loginErr.response?.data.title === "E-mail not confirmed") {
       window.location.href = `/auth/${applicationId}/confirm-email?${urlParams.toString()}&email=${
         values.email
       }&trying_to_sign_in=true`;
       return;
     }
 
-    if (err) {
-      console.error(err);
-      setError(err?.response?.data.message || "An error occurred");
+    if (loginErr) {
+      console.error(loginErr);
+      setError(loginErr?.response?.data.message || "An error occurred");
       setIsLoading(false);
       setTimeout(() => setError(null), 6000);
       return;
     }
 
-    if (!data) {
+    if (!loginData) {
       setError("An error occurred");
       setIsLoading(false);
       setTimeout(() => setError(null), 6000);
@@ -100,7 +104,54 @@ export function AuthForm({ application }: Props) {
 
     setIsLoading(false);
 
-    window.location.href = `${redirectUri}?code=${data.authorizationCode}&state=${state}&redirect_uri=${redirectUri}&client_id=${applicationId}`;
+    toast.success("You have successfully signed in");
+
+    if (loginData.mfaEmailRequired) {
+      router.push(
+        `/auth/${applicationId}/one-time-password?${urlParams.toString()}&mfaEmailRequired=true&email=${
+          values.email
+        }`
+      );
+      return;
+    }
+
+    if (loginData.mfaAuthAppRequired) {
+      router.push(
+        `/auth/${applicationId}/one-time-password?${urlParams.toString()}&mfaAuthAppRequired=true&email=${
+          values.email
+        }`
+      );
+      return;
+    }
+
+    const [authorizeData, authorizeErr] = await authorizeApi({
+      email: values.email.trim(),
+      sessionCode: loginData.sessionCode,
+      applicationId,
+      redirectUri,
+      responseType,
+      scope,
+      codeChallengeMethod,
+      codeChallenge,
+      state,
+    });
+
+    if (authorizeErr) {
+      console.error(authorizeErr);
+      setError(authorizeErr?.response?.data.message || "An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    if (!authorizeData) {
+      setError("An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    window.location.href = `${redirectUri}?code=${authorizeData.authorizationCode}&state=${state}&redirect_uri=${redirectUri}&client_id=${applicationId}`;
   }
 
   return (

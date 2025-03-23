@@ -105,6 +105,16 @@ type EmailConfirmation struct {
 	IsUsed    bool             `db:"is_used"`
 }
 
+type EmailMfaCode struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Email     string           `db:"email"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+	IsUsed    bool             `db:"is_used"`
+}
+
 type ExternalLogin struct {
 	UserID      uuid.UUID `db:"user_id"`
 	Email       string    `db:"email"`
@@ -134,6 +144,15 @@ type RefreshToken struct {
 	AvailableRefreshes int32            `db:"available_refreshes"`
 	ExpiresAt          pgtype.Timestamp `db:"expires_at"`
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
+}
+
+type SessionCode struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+	IsUsed    bool             `db:"is_used"`
 }
 
 type UserProfile struct {

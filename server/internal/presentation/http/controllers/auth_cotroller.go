@@ -11,11 +11,13 @@ import (
 	confirmuseremail "github.com/gate-keeper/internal/application/services/authentication/confirm-user-email"
 	externalloginprovider "github.com/gate-keeper/internal/application/services/authentication/external-login-provider"
 	forgotpassword "github.com/gate-keeper/internal/application/services/authentication/forgot-password"
+	"github.com/gate-keeper/internal/application/services/authentication/login"
 	resendemailconfirmation "github.com/gate-keeper/internal/application/services/authentication/resend-email-confirmation"
 	resetpassword "github.com/gate-keeper/internal/application/services/authentication/reset-password"
 	"github.com/gate-keeper/internal/application/services/authentication/session"
 	signin "github.com/gate-keeper/internal/application/services/authentication/sign-in-credential"
 	signup "github.com/gate-keeper/internal/application/services/authentication/sign-up-credential"
+	verifymfa "github.com/gate-keeper/internal/application/services/authentication/verify-mfa"
 )
 
 type AuthController struct {
@@ -57,6 +59,51 @@ func (ac *AuthController) AuthorizeController(writter http.ResponseWriter, reque
 		DbPool:  ac.DbPool,
 		New:     authorize.New,
 		Request: authorizeRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+// Sign In with credentials controller
+func (ac *AuthController) LoginController(writter http.ResponseWriter, request *http.Request) {
+	var loginRequest login.Request
+
+	if err := http_router.ParseBodyToSchema(&loginRequest, request); err != nil {
+		panic(err)
+	}
+
+	params := repositories.ParamsRs[login.Request, *login.Response, login.LoginService]{
+		DbPool:  ac.DbPool,
+		New:     login.New,
+		Request: loginRequest,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+func (ac *AuthController) VerifyMfaController(writter http.ResponseWriter, request *http.Request) {
+	var verifyMfaRequest verifymfa.Request
+
+	if err := http_router.ParseBodyToSchema(&verifyMfaRequest, request); err != nil {
+		panic(err)
+	}
+
+	params := repositories.ParamsRs[verifymfa.Request, *verifymfa.Response, verifymfa.VerifyMfaService]{
+		DbPool:  ac.DbPool,
+		New:     verifymfa.New,
+		Request: verifyMfaRequest,
 	}
 
 	response, err := repositories.WithTransactionRs(request.Context(), params)

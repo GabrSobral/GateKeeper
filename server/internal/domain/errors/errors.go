@@ -51,6 +51,14 @@ var (
 	ErrAuthorizationCodeInvalidRedirectURI = CustomError{Name: "ErrAuthorizationCodeInvalidRedirectURI", Code: http.StatusBadRequest, Message: "Invalid redirect URI", Title: "Invalid redirect URI"}
 	ErrAuthorizationCodeInvalidClientID    = CustomError{Name: "ErrAuthorizationCodeInvalidClientID", Code: http.StatusBadRequest, Message: "Invalid client ID", Title: "Invalid client ID"}
 	ErrAuthorizationCodeInvalidPKCE        = CustomError{Name: "ErrAuthorizationCodeInvalidPKCE", Code: http.StatusBadRequest, Message: "Invalid PKCE", Title: "Invalid PKCE"}
+
+	ErrSessionCodeNotFound    = CustomError{Name: "ErrSessionCodeNotFound", Code: http.StatusNotFound, Message: "Session code not found", Title: "Session code not found"}
+	ErrSessionCodeExpired     = CustomError{Name: "ErrSessionCodeExpired", Code: http.StatusBadRequest, Message: "Session code expired", Title: "Session code expired"}
+	ErrSessionCodeAlreadyUsed = CustomError{Name: "ErrSessionCodeAlreadyUsed", Code: http.StatusBadRequest, Message: "Session code already used", Title: "Session code already used"}
+
+	ErrEmailMfaCodeExpired  = CustomError{Name: "ErrEmailMfaCodeExpired", Code: http.StatusBadRequest, Message: "E-mail MFA code expired", Title: "E-mail MFA code expired"}
+	ErrEmailMfaCodeNotFound = CustomError{Name: "ErrEmailMfaCodeNotFound", Code: http.StatusNotFound, Message: "E-mail MFA code invalid", Title: "E-mail MFA code not found"}
+	ErrMfaEmailNotEnabled   = CustomError{Name: "ErrMfaEmailNotEnabled", Code: http.StatusBadRequest, Message: "MFA e-mail not enabled", Title: "MFA e-mail not enabled to user"}
 )
 
 var ErrorsList = map[string]CustomError{
@@ -82,4 +90,10 @@ var ErrorsList = map[string]CustomError{
 	"ErrAuthorizationCodeInvalidRedirectURI": ErrAuthorizationCodeInvalidRedirectURI,
 	"ErrAuthorizationCodeInvalidClientID":    ErrAuthorizationCodeInvalidClientID,
 	"ErrAuthorizationCodeInvalidPKCE":        ErrAuthorizationCodeInvalidPKCE,
+	"ErrSessionCodeNotFound":                 ErrSessionCodeNotFound,
+	"ErrSessionCodeExpired":                  ErrSessionCodeExpired,
+	"ErrSessionCodeAlreadyUsed":              ErrSessionCodeAlreadyUsed,
+	"ErrMfaEmailNotEnabled":                  ErrMfaEmailNotEnabled,
+	"ErrEmailMfaCodeExpired":                 ErrEmailMfaCodeExpired,
+	"ErrEmailMfaCodeNotFound":                ErrEmailMfaCodeNotFound,
 }

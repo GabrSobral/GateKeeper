@@ -56,7 +56,7 @@ export function SecretsSection({ application }: Props) {
             </div>
 
             <div className="ml-auto text-sm">
-              Expiração:{" "}
+              Expiration:{" "}
               <span className="text-md font-medium">
                 {secret?.expirationDate
                   ? formatDate(new Date(secret.expirationDate))

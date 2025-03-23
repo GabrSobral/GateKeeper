@@ -2,8 +2,8 @@ package authorize
 
 import (
 	"context"
+	"time"
 
-	application_utils "github.com/gate-keeper/internal/application/utils"
 	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/gate-keeper/internal/infra/database/repositories"
@@ -15,8 +15,8 @@ import (
 
 type Request struct {
 	ApplicationID       uuid.UUID `json:"applicationId" validate:"required"`
+	SessionCode         string    `json:"sessionCode" validate:"required"`
 	Email               string    `json:"email" validate:"required,email"`
-	Password            string    `json:"password" validate:"required"`
 	CodeChallenge       string    `json:"codeChallenge" validate:"required"`
 	CodeChallengeMethod string    `json:"codeChallengeMethod" validate:"required"`
 	RedirectUri         string    `json:"redirectUri" validate:"required"`
@@ -39,6 +39,7 @@ type AuthorizeService struct {
 	UserProfileRepository     repository_interfaces.IUserProfileRepository
 	RefreshTokenRepository    repository_interfaces.IRefreshTokenRepository
 	AuthozationCodeRepository repository_interfaces.IApplicationAuthorizationCodeRepository
+	SessionCodeRepository     repository_interfaces.ISessionCodeRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
@@ -47,6 +48,7 @@ func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
 		RefreshTokenRepository:    repository_handlers.RefreshTokenRepository{Store: q},
 		AuthozationCodeRepository: repository_handlers.ApplicationAuthorizationCodeRepository{Store: q},
+		SessionCodeRepository:     repository_handlers.SessionCodeRepository{Store: q},
 	}
 }
 
@@ -69,19 +71,25 @@ func (ss *AuthorizeService) Handler(ctx context.Context, request Request) (*Resp
 		return nil, &errors.ErrUserSignUpWithSocial
 	}
 
-	isPasswordCorrect, err := application_utils.ComparePassword(*user.PasswordHash, request.Password)
+	if !user.IsEmailConfirmed {
+		return nil, &errors.ErrEmailNotConfirmed
+	}
+
+	sessionCode, err := ss.SessionCodeRepository.GetByToken(ctx, user.ID, request.SessionCode)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if !isPasswordCorrect {
-		return nil, &errors.ErrEmailOrPasswordInvalid
+	if sessionCode == nil {
+		return nil, &errors.ErrSessionCodeNotFound
 	}
 
-	if !user.IsEmailConfirmed {
-		return nil, &errors.ErrEmailNotConfirmed
+	if sessionCode.ExpiresAt.Before(time.Now().UTC()) {
+		return nil, &errors.ErrSessionCodeExpired
 	}
+
+	ss.SessionCodeRepository.DeleteByID(ctx, sessionCode.ID)
 
 	authorizationCode, err := entities.CreateApplicationAuthorizationCode(
 		request.ApplicationID,

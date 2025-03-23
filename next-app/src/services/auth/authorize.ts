@@ -3,7 +3,7 @@ import { APIError, Result } from "@/types/service-options";
 
 type Request = {
   email: string;
-  password: string;
+  sessionCode: string;
   applicationId: string;
   redirectUri: string;
   codeChallengeMethod: string;
@@ -24,7 +24,7 @@ type Response = {
 
 export async function authorizeApi({
   email,
-  password,
+  sessionCode,
   applicationId,
   redirectUri,
   codeChallengeMethod,
@@ -36,7 +36,7 @@ export async function authorizeApi({
   try {
     const { data } = await api.post<Response>(`/v1/auth/authorize`, {
       email,
-      password,
+      sessionCode,
       applicationId,
       redirectUri,
       codeChallengeMethod,

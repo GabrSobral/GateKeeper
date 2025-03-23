@@ -1,9 +1,20 @@
 "use client";
 
 import { z } from "zod";
+import { toast } from "sonner";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { useParams, useSearchParams } from "next/navigation";
 
-import { Form } from "@/components/ui/form";
+import {
+  FormControl,
+  Form,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
 import { formSchema } from "./auth-schema";
@@ -16,46 +27,133 @@ import {
 } from "@/components/ui/input-otp";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
+import { ErrorAlert } from "@/components/error-alert";
+
+import { authorizeApi } from "@/services/auth/authorize";
+import { verifyMfaApi } from "@/services/auth/verify-mfa";
+
 export function AuthForm() {
-  // const applicationId = useParams().applicationId;
+  const applicationId = useParams().applicationId as string;
+  const searchParams = useSearchParams();
+
+  const redirectUri = searchParams.get("redirect_uri") || "/";
+  const codeChallengeMethod = searchParams.get("code_challenge_method") || "";
+  const responseType = searchParams.get("response_type") || "";
+  const scope = searchParams.get("scope") || "";
+  const state = searchParams.get("state") || "";
+  const email = searchParams.get("email") || "";
+  const codeChallenge = searchParams.get("code_challenge") || "";
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
+      code: "",
     },
   });
 
-  const isLoading = false;
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsLoading(true);
+
+    const [verifyMfaData, verifyMfaErr] = await verifyMfaApi({
+      email: email.trim(),
+      applicationId,
+      code: values.code,
+    });
+
+    if (verifyMfaErr) {
+      console.error(verifyMfaErr);
+      setError(verifyMfaErr?.response?.data.message || "An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    if (!verifyMfaData) {
+      setError("An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    setIsLoading(false);
+
+    toast.success("You have successfully signed in");
+
+    const [authorizeData, authorizeErr] = await authorizeApi({
+      email: email.trim(),
+      sessionCode: verifyMfaData.sessionCode,
+      applicationId,
+      redirectUri,
+      responseType,
+      scope,
+      codeChallengeMethod,
+      codeChallenge,
+      state,
+    });
+
+    if (authorizeErr) {
+      console.error(authorizeErr);
+      setError(authorizeErr?.response?.data.message || "An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    if (!authorizeData) {
+      setError("An error occurred");
+      setIsLoading(false);
+      setTimeout(() => setError(null), 6000);
+      return;
+    }
+
+    window.location.href = `${redirectUri}?code=${authorizeData.authorizationCode}&state=${state}&redirect_uri=${redirectUri}&client_id=${applicationId}`;
   }
 
   return (
     <div className="grid gap-4">
+      {error && <ErrorAlert message={error} title="An error occurred..." />}
+
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
           className="space-y-3 w-full items-center flex flex-col"
         >
-          <InputOTP maxLength={6}>
-            <InputOTPGroup>
-              <InputOTPSlot index={0} />
-              <InputOTPSlot index={1} />
-              <InputOTPSlot index={2} />
-            </InputOTPGroup>
+          <FormField
+            control={form.control}
+            name="code"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="sr-only">Code</FormLabel>
+                <FormControl>
+                  <InputOTP
+                    maxLength={6}
+                    onChange={field.onChange}
+                    value={field.value}
+                  >
+                    <InputOTPGroup>
+                      <InputOTPSlot index={0} />
+                      <InputOTPSlot index={1} />
+                      <InputOTPSlot index={2} />
+                    </InputOTPGroup>
 
-            <InputOTPSeparator />
+                    <InputOTPSeparator />
 
-            <InputOTPGroup>
-              <InputOTPSlot index={3} />
-              <InputOTPSlot index={4} />
-              <InputOTPSlot index={5} />
-            </InputOTPGroup>
-          </InputOTP>
+                    <InputOTPGroup>
+                      <InputOTPSlot index={3} />
+                      <InputOTPSlot index={4} />
+                      <InputOTPSlot index={5} />
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+
+                <FormDescription></FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button
             type="submit"

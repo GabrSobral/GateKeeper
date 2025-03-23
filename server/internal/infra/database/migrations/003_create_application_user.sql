@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS "application_user" (
     id UUID PRIMARY KEY,
     application_id UUID NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
+    email VARCHAR(128) NOT NULL UNIQUE,
     password_hash VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NULL,
