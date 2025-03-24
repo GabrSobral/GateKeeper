@@ -94,6 +94,15 @@ type ApplicationUser struct {
 	TwoFactorSecret     *string          `db:"two_factor_secret"`
 }
 
+type ChangePasswordCode struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Email     string           `db:"email"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+}
+
 type EmailConfirmation struct {
 	ID        uuid.UUID        `db:"id"`
 	UserID    uuid.UUID        `db:"user_id"`

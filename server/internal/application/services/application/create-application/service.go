@@ -38,12 +38,14 @@ type Response struct {
 }
 
 type CreateApplicationService struct {
-	ApplicationRepository repository_interfaces.IApplicationRepository
+	ApplicationRepository     repository_interfaces.IApplicationRepository
+	ApplicationRoleRepository repository_interfaces.IApplicationRoleRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &CreateApplicationService{
-		ApplicationRepository: repository_handlers.ApplicationRepository{Store: q},
+		ApplicationRepository:     repository_handlers.ApplicationRepository{Store: q},
+		ApplicationRoleRepository: repository_handlers.ApplicationRoleRepository{Store: q},
 	}
 }
 
@@ -67,6 +69,16 @@ func (s *CreateApplicationService) Handler(ctx context.Context, request Request)
 	if err != nil {
 		return nil, err
 	}
+
+	userRoleDescription := "Default user role"
+	adminRoleDescription := "Default admin role"
+
+	userRole := entities.NewApplicationRole(newApplication.ID, "User", &userRoleDescription)
+	adminRole := entities.NewApplicationRole(newApplication.ID, "Admin", &adminRoleDescription)
+
+	// Add default roles
+	s.ApplicationRoleRepository.AddRole(ctx, userRole)
+	s.ApplicationRoleRepository.AddRole(ctx, adminRole)
 
 	return &Response{
 		ID:                 newApplication.ID,

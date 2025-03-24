@@ -71,6 +71,7 @@ func (s *CreateApplicationUserService) Handler(ctx context.Context, request Requ
 
 	applicationUser.IsMfaAuthAppEnabled = request.IsMfaAuthAppEnabled
 	applicationUser.IsMfaEmailEnabled = request.IsMfaEmailEnabled
+	applicationUser.IsEmailConfirmed = request.IsEmailConfirmed
 
 	applicationUserProfile := entities.NewUserProfile(
 		applicationUser.ID,

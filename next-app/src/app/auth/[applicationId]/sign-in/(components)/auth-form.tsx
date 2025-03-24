@@ -106,23 +106,39 @@ export function AuthForm({ application }: Props) {
 
     toast.success("You have successfully signed in");
 
+    urlParams.append("mfa_auth_app_required", "true");
+    urlParams.append("email", values.email);
+
+    if (loginData.changePasswordCode) {
+      urlParams.append("change_password_code", loginData.changePasswordCode);
+    }
+
+    if (loginData.userId) {
+      urlParams.append("user_id", loginData.userId);
+    }
+
     if (loginData.mfaEmailRequired) {
       router.push(
-        `/auth/${applicationId}/one-time-password?${urlParams.toString()}&mfaEmailRequired=true&email=${
-          values.email
-        }`
+        `/auth/${applicationId}/one-time-password?${urlParams.toString()}`
       );
       return;
     }
 
-    if (loginData.mfaAuthAppRequired) {
+    if (loginData.changePasswordCode && loginData.userId) {
+      urlParams.append("session_code", loginData.sessionCode);
+
       router.push(
-        `/auth/${applicationId}/one-time-password?${urlParams.toString()}&mfaAuthAppRequired=true&email=${
-          values.email
-        }`
+        `/auth/${applicationId}/update-password?${urlParams.toString()}`
       );
       return;
     }
+
+    // if (loginData.mfaAuthAppRequired) {
+    //   router.push(
+    //     `/auth/${applicationId}/one-time-password?${urlParams.toString()}`
+    //   );
+    //   return;
+    // }
 
     const [authorizeData, authorizeErr] = await authorizeApi({
       email: values.email.trim(),

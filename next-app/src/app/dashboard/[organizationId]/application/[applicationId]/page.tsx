@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
+import { ErrorAlert } from "@/components/error-alert";
 
 import { cn } from "@/lib/utils";
 import { getApplicationByIdService } from "@/services/dashboard/get-application-by-id";
@@ -51,7 +52,17 @@ export default async function ApplicationDetailPage({ params }: Props) {
   );
 
   if (err) {
-    return <div>Failed to fetch application</div>;
+    return (
+      <div className="flex m-4 w-full">
+        <ErrorAlert
+          message={
+            err.response?.data.message ||
+            "Failed on trying to fetch application"
+          }
+          title={err.response?.data.title || "An Error Occurred"}
+        />
+      </div>
+    );
   }
 
   return (

@@ -62,6 +62,7 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 			r.Post("/sign-up", authController.SignUpAuthController)
 			r.Post("/confirm-email", authController.ConfirmEmailAuthController)
 			r.Post("/reset-password", authController.ResetPasswordAuthController)
+			r.Post("/change-password", authController.ChangePasswordController)
 			r.Post("/forgot-password", authController.ForgotPasswordAuthController)
 			r.Post("/external-provider", authController.ExternalLoginAuthController)
 			r.Post("/confirm-email/resend", authController.ResendEmailConfirmationAuthController)

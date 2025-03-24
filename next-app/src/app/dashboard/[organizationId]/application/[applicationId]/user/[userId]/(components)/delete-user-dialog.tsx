@@ -1,7 +1,9 @@
 "use client";
 
+import { toast } from "sonner";
 import { useState } from "react";
 import { Trash } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
 
 import {
   Dialog,
@@ -19,15 +21,42 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+
+import { deleteApplicationUserApi } from "@/services/dashboard/delete-application-user";
 
 export function DeleteUserDialog() {
   const [isLoading, setIsLoading] = useState(false);
+  const { userId, applicationId, organizationId } = useParams() as {
+    userId: string;
+    applicationId: string;
+    organizationId: string;
+  };
 
-  function handler() {
+  const router = useRouter();
+
+  async function handler() {
     setIsLoading(true);
 
-    // Logic here
+    const [err] = await deleteApplicationUserApi(
+      { applicationId, organizationId, userId },
+      { accessToken: "" }
+    );
+
+    if (err) {
+      setIsLoading(false);
+      console.error(err);
+      toast.error(err.response?.data.message || "Something went wrong");
+      return;
+    }
+
     setIsLoading(false);
+
+    toast.success("User deleted successfully");
+
+    router.push(
+      `/dashboard/${organizationId}/application/${applicationId}?tab=users`
+    );
   }
 
   return (
@@ -57,8 +86,14 @@ export function DeleteUserDialog() {
             Cancel
           </DialogClose>
 
-          <Button type="submit" onClick={handler} variant="destructive">
-            {isLoading ? "Deleting..." : "Delete"}
+          <Button
+            type="submit"
+            onClick={handler}
+            variant="destructive"
+            disabled={isLoading}
+          >
+            {isLoading && <LoadingSpinner className="absolute left-4" />}
+            Delete
           </Button>
         </DialogFooter>
       </DialogContent>

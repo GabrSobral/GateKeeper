@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 
 import { ApplicationAuthData } from "@/services/auth/get-application-auth-data";
 import { Toaster } from "@/components/ui/sonner";
+import { ThemeToggle } from "@/components/ui/theme-togle";
 
 type Props = {
   children: ReactNode;
@@ -52,6 +53,10 @@ export function Background({
 
         <div className="flex flex-1 items-center relative justify-center h-full lg:overflow-auto">
           <div className="lg:p-8">
+            <span className="absolute bottom-4 right-4">
+              <ThemeToggle />
+            </span>
+
             <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
               {children}
 

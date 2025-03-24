@@ -27,32 +27,36 @@ type Request struct {
 }
 
 type Response struct {
-	MfaEmailRequired   bool    `json:"mfaEmailRequired"`
-	MfaAuthAppRequired bool    `json:"mfaAuthAppRequired"`
-	SessionCode        *string `json:"sessionCode"`
-	Message            string  `json:"message"`
+	MfaEmailRequired   bool      `json:"mfaEmailRequired"`
+	MfaAuthAppRequired bool      `json:"mfaAuthAppRequired"`
+	SessionCode        *string   `json:"sessionCode"`
+	ChangePasswordCode *string   `json:"changePasswordCode"`
+	Message            string    `json:"message"`
+	UserID             uuid.UUID `json:"userId"`
 }
 
 type LoginService struct {
-	ApplicationUserRepository   repository_interfaces.IApplicationUserRepository
-	UserProfileRepository       repository_interfaces.IUserProfileRepository
-	RefreshTokenRepository      repository_interfaces.IRefreshTokenRepository
-	AuthozationCodeRepository   repository_interfaces.IApplicationAuthorizationCodeRepository
-	EmailConfirmationRepository repository_interfaces.IEmailConfirmationRepository
-	EmailMfaCodeRepository      repository_interfaces.IEmailMfaCodeRepository
-	SessionCodeRepository       repository_interfaces.ISessionCodeRepository
+	ApplicationUserRepository    repository_interfaces.IApplicationUserRepository
+	UserProfileRepository        repository_interfaces.IUserProfileRepository
+	RefreshTokenRepository       repository_interfaces.IRefreshTokenRepository
+	AuthozationCodeRepository    repository_interfaces.IApplicationAuthorizationCodeRepository
+	EmailConfirmationRepository  repository_interfaces.IEmailConfirmationRepository
+	EmailMfaCodeRepository       repository_interfaces.IEmailMfaCodeRepository
+	SessionCodeRepository        repository_interfaces.ISessionCodeRepository
+	ChangePasswordCodeRepository repository_interfaces.IChangePasswordCodeRepository
 
 	MailService mailservice.IMailService
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Request, *Response] {
 	return &LoginService{
-		ApplicationUserRepository: repository_handlers.ApplicationUserRepository{Store: q},
-		UserProfileRepository:     repository_handlers.UserProfileRepository{Store: q},
-		RefreshTokenRepository:    repository_handlers.RefreshTokenRepository{Store: q},
-		AuthozationCodeRepository: repository_handlers.ApplicationAuthorizationCodeRepository{Store: q},
-		EmailMfaCodeRepository:    repository_handlers.EmailMfaCodeRepository{Store: q},
-		SessionCodeRepository:     repository_handlers.SessionCodeRepository{Store: q},
+		ApplicationUserRepository:    repository_handlers.ApplicationUserRepository{Store: q},
+		UserProfileRepository:        repository_handlers.UserProfileRepository{Store: q},
+		RefreshTokenRepository:       repository_handlers.RefreshTokenRepository{Store: q},
+		AuthozationCodeRepository:    repository_handlers.ApplicationAuthorizationCodeRepository{Store: q},
+		EmailMfaCodeRepository:       repository_handlers.EmailMfaCodeRepository{Store: q},
+		SessionCodeRepository:        repository_handlers.SessionCodeRepository{Store: q},
+		ChangePasswordCodeRepository: repository_handlers.ChangePasswordCodeRepository{Store: q},
 
 		MailService: &mailservice.MailService{},
 	}
@@ -91,6 +95,21 @@ func (ss *LoginService) Handler(ctx context.Context, request Request) (*Response
 		return nil, &errors.ErrEmailNotConfirmed
 	}
 
+	// Revoke all Password change codes if exists
+	if err := ss.ChangePasswordCodeRepository.RevokeAllByID(ctx, user.ID); err != nil {
+		return nil, err
+	}
+
+	var changePasswordCode *entities.ChangePasswordCode = nil
+
+	if user.ShouldChangePass {
+		changePasswordCode = entities.NewChangePasswordCode(user.ID, user.Email)
+
+		if err := ss.ChangePasswordCodeRepository.Add(ctx, changePasswordCode); err != nil {
+			return nil, err
+		}
+	}
+
 	if user.IsMfaEmailEnabled {
 		userProfile, err := ss.UserProfileRepository.GetUserById(ctx, user.ID)
 
@@ -110,11 +129,24 @@ func (ss *LoginService) Handler(ctx context.Context, request Request) (*Response
 			}
 		}()
 
+		if changePasswordCode == nil {
+			return &Response{
+				MfaEmailRequired:   true,
+				MfaAuthAppRequired: false,
+				ChangePasswordCode: nil,
+				Message:            "MFA is required, please enter the code from your authentication app",
+				SessionCode:        nil,
+				UserID:             user.ID,
+			}, nil
+		}
+
 		return &Response{
-			MfaEmailRequired:   false,
-			MfaAuthAppRequired: true,
+			MfaEmailRequired:   true,
+			MfaAuthAppRequired: false,
+			ChangePasswordCode: &changePasswordCode.Token,
 			Message:            "MFA is required, please enter the code from your authentication app",
 			SessionCode:        nil,
+			UserID:             user.ID,
 		}, nil
 	}
 
@@ -133,10 +165,23 @@ func (ss *LoginService) Handler(ctx context.Context, request Request) (*Response
 
 	tokenString := sessionToken.Token
 
+	if changePasswordCode == nil {
+		return &Response{
+			MfaEmailRequired:   false,
+			MfaAuthAppRequired: false,
+			Message:            "Login successful",
+			ChangePasswordCode: nil,
+			SessionCode:        &tokenString,
+			UserID:             user.ID,
+		}, nil
+	}
+
 	return &Response{
 		MfaEmailRequired:   false,
 		MfaAuthAppRequired: false,
 		Message:            "Login successful",
+		ChangePasswordCode: &changePasswordCode.Token,
 		SessionCode:        &tokenString,
+		UserID:             user.ID,
 	}, nil
 }

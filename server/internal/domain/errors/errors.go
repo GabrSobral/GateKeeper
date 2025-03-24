@@ -59,6 +59,12 @@ var (
 	ErrEmailMfaCodeExpired  = CustomError{Name: "ErrEmailMfaCodeExpired", Code: http.StatusBadRequest, Message: "E-mail MFA code expired", Title: "E-mail MFA code expired"}
 	ErrEmailMfaCodeNotFound = CustomError{Name: "ErrEmailMfaCodeNotFound", Code: http.StatusNotFound, Message: "E-mail MFA code invalid", Title: "E-mail MFA code not found"}
 	ErrMfaEmailNotEnabled   = CustomError{Name: "ErrMfaEmailNotEnabled", Code: http.StatusBadRequest, Message: "MFA e-mail not enabled", Title: "MFA e-mail not enabled to user"}
+
+	ErrChangePasswordCodeNotFound  = CustomError{Name: "ErrChangePasswordCodeNotFound", Code: http.StatusNotFound, Message: "Change password code not found", Title: "Change password code not found"}
+	ErrChangePasswordCodeExpired   = CustomError{Name: "ErrChangePasswordCodeExpired", Code: http.StatusBadRequest, Message: "Change password code expired", Title: "Change password code expired"}
+	ErrChangePasswordTokenMismatch = CustomError{Name: "ErrChangePasswordTokenMismatch", Code: http.StatusBadRequest, Message: "Change password token mismatch", Title: "Change password token mismatch"}
+	ErrUserShouldNotChangePassword = CustomError{Name: "ErrUserShouldNotChangePassword", Code: http.StatusBadRequest, Message: "User should not change password", Title: "User should not change password"}
+	ErrUserShouldChangePassword    = CustomError{Name: "ErrUserShouldChangePassword", Code: http.StatusBadRequest, Message: "User should change password", Title: "User should change password"}
 )
 
 var ErrorsList = map[string]CustomError{
@@ -96,4 +102,9 @@ var ErrorsList = map[string]CustomError{
 	"ErrMfaEmailNotEnabled":                  ErrMfaEmailNotEnabled,
 	"ErrEmailMfaCodeExpired":                 ErrEmailMfaCodeExpired,
 	"ErrEmailMfaCodeNotFound":                ErrEmailMfaCodeNotFound,
+	"ErrChangePasswordCodeNotFound":          ErrChangePasswordCodeNotFound,
+	"ErrChangePasswordCodeExpired":           ErrChangePasswordCodeExpired,
+	"ErrChangePasswordTokenMismatch":         ErrChangePasswordTokenMismatch,
+	"ErrUserShouldNotChangePassword":         ErrUserShouldNotChangePassword,
+	"ErrUserShouldChangePassword":            ErrUserShouldChangePassword,
 }

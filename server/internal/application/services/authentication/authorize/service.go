@@ -75,6 +75,10 @@ func (ss *AuthorizeService) Handler(ctx context.Context, request Request) (*Resp
 		return nil, &errors.ErrEmailNotConfirmed
 	}
 
+	if user.ShouldChangePass {
+		return nil, &errors.ErrUserShouldChangePassword
+	}
+
 	sessionCode, err := ss.SessionCodeRepository.GetByToken(ctx, user.ID, request.SessionCode)
 
 	if err != nil {

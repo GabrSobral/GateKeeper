@@ -18,6 +18,8 @@ type Response = {
   mfaAuthAppRequired: boolean;
   message: string;
   sessionCode: string;
+  userId: string;
+  changePasswordCode: string;
 };
 
 export async function loginApi({

@@ -4,7 +4,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useParams, useSearchParams } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 
 import {
   FormControl,
@@ -35,6 +35,7 @@ import { verifyMfaApi } from "@/services/auth/verify-mfa";
 export function AuthForm() {
   const applicationId = useParams().applicationId as string;
   const searchParams = useSearchParams();
+  const router = useRouter();
 
   const redirectUri = searchParams.get("redirect_uri") || "/";
   const codeChallengeMethod = searchParams.get("code_challenge_method") || "";
@@ -43,6 +44,21 @@ export function AuthForm() {
   const state = searchParams.get("state") || "";
   const email = searchParams.get("email") || "";
   const codeChallenge = searchParams.get("code_challenge") || "";
+
+  const changePasswordCode = searchParams.get("change_password_code") || "";
+  const mfaAuthAppRequired = searchParams.get("mfa_auth_app_required") || "";
+  const userId = searchParams.get("user_id") || "";
+
+  const urlParams = new URLSearchParams({
+    redirect_uri: redirectUri,
+    response_type: responseType,
+    scope,
+    code_challenge_method: codeChallengeMethod,
+    code_challenge: codeChallenge,
+    state,
+    mfa_auth_app_required: mfaAuthAppRequired,
+    email,
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -78,9 +94,16 @@ export function AuthForm() {
       return;
     }
 
-    setIsLoading(false);
+    if (changePasswordCode && userId) {
+      urlParams.append("session_code", verifyMfaData.sessionCode);
+      urlParams.append("change_password_code", changePasswordCode);
+      urlParams.append("user_id", userId);
 
-    toast.success("You have successfully signed in");
+      router.push(
+        `/auth/${applicationId}/update-password?${urlParams.toString()}`
+      );
+      return;
+    }
 
     const [authorizeData, authorizeErr] = await authorizeApi({
       email: email.trim(),
@@ -108,6 +131,10 @@ export function AuthForm() {
       setTimeout(() => setError(null), 6000);
       return;
     }
+
+    setIsLoading(false);
+
+    toast.success("You have successfully signed in");
 
     window.location.href = `${redirectUri}?code=${authorizeData.authorizationCode}&state=${state}&redirect_uri=${redirectUri}&client_id=${applicationId}`;
   }

@@ -8,6 +8,7 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 
 	"github.com/gate-keeper/internal/application/services/authentication/authorize"
+	changepassword "github.com/gate-keeper/internal/application/services/authentication/change-password"
 	confirmuseremail "github.com/gate-keeper/internal/application/services/authentication/confirm-user-email"
 	externalloginprovider "github.com/gate-keeper/internal/application/services/authentication/external-login-provider"
 	forgotpassword "github.com/gate-keeper/internal/application/services/authentication/forgot-password"
@@ -113,6 +114,26 @@ func (ac *AuthController) VerifyMfaController(writter http.ResponseWriter, reque
 	}
 
 	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+func (ac *AuthController) ChangePasswordController(writter http.ResponseWriter, request *http.Request) {
+	var changePasswordRequest changepassword.Request
+
+	if err := http_router.ParseBodyToSchema(&changePasswordRequest, request); err != nil {
+		panic(err)
+	}
+
+	params := repositories.Params[changepassword.Request, changepassword.ChangePasswordService]{
+		DbPool:  ac.DbPool,
+		New:     changepassword.New,
+		Request: changePasswordRequest,
+	}
+
+	if err := repositories.WithTransaction(request.Context(), params); err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, nil, http.StatusNoContent)
 }
 
 func (ac *AuthController) GetSessionAuthController(writter http.ResponseWriter, request *http.Request) {
