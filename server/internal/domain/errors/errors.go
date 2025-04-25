@@ -23,6 +23,7 @@ var (
 	ErrUserNotActive          = CustomError{Name: "ErrUserNotActive", Code: http.StatusBadRequest, Message: "User not active, please contact support", Title: "User not active"}
 	ErrUserAlreadyExists      = CustomError{Name: "ErrUserAlreadyExists", Code: http.StatusBadRequest, Message: "An user is already registered with this e-mail, try another e-mail", Title: "User already exists"}
 	ErrUserSignUpWithSocial   = CustomError{Name: "ErrUserSignUpWithSocial", Code: http.StatusBadRequest, Message: "User signed up with social login, please use social login", Title: "User signed up with social login"}
+	ErrMfaAuthAppNotEnabled   = CustomError{Name: "ErrMfaAuthAppNotEnabled", Code: http.StatusBadRequest, Message: "MFA Auth App not enabled to user", Title: "MFA Auth App not enabled"}
 
 	ErrEmailConfirmationIsInCoolDown   = CustomError{Name: "ErrEmailConfirmationIsInCoolDown", Code: http.StatusBadRequest, Message: "E-mail confirmation is in cool down yet, wait a few minutes and try again", Title: "E-mail confirmation is in cool down"}
 	ErrEmailConfirmationNotFound       = CustomError{Name: "ErrEmailConfirmationNotFound", Code: http.StatusBadRequest, Message: "E-mail confirmation not found", Title: "E_mail confirmation not found"}
@@ -74,6 +75,7 @@ var ErrorsList = map[string]CustomError{
 	"ErrEmailNotConfirmed":                   ErrEmailNotConfirmed,
 	"ErrUserNotActive":                       ErrUserNotActive,
 	"ErrUserAlreadyExists":                   ErrUserAlreadyExists,
+	"ErrMfaAuthAppNotEnabled":                ErrMfaAuthAppNotEnabled,
 	"ErrEmailConfirmationIsInCoolDown":       ErrEmailConfirmationIsInCoolDown,
 	"ErrEmailConfirmationNotFound":           ErrEmailConfirmationNotFound,
 	"ErrConfirmationTokenAlreadyExpired":     ErrConfirmationTokenAlreadyExpired,

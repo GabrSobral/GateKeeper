@@ -47,7 +47,7 @@ func (ss *VerifyMfaService) Handler(ctx context.Context, request Request) (*Resp
 	user, err := ss.ApplicationUserRepository.GetUserByEmail(ctx, request.Email, request.ApplicationID)
 
 	if err != nil {
-		return nil, &errors.ErrUserNotFound
+		return nil, err
 	}
 
 	if user == nil {

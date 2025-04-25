@@ -12,6 +12,7 @@ import (
 	confirmuseremail "github.com/gate-keeper/internal/application/services/authentication/confirm-user-email"
 	externalloginprovider "github.com/gate-keeper/internal/application/services/authentication/external-login-provider"
 	forgotpassword "github.com/gate-keeper/internal/application/services/authentication/forgot-password"
+	generateauthappsecret "github.com/gate-keeper/internal/application/services/authentication/generate-auth-app-secret"
 	"github.com/gate-keeper/internal/application/services/authentication/login"
 	resendemailconfirmation "github.com/gate-keeper/internal/application/services/authentication/resend-email-confirmation"
 	resetpassword "github.com/gate-keeper/internal/application/services/authentication/reset-password"
@@ -136,6 +137,29 @@ func (ac *AuthController) ChangePasswordController(writter http.ResponseWriter, 
 	http_router.SendJson(writter, nil, http.StatusNoContent)
 }
 
+func (ac *AuthController) GenerateAuthAppSecretController(writter http.ResponseWriter, request *http.Request) {
+	var requestSchema generateauthappsecret.Request
+
+	if err := http_router.ParseBodyToSchema(&requestSchema, request); err != nil {
+		panic(err)
+	}
+
+	params := repositories.ParamsRs[generateauthappsecret.Request, *generateauthappsecret.Response, generateauthappsecret.GenerateAuthAppSecretService]{
+		DbPool:  ac.DbPool,
+		New:     generateauthappsecret.New,
+		Request: requestSchema,
+	}
+
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
+		panic(err)
+	}
+
+	http_router.SendJson(writter, response, http.StatusOK)
+}
+
+// Get Session controller
 func (ac *AuthController) GetSessionAuthController(writter http.ResponseWriter, request *http.Request) {
 	authorizationHeader := request.Header.Get("Authorization")
 	accessToken := authorizationHeader[len("Bearer "):]

@@ -5,6 +5,7 @@ type GateKeeperSession = {
     lastName: string;
     email: string;
     displayName: string;
+    applicationId: string;
   };
   accessToken: string;
 };

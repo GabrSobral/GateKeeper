@@ -9,11 +9,12 @@ import (
 )
 
 type JWTClaims struct {
-	UserID      uuid.UUID
-	FirstName   string
-	LastName    string
-	DisplayName string
-	Email       string
+	UserID        uuid.UUID
+	FirstName     string
+	LastName      string
+	DisplayName   string
+	Email         string
+	ApplicationID uuid.UUID
 }
 
 // CreateToken creates a JWT token with the given claims and key
@@ -26,6 +27,7 @@ func CreateToken(claims JWTClaims) (string, error) {
 		"family_name": claims.LastName,
 		"name":        claims.DisplayName,
 		"email":       claims.Email,
+		"app_id":      claims.ApplicationID.String(),
 		"aud":         "https://proxymity.tech/guard",
 		"exp":         time.Now().Add(time.Minute * 45).Unix(),
 		"iss":         "https://proxymity.tech/guard",
@@ -79,10 +81,11 @@ func DecodeToken(jwtToken string) (*JWTClaims, error) {
 	}
 
 	return &JWTClaims{
-		UserID:      uuid.MustParse(claims["oid"].(string)),
-		FirstName:   claims["given_name"].(string),
-		LastName:    claims["family_name"].(string),
-		DisplayName: claims["name"].(string),
-		Email:       claims["email"].(string),
+		UserID:        uuid.MustParse(claims["oid"].(string)),
+		FirstName:     claims["given_name"].(string),
+		LastName:      claims["family_name"].(string),
+		DisplayName:   claims["name"].(string),
+		Email:         claims["email"].(string),
+		ApplicationID: uuid.MustParse(claims["app_id"].(string)),
 	}, nil
 }

@@ -19,12 +19,13 @@ type Response struct {
 }
 
 type UserData struct {
-	ID          uuid.UUID `json:"id"`
-	DisplayName string    `json:"displayName"`
-	FirstName   string    `json:"firstName"`
-	LastName    string    `json:"lastName"`
-	Email       string    `json:"email"`
-	PhotoURL    *string   `json:"photoUrl"`
+	ID            uuid.UUID `json:"id"`
+	DisplayName   string    `json:"displayName"`
+	ApplicationID uuid.UUID `json:"applicationId"`
+	FirstName     string    `json:"firstName"`
+	LastName      string    `json:"lastName"`
+	Email         string    `json:"email"`
+	PhotoURL      *string   `json:"photoUrl"`
 }
 
 func New() *SessionService {
@@ -40,12 +41,13 @@ func (ss *SessionService) Handler(ctx context.Context, request Request) (*Respon
 
 	return &Response{
 		User: UserData{
-			ID:          token.UserID,
-			DisplayName: token.DisplayName,
-			FirstName:   token.FirstName,
-			LastName:    token.LastName,
-			Email:       token.Email,
-			PhotoURL:    nil,
+			ID:            token.UserID,
+			DisplayName:   token.DisplayName,
+			FirstName:     token.FirstName,
+			LastName:      token.LastName,
+			Email:         token.Email,
+			ApplicationID: token.ApplicationID,
+			PhotoURL:      nil,
 		},
 		AccessToken: request.AccessToken,
 	}, nil

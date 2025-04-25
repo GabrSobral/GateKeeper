@@ -1,4 +1,4 @@
-package forgotpassword
+package resendemailconfirmation
 
 import (
 	"context"

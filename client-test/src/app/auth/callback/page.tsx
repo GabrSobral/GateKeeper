@@ -1,3 +1,4 @@
+import { GenerateMfaSecretButton } from "@/components/generate-mfa-secret-button";
 import { LogoutButton } from "@/components/logout-button";
 import { getServerSession } from "@/lib/utils/get-server-session";
 
@@ -19,6 +20,7 @@ export default async function CallbackPage() {
       )}
 
       <LogoutButton />
+      <GenerateMfaSecretButton />
     </div>
   );
 }

@@ -29,13 +29,14 @@ type Response struct {
 }
 
 type UserResponse struct {
-	ID          uuid.UUID `json:"id"`
-	DisplayName string    `json:"displayName"`
-	FirstName   string    `json:"firstName"`
-	LastName    string    `json:"lastName"`
-	Email       string    `json:"email"`
-	PhotoURL    *string   `json:"photoUrl"`
-	CreatedAt   time.Time `json:"createdAt"`
+	ID            uuid.UUID `json:"id"`
+	DisplayName   string    `json:"displayName"`
+	FirstName     string    `json:"firstName"`
+	LastName      string    `json:"lastName"`
+	ApplicationID uuid.UUID `json:"applicationId"`
+	Email         string    `json:"email"`
+	PhotoURL      *string   `json:"photoUrl"`
+	CreatedAt     time.Time `json:"createdAt"`
 }
 
 type SignInService struct {
@@ -111,13 +112,14 @@ func (ss *SignInService) Handler(ctx context.Context, request Request) (*Respons
 
 	return &Response{
 		User: UserResponse{
-			ID:          user.ID,
-			DisplayName: userProfile.DisplayName,
-			FirstName:   userProfile.FirstName,
-			LastName:    userProfile.LastName,
-			Email:       user.Email,
-			PhotoURL:    userProfile.PhotoURL,
-			CreatedAt:   user.CreatedAt,
+			ID:            user.ID,
+			DisplayName:   userProfile.DisplayName,
+			FirstName:     userProfile.FirstName,
+			LastName:      userProfile.LastName,
+			Email:         user.Email,
+			PhotoURL:      userProfile.PhotoURL,
+			CreatedAt:     user.CreatedAt,
+			ApplicationID: user.ApplicationID,
 		},
 		AccessToken:  jwtToken,
 		RefreshToken: refreshToken.ID,
