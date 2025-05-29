@@ -45,7 +45,8 @@ SET
     is_mfa_auth_app_enabled = sqlc.arg('is_mfa_auth_app_enabled'),
     is_mfa_email_enabled = sqlc.arg('is_mfa_email_enabled'),
     two_factor_secret = sqlc.narg('two_factor_secret'),
-    should_change_pass = sqlc.arg('should_change_pass')
+    should_change_pass = sqlc.arg('should_change_pass'),
+    preferred_2fa_method = sqlc.arg('preferred_2fa_method')
 WHERE
     id = sqlc.arg('id');
 
@@ -71,7 +72,8 @@ SELECT
     is_mfa_auth_app_enabled,
     is_mfa_email_enabled,
     should_change_pass,
-    two_factor_secret
+    two_factor_secret,
+    preferred_2fa_method
 FROM
     "application_user"
 WHERE
@@ -91,7 +93,8 @@ SELECT
     is_mfa_auth_app_enabled,
     is_mfa_email_enabled,
     should_change_pass,
-    two_factor_secret
+    two_factor_secret,
+    preferred_2fa_method
 FROM
     "application_user"
 WHERE

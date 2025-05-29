@@ -6,7 +6,7 @@ import (
 
 	_ "github.com/gate-keeper/cmd/server/docs"
 	"github.com/gate-keeper/internal/infra/database"
-	http_controllers "github.com/gate-keeper/internal/presentation/http/controllers"
+	"github.com/gate-keeper/internal/presentation/http/routing"
 	"github.com/joho/godotenv"
 )
 
@@ -34,7 +34,7 @@ func main() {
 
 	defer pool.Close()
 
-	router := http_controllers.SetHttpRoutes(pool)
+	router := routing.SetHttpRoutes(pool)
 
 	slog.Info("✅ Server is running on port 8080")
 

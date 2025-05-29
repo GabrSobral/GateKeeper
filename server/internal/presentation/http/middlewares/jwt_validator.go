@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	application_utils "github.com/gate-keeper/internal/application/utils"
+	application_utils "github.com/gate-keeper/internal/features/utils"
 )
 
 func JwtHandler(next http.Handler) http.Handler {

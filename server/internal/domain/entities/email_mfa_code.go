@@ -6,6 +6,11 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	MFAApp   = 0
+	MFAEmail = 1
+)
+
 type EmailMfaCode struct {
 	ID        uuid.UUID
 	UserID    uuid.UUID

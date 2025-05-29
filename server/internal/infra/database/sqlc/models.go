@@ -11,6 +11,14 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+type AppMfaCode struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Email     string           `db:"email"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+}
+
 type Application struct {
 	ID                 uuid.UUID        `db:"id"`
 	OrganizationID     uuid.UUID        `db:"organization_id"`
@@ -92,6 +100,7 @@ type ApplicationUser struct {
 	ShouldChangePass    bool             `db:"should_change_pass"`
 	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
 	TwoFactorSecret     *string          `db:"two_factor_secret"`
+	Preferred2faMethod  pgtype.Int2      `db:"preferred_2fa_method"`
 }
 
 type ChangePasswordCode struct {
@@ -129,6 +138,15 @@ type ExternalLogin struct {
 	Email       string    `db:"email"`
 	Provider    string    `db:"provider"`
 	ProviderKey string    `db:"provider_key"`
+}
+
+type MfaUserSecret struct {
+	ID          uuid.UUID        `db:"id"`
+	UserID      uuid.UUID        `db:"user_id"`
+	Secret      string           `db:"secret"`
+	IsValidated bool             `db:"is_validated"`
+	CreatedAt   pgtype.Timestamp `db:"created_at"`
+	ExpiresAt   pgtype.Timestamp `db:"expires_at"`
 }
 
 type Organization struct {

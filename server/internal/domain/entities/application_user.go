@@ -19,6 +19,7 @@ type ApplicationUser struct {
 	IsMfaAuthAppEnabled bool
 	IsMfaEmailEnabled   bool
 	TwoFactorSecret     *string
+	Preferred2FAMethod  *int
 }
 
 func CreateApplicationUser(email string, passwordHash *string, applicationID uuid.UUID, shouldChangePass bool) (*ApplicationUser, error) {
@@ -41,6 +42,7 @@ func CreateApplicationUser(email string, passwordHash *string, applicationID uui
 		IsMfaAuthAppEnabled: false,
 		IsMfaEmailEnabled:   false,
 		TwoFactorSecret:     nil,
+		Preferred2FAMethod:  nil,
 	}, nil
 }
 

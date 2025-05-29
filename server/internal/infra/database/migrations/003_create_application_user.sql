@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS "application_user" (
     id UUID PRIMARY KEY,
     application_id UUID NOT NULL,
-    email VARCHAR(128) NOT NULL UNIQUE,
+    email VARCHAR(128) NOT NULL,
     password_hash VARCHAR(255) NULL,
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NULL,
@@ -11,7 +11,8 @@ CREATE TABLE IF NOT EXISTS "application_user" (
     is_mfa_auth_app_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     should_change_pass BOOLEAN NOT NULL DEFAULT FALSE,
     is_mfa_email_enabled BOOLEAN NOT NULL DEFAULT FALSE,
-    two_factor_secret VARCHAR(255) NULL
+    two_factor_secret VARCHAR(255) NULL,
+    preferred_2fa_method SMALLINT NULL
 );
 
 ---- create above / drop below ----
