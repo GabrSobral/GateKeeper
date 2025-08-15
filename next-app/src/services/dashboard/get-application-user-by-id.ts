@@ -18,8 +18,9 @@ export type UserByIdResponse = {
   isActive: boolean;
   address: string | null;
   photoUrl: string | null;
-  isMfaEmailEnabled: boolean;
-  isMfaAuthAppEnabled: boolean;
+  isMfaEmailConfigured: boolean;
+  isMfaAuthAppConfigured: boolean;
+  preferred2FAMethod: "email" | "sms" | "totp" | null;
   isEmailVerified: boolean;
   badges: {
     id: string;

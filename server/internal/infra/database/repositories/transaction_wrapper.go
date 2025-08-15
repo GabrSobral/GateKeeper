@@ -52,7 +52,7 @@ func WithTransaction[Request any, TService any](ctx context.Context, params Para
 
 	if err := fn.Handler(ctx, params.Request); err != nil && err != ErrNoRows {
 		tx.Rollback(ctx)
-		slog.Error("Transaction error, rolling back...", err.Error())
+		slog.Error("Transaction error, rolling back...", err.Error(), nil)
 
 		panic(err)
 	}
@@ -83,7 +83,7 @@ func WithTransactionRs[TRequest any, TResponse any, TService any](ctx context.Co
 
 	if err != nil && err != ErrNoRows {
 		tx.Rollback(ctx)
-		slog.Error("Transaction error, rolling back...", err.Error())
+		slog.Error("Transaction error, rolling back...", err.Error(), nil)
 
 		panic(err)
 	}

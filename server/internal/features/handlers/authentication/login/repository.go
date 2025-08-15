@@ -14,20 +14,67 @@ import (
 type IRepository interface {
 	GetApplicationByID(ctx context.Context, applicationID uuid.UUID) (*entities.Application, error)
 	GetUserProfileByID(ctx context.Context, userID uuid.UUID) (*entities.UserProfile, error)
+	GetMfaTotpSecretValidationByUserID(ctx context.Context, userID uuid.UUID) (*entities.MfaUserSecret, error)
 	GetUserByEmail(ctx context.Context, userEmail string, applicationID uuid.UUID) (*entities.ApplicationUser, error)
 	RevokeAllChangePasswordCodeByUserID(ctx context.Context, userID uuid.UUID) error
-	AddEmailMfaCode(ctx context.Context, emailMfaCode *entities.EmailMfaCode) error
-	AddAppMfaCode(ctx context.Context, appMfaCode *entities.AppMfaCode) error
+	AddMfaEmailCode(ctx context.Context, emailMfaCode *entities.MfaEmailCode) error
+	AddMfaTotpCode(ctx context.Context, mfaTotpCode *entities.MfaTotpCode) error
 	AddSessionCode(ctx context.Context, sessionCode *entities.SessionCode) error
 	AddChangePasswordCode(ctx context.Context, changePasswordCode *entities.ChangePasswordCode) error
+	GetMfaMethodByUserID(ctx context.Context, userID uuid.UUID, method string) (*entities.MfaMethod, error)
 }
 
 type Repository struct {
 	Store *pgstore.Queries
 }
 
+func (r Repository) GetMfaTotpSecretValidationByUserID(ctx context.Context, userID uuid.UUID) (*entities.MfaUserSecret, error) {
+	mfaUserSecret, err := r.Store.GetMfaTotpSecretValidationByUserId(ctx, userID)
+
+	if err == repositories.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.MfaUserSecret{
+		ID:          mfaUserSecret.ID,
+		UserID:      mfaUserSecret.UserID,
+		Secret:      mfaUserSecret.Secret,
+		IsValidated: mfaUserSecret.IsValidated,
+		CreatedAt:   mfaUserSecret.CreatedAt.Time,
+		ExpiresAt:   mfaUserSecret.ExpiresAt.Time,
+	}, nil
+}
+
+func (r Repository) GetMfaMethodByUserID(ctx context.Context, userID uuid.UUID, method string) (*entities.MfaMethod, error) {
+	mfaMethod, err := r.Store.GetMfaMethodByUserIDAndMethod(ctx, pgstore.GetMfaMethodByUserIDAndMethodParams{
+		UserID: userID,
+		Type:   method,
+	})
+
+	if err == repositories.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.MfaMethod{
+		ID:         mfaMethod.ID,
+		UserID:     mfaMethod.UserID,
+		Type:       mfaMethod.Type,
+		Enabled:    mfaMethod.Enabled,
+		CreatedAt:  mfaMethod.CreatedAt.Time,
+		LastUsedAt: mfaMethod.LastUsedAt,
+	}, nil
+}
+
 func (r Repository) AddSessionCode(ctx context.Context, sessionCode *entities.SessionCode) error {
-	err := r.Store.AddSessionCode(ctx, pgstore.AddSessionCodeParams{
+	err := r.Store.AddAuthorizationSession(ctx, pgstore.AddAuthorizationSessionParams{
 		ID:        sessionCode.ID,
 		UserID:    sessionCode.UserID,
 		Token:     sessionCode.Token,
@@ -39,27 +86,25 @@ func (r Repository) AddSessionCode(ctx context.Context, sessionCode *entities.Se
 	return err
 }
 
-func (r Repository) AddEmailMfaCode(ctx context.Context, emailMfaCode *entities.EmailMfaCode) error {
-	err := r.Store.AddEmailMfaCode(ctx, pgstore.AddEmailMfaCodeParams{
-		ID:        emailMfaCode.ID,
-		UserID:    emailMfaCode.UserID,
-		Email:     emailMfaCode.Email,
-		Token:     emailMfaCode.Token,
-		CreatedAt: pgtype.Timestamp{Time: emailMfaCode.CreatedAt, Valid: true},
-		ExpiresAt: pgtype.Timestamp{Time: emailMfaCode.ExpiresAt, Valid: true},
-		IsUsed:    emailMfaCode.IsUsed,
+func (r Repository) AddMfaEmailCode(ctx context.Context, emailMfaCode *entities.MfaEmailCode) error {
+	err := r.Store.AddMfaEmailCode(ctx, pgstore.AddMfaEmailCodeParams{
+		ID:          emailMfaCode.ID,
+		MfaMethodID: emailMfaCode.MfaMethodID,
+		Token:       emailMfaCode.Token,
+		CreatedAt:   pgtype.Timestamp{Time: emailMfaCode.CreatedAt, Valid: true},
+		ExpiresAt:   pgtype.Timestamp{Time: emailMfaCode.ExpiresAt, Valid: true},
+		Verified:    emailMfaCode.Verified,
 	})
 
 	return err
 }
 
-func (r Repository) AddAppMfaCode(ctx context.Context, appMfaCode *entities.AppMfaCode) error {
-	err := r.Store.AddAppMfaCode(ctx, pgstore.AddAppMfaCodeParams{
-		ID:        appMfaCode.ID,
-		UserID:    appMfaCode.UserID,
-		Email:     appMfaCode.Email,
-		CreatedAt: pgtype.Timestamp{Time: appMfaCode.CreatedAt, Valid: true},
-		ExpiresAt: pgtype.Timestamp{Time: appMfaCode.ExpiresAt, Valid: true},
+func (r Repository) AddMfaTotpCode(ctx context.Context, mfaTotpCode *entities.MfaTotpCode) error {
+	err := r.Store.AddMfaTotpCode(ctx, pgstore.AddMfaTotpCodeParams{
+		ID:          mfaTotpCode.ID,
+		MfaMethodID: mfaTotpCode.MfaMethodID,
+		Secret:      mfaTotpCode.Secret,
+		CreatedAt:   pgtype.Timestamp{Time: mfaTotpCode.CreatedAt, Valid: true},
 	})
 
 	return err
@@ -122,29 +167,17 @@ func (r Repository) GetUserByEmail(ctx context.Context, email string, applicatio
 		return nil, err
 	}
 
-	var preferred2faMethod *int
-
-	if user.Preferred2faMethod.Valid {
-		preferred2faMethodInt := int(user.Preferred2faMethod.Int16)
-		preferred2faMethod = &preferred2faMethodInt
-	} else {
-		preferred2faMethod = nil
-	}
-
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		TwoFactorSecret:     user.TwoFactorSecret,
-		Preferred2FAMethod:  preferred2faMethod,
+		ID:                 user.ID,
+		Email:              user.Email,
+		PasswordHash:       user.PasswordHash,
+		CreatedAt:          user.CreatedAt.Time,
+		UpdatedAt:          user.UpdatedAt,
+		IsActive:           user.IsActive,
+		IsEmailConfirmed:   user.IsEmailConfirmed,
+		ApplicationID:      user.ApplicationID,
+		ShouldChangePass:   user.ShouldChangePass,
+		Preferred2FAMethod: user.Preferred2faMethod,
 	}, nil
 }
 

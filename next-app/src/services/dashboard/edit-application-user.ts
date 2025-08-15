@@ -11,10 +11,11 @@ type Request = {
   email: string;
   isEmailConfirmed: boolean;
   temporaryPasswordHash: string | null;
-  isMfaAuthAppEnabled: boolean;
-  isMfaEmailEnabled: boolean;
   roles: string[];
   isActive: boolean;
+  preferred2FAMethod: string | null;
+  // isMfaAuthAppEnabled: boolean;
+  // isMfaEmailEnabled: boolean;
 };
 
 type Response = {
@@ -41,8 +42,9 @@ export async function editApplicationUserApi(
     lastName,
     email,
     isEmailConfirmed,
-    isMfaAuthAppEnabled,
-    isMfaEmailEnabled,
+    preferred2FAMethod,
+    // isMfaAuthAppEnabled,
+    // isMfaEmailEnabled,
     temporaryPasswordHash,
     roles,
     organizationId,
@@ -59,8 +61,9 @@ export async function editApplicationUserApi(
         lastName,
         email,
         isEmailConfirmed,
-        isMfaAuthAppEnabled,
-        isMfaEmailEnabled,
+        preferred2FAMethod,
+        // isMfaAuthAppEnabled,
+        // isMfaEmailEnabled,
         temporaryPasswordHash,
         roles,
         isActive,

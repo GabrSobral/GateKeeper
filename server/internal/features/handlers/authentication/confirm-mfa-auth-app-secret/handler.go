@@ -3,6 +3,7 @@ package confirmmfaauthappsecret
 import (
 	"context"
 
+	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/gate-keeper/internal/infra/database/repositories"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
@@ -30,42 +31,41 @@ func (s *Handler) Handler(ctx context.Context, command Command) error {
 		return &errors.ErrUserNotFound
 	}
 
-	if !user.IsMfaAuthAppEnabled {
-		return &errors.ErrMfaAuthAppNotEnabled
-	}
-
-	mfaUserSecret, err := s.repository.GetMfaUserSecretByUserID(ctx, user.ID)
+	mfaMethod, err := s.repository.GetMfaMethodByUserID(ctx, user.ID, entities.MfaMethodTotp)
 
 	if err != nil {
 		return err
 	}
 
-	if mfaUserSecret == nil {
+	if mfaMethod == nil {
+		return &errors.ErrMfaAuthAppNotEnabled
+	}
+
+	mfaTotpSecretValidation, err := s.repository.GetMfaTotpSecretValidationByUserId(ctx, command.UserID)
+
+	if err != nil {
+		return err
+	}
+
+	if mfaTotpSecretValidation == nil {
 		return &errors.ErrMfaUserSecretNotFound
 	}
 
-	// if mfaUserSecret.IsValidated {
-	// 	return &errors.ErrMfaUserSecretAlreadyValidated
-	// }
+	if mfaTotpSecretValidation.IsValidated {
+		return &errors.ErrMfaUserSecretAlreadyValidated
+	}
 
-	isValid := totp.Validate(command.MfaAuthAppCode, mfaUserSecret.Secret)
+	isValid := totp.Validate(command.MfaAuthAppCode, mfaTotpSecretValidation.Secret)
 
 	if !isValid {
 		return &errors.ErrInvalidMfaAuthAppCode
 	}
 
-	// mfaUserSecret.Validate()
+	mfaTotpSecretValidation.Validate()
 
-	// if err := s.repository.UpdateMfaUserSecret(ctx, mfaUserSecret); err != nil {
-	// 	return err
-	// }
-
-	if err := s.repository.RevokeMfaUserSecret(ctx, command.UserID); err != nil {
+	if err := s.repository.UpdateMfaTotpSecretValidation(ctx, mfaTotpSecretValidation); err != nil {
 		return err
 	}
-
-	user.TwoFactorSecret = &mfaUserSecret.Secret
-	s.repository.UpdateUser(ctx, user)
 
 	return nil
 }

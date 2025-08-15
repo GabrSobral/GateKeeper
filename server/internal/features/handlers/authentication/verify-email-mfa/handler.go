@@ -42,11 +42,21 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		return nil, &errors.ErrEmailNotConfirmed
 	}
 
-	if !user.IsMfaEmailEnabled {
+	if *user.Preferred2FAMethod != entities.MfaMethodEmail {
 		return nil, &errors.ErrMfaEmailNotEnabled
 	}
 
-	emailMfaCode, err := s.repository.GetEmailMfaCodeByToken(ctx, user.ID, command.Code)
+	mfaMethod, err := s.repository.GetMfaMethodByUserID(ctx, user.ID, entities.MfaMethodEmail)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if mfaMethod == nil || !mfaMethod.Enabled {
+		return nil, &errors.ErrMfaEmailNotEnabled
+	}
+
+	emailMfaCode, err := s.repository.GetMfaEmailCodeByToken(ctx, mfaMethod.ID, command.Code)
 
 	if err != nil {
 		return nil, &errors.ErrEmailMfaCodeNotFound

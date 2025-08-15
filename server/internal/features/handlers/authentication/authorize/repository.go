@@ -12,20 +12,20 @@ import (
 
 type IRepository interface {
 	GetUserByEmail(ctx context.Context, email string, applicationID uuid.UUID) (*entities.ApplicationUser, error)
-	GetSessionCodeByToken(ctx context.Context, userID uuid.UUID, sessionCodeToken string) (*entities.SessionCode, error)
+	GetAuthorizationSesson(ctx context.Context, userID uuid.UUID, sessionCodeToken string) (*entities.SessionCode, error)
 	DeleteSessionCodeByID(ctx context.Context, sessionCodeID uuid.UUID) error
 	RemoveAuthorizationCode(ctx context.Context, userID, applicationID uuid.UUID) error
 	AddAuthorizationCode(ctx context.Context, authorizationCode *entities.ApplicationAuthorizationCode) error
-	GetAppMfaCodeByID(ctx context.Context, id uuid.UUID) (*entities.AppMfaCode, error)
-	DeleteMfaAppCodeByID(ctx context.Context, id uuid.UUID) error
+	GetMfaTotpCodeByID(ctx context.Context, id uuid.UUID) (*entities.MfaTotpCode, error)
+	DeleteMfaTotpCodeByID(ctx context.Context, id uuid.UUID) error
 }
 
 type Repository struct {
 	Store *pgstore.Queries
 }
 
-func (r Repository) GetAppMfaCodeByID(ctx context.Context, id uuid.UUID) (*entities.AppMfaCode, error) {
-	appMfaCode, err := r.Store.GetAppMfaCodeByID(ctx, id)
+func (r Repository) GetMfaTotpCodeByID(ctx context.Context, id uuid.UUID) (*entities.MfaTotpCode, error) {
+	appMfaCode, err := r.Store.GetMfaTotpCodeByID(ctx, id)
 
 	if err == repositories.ErrNoRows {
 		return nil, nil
@@ -35,17 +35,16 @@ func (r Repository) GetAppMfaCodeByID(ctx context.Context, id uuid.UUID) (*entit
 		return nil, err
 	}
 
-	return &entities.AppMfaCode{
-		ID:        appMfaCode.ID,
-		UserID:    appMfaCode.UserID,
-		Email:     appMfaCode.Email,
-		CreatedAt: appMfaCode.CreatedAt.Time,
-		ExpiresAt: appMfaCode.ExpiresAt.Time,
+	return &entities.MfaTotpCode{
+		ID:          appMfaCode.ID,
+		MfaMethodID: appMfaCode.MfaMethodID,
+		Secret:      appMfaCode.Secret,
+		CreatedAt:   appMfaCode.CreatedAt.Time,
 	}, nil
 }
 
-func (r Repository) DeleteMfaAppCodeByID(ctx context.Context, id uuid.UUID) error {
-	err := r.Store.DeleteAppMfaCode(ctx, id)
+func (r Repository) DeleteMfaTotpCodeByID(ctx context.Context, id uuid.UUID) error {
+	err := r.Store.DeleteMfaTotpCode(ctx, id)
 
 	if err != nil {
 		return err
@@ -65,23 +64,20 @@ func (r Repository) GetUserByEmail(ctx context.Context, email string, applicatio
 	}
 
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		TwoFactorSecret:     user.TwoFactorSecret,
+		ID:               user.ID,
+		Email:            user.Email,
+		PasswordHash:     user.PasswordHash,
+		CreatedAt:        user.CreatedAt.Time,
+		UpdatedAt:        user.UpdatedAt,
+		IsActive:         user.IsActive,
+		IsEmailConfirmed: user.IsEmailConfirmed,
+		ApplicationID:    user.ApplicationID,
+		ShouldChangePass: user.ShouldChangePass,
 	}, nil
 }
 
-func (r Repository) GetSessionCodeByToken(ctx context.Context, userID uuid.UUID, sessionCodeToken string) (*entities.SessionCode, error) {
-	emailConfirmation, err := r.Store.GetSessionCodeByToken(ctx, pgstore.GetSessionCodeByTokenParams{
+func (r Repository) GetAuthorizationSesson(ctx context.Context, userID uuid.UUID, sessionCodeToken string) (*entities.SessionCode, error) {
+	emailConfirmation, err := r.Store.GetAuthorizationSession(ctx, pgstore.GetAuthorizationSessionParams{
 		Token:  sessionCodeToken,
 		UserID: userID,
 	})
@@ -105,7 +101,7 @@ func (r Repository) GetSessionCodeByToken(ctx context.Context, userID uuid.UUID,
 }
 
 func (r Repository) DeleteSessionCodeByID(ctx context.Context, sessionCodeID uuid.UUID) error {
-	err := r.Store.DeleteSessionCode(ctx, sessionCodeID)
+	err := r.Store.DeleteAuthorizationSession(ctx, sessionCodeID)
 
 	return err
 }

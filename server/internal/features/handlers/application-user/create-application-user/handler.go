@@ -59,8 +59,8 @@ func (s *Handler) Handler(ctx context.Context, request Command) (*Response, erro
 		return nil, err
 	}
 
-	applicationUser.IsMfaAuthAppEnabled = request.IsMfaAuthAppEnabled
-	applicationUser.IsMfaEmailEnabled = request.IsMfaEmailEnabled
+	// applicationUser.IsMfaAuthAppEnabled = request.IsMfaAuthAppEnabled
+	// applicationUser.IsMfaEmailEnabled = request.IsMfaEmailEnabled
 	applicationUser.IsEmailConfirmed = request.IsEmailConfirmed
 
 	applicationUserProfile := entities.NewUserProfile(

@@ -8,11 +8,11 @@ CREATE TABLE IF NOT EXISTS "application_user" (
     updated_at TIMESTAMP NULL,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     is_email_confirmed BOOLEAN NOT NULL DEFAULT FALSE,
-    is_mfa_auth_app_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     should_change_pass BOOLEAN NOT NULL DEFAULT FALSE,
-    is_mfa_email_enabled BOOLEAN NOT NULL DEFAULT FALSE,
     two_factor_secret VARCHAR(255) NULL,
-    preferred_2fa_method SMALLINT NULL
+    preferred_2fa_method VARCHAR(24) NULL,
+    /* application_user >- application = fk_application_user_application */
+    CONSTRAINT fk_application_user_application FOREIGN KEY (application_id) REFERENCES "application" (id) ON DELETE CASCADE
 );
 
 ---- create above / drop below ----

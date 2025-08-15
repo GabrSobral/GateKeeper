@@ -13,7 +13,7 @@ import (
 type IRepository interface {
 	GetUserByEmail(ctx context.Context, email string, applicationID uuid.UUID) (*entities.ApplicationUser, error)
 	GetSessionCodeByToken(ctx context.Context, userID uuid.UUID, sessionCodeToken string) (*entities.SessionCode, error)
-	DeleteSessionCodeByID(ctx context.Context, sessionCodeID uuid.UUID) error
+	DeleteAuthorizationSession(ctx context.Context, sessionCodeID uuid.UUID) error
 	RemoveAuthorizationCode(ctx context.Context, userID, applicationID uuid.UUID) error
 	AddAuthorizationCode(ctx context.Context, authorizationCode *entities.ApplicationAuthorizationCode) error
 }
@@ -33,23 +33,21 @@ func (r Repository) GetUserByEmail(ctx context.Context, email string, applicatio
 	}
 
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		TwoFactorSecret:     user.TwoFactorSecret,
+		ID:                 user.ID,
+		Email:              user.Email,
+		PasswordHash:       user.PasswordHash,
+		CreatedAt:          user.CreatedAt.Time,
+		UpdatedAt:          user.UpdatedAt,
+		IsActive:           user.IsActive,
+		IsEmailConfirmed:   user.IsEmailConfirmed,
+		ApplicationID:      user.ApplicationID,
+		ShouldChangePass:   user.ShouldChangePass,
+		Preferred2FAMethod: user.Preferred2faMethod,
 	}, nil
 }
 
 func (r Repository) GetSessionCodeByToken(ctx context.Context, userID uuid.UUID, sessionCodeToken string) (*entities.SessionCode, error) {
-	emailConfirmation, err := r.Store.GetSessionCodeByToken(ctx, pgstore.GetSessionCodeByTokenParams{
+	emailConfirmation, err := r.Store.GetAuthorizationSession(ctx, pgstore.GetAuthorizationSessionParams{
 		Token:  sessionCodeToken,
 		UserID: userID,
 	})
@@ -72,8 +70,8 @@ func (r Repository) GetSessionCodeByToken(ctx context.Context, userID uuid.UUID,
 	}, nil
 }
 
-func (r Repository) DeleteSessionCodeByID(ctx context.Context, sessionCodeID uuid.UUID) error {
-	err := r.Store.DeleteSessionCode(ctx, sessionCodeID)
+func (r Repository) DeleteAuthorizationSession(ctx context.Context, sessionCodeID uuid.UUID) error {
+	err := r.Store.DeleteAuthorizationSession(ctx, sessionCodeID)
 
 	return err
 }

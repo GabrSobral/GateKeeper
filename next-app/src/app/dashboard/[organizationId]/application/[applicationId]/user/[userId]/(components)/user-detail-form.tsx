@@ -69,12 +69,13 @@ export function UserDetailForm({ user }: Props) {
       email: user?.email || "",
       firstName: user?.firstName || "",
       lastName: user?.lastName || "",
-      hasMfaAuthAppEnabled: user?.isMfaAuthAppEnabled || false,
-      hasMfaEmailEnabled: user?.isMfaEmailEnabled || false,
       roles: user?.badges.map((role) => role.id) || [],
       temporaryPassword: "",
+      preferred2FAMethod: user?.preferred2FAMethod || null,
       isEmailConfirmed: user?.isEmailVerified || false,
       isActive: user?.isActive || false,
+      IsMfaAuthAppConfigured: user?.isMfaAuthAppConfigured || false,
+      isMfaEmailConfigured: user?.isMfaEmailConfigured || false,
     },
   });
 
@@ -92,8 +93,7 @@ export function UserDetailForm({ user }: Props) {
         lastName: values.lastName,
         isEmailConfirmed: values.isEmailConfirmed,
         roles: values.roles,
-        isMfaAuthAppEnabled: values.hasMfaAuthAppEnabled,
-        isMfaEmailEnabled: values.hasMfaEmailEnabled,
+        preferred2FAMethod: values.preferred2FAMethod,
         temporaryPasswordHash: values.temporaryPassword || null,
         isActive: values.isActive,
       },
@@ -135,8 +135,7 @@ export function UserDetailForm({ user }: Props) {
     form.setValue("isEmailConfirmed", user?.isEmailVerified || false);
     form.setValue("isActive", user?.isActive || false);
     form.setValue("roles", user?.badges.map((role) => role.id) || []);
-    form.setValue("hasMfaAuthAppEnabled", user?.isMfaAuthAppEnabled || false);
-    form.setValue("hasMfaEmailEnabled", user?.isMfaEmailEnabled || false);
+    form.setValue("preferred2FAMethod", user?.preferred2FAMethod || null);
     form.setValue("displayName", user?.displayName || "");
     form.setValue("email", user?.email || "");
     form.setValue("firstName", user?.firstName || "");

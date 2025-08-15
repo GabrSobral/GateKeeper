@@ -1,12 +1,14 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 
 import { generateMfaToken } from "@/lib/utils/generate-mfa-token";
 import { generateQrCode } from "@/lib/utils/generate-qrcode";
+import { confirmMfaUserSecret } from "@/lib/utils/confirm-mfa-user-secret";
 
 export function GenerateMfaSecretButton() {
   const qrCodeCanvas = useRef<HTMLCanvasElement | null>(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   function generateMfaTokenHandler() {
     if (qrCodeCanvas.current) {
@@ -44,6 +46,38 @@ export function GenerateMfaSecretButton() {
           className="border border-gray-300 rounded-md"
         ></canvas>
       </div>
+
+      <input
+        type="text"
+        placeholder="Enter MFA Auth App Code"
+        value={mfaCode}
+        onChange={(e) => setMfaCode(e.target.value)}
+        className="mt-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+
+      <button
+        type="button"
+        onClick={async () => {
+          if (mfaCode) {
+            console.log("MFA Auth App Code:", mfaCode);
+            // Call the function to confirm the MFA secret here
+            try {
+              await confirmMfaUserSecret({ mfaAuthAppCode: mfaCode });
+              alert("MFA Secret Confirmed!");
+            } catch (error) {
+              alert("MFA Auth App Code is required.");
+              console.error("Error confirming MFA secret:", error);
+            }
+          } else {
+            console.error("MFA Auth App Code is required.");
+
+            alert("MFA Auth App Code is required.");
+          }
+        }}
+        className="mt-4 px-4 py-2 text-white bg-green-500 rounded-md shadow-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:ring-offset-white"
+      >
+        Confirm MFA Secret
+      </button>
     </div>
   );
 }

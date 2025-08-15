@@ -78,6 +78,10 @@ var (
 	ErrMfaCodeNotFound = CustomError{Name: "ErrMfaCodeNotFound", Code: http.StatusNotFound, Message: "MFA code not found", Title: "MFA code not found"}
 	ErrMfaCodeExpired  = CustomError{Name: "ErrMfaCodeExpired", Code: http.StatusBadRequest, Message: "MFA code expired", Title: "MFA code expired"}
 	ErrMfaCodeRequired = CustomError{Name: "ErrMfaCodeRequired", Code: http.StatusBadRequest, Message: "MFA code is required", Title: "MFA code required"}
+
+	ErrInvalid2FAMethod    = CustomError{Name: "ErrInvalid2FAMethod", Code: http.StatusBadRequest, Message: "Invalid 2FA method", Title: "Invalid 2FA method"}
+	ErrMfaMethodNotFound   = CustomError{Name: "ErrMfaMethodNotFound", Code: http.StatusNotFound, Message: "MFA method not found", Title: "MFA method not found"}
+	ErrMfaMethodNotEnabled = CustomError{Name: "ErrMfaMethodNotEnabled", Code: http.StatusBadRequest, Message: "MFA method not enabled", Title: "MFA method not enabled"}
 )
 
 var ErrorsList = map[string]CustomError{
@@ -130,4 +134,7 @@ var ErrorsList = map[string]CustomError{
 	"ErrMfaCodeNotFound":                     ErrMfaCodeNotFound,
 	"ErrMfaCodeExpired":                      ErrMfaCodeExpired,
 	"ErrMfaCodeRequired":                     ErrMfaCodeRequired,
+	"ErrInvalid2FAMethod":                    ErrInvalid2FAMethod,
+	"ErrMfaMethodNotFound":                   ErrMfaMethodNotFound,
+	"ErrMfaMethodNotEnabled":                 ErrMfaMethodNotEnabled,
 }

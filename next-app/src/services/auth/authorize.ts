@@ -11,6 +11,7 @@ type Request = {
   scope: string;
   state: string;
   codeChallenge: string;
+  mfaId?: string;
 };
 
 type Response = {

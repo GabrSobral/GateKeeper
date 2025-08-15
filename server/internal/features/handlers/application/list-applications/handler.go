@@ -5,25 +5,21 @@ import (
 
 	"github.com/gate-keeper/internal/domain/errors"
 	"github.com/gate-keeper/internal/infra/database/repositories"
-	repository_handlers "github.com/gate-keeper/internal/infra/database/repositories/handlers"
-	repository_interfaces "github.com/gate-keeper/internal/infra/database/repositories/interfaces"
 	pgstore "github.com/gate-keeper/internal/infra/database/sqlc"
 )
 
 type Handler struct {
-	OrganizationRepository repository_interfaces.IOrganizationRepository
-	ApplicationRepository  repository_interfaces.IApplicationRepository
+	Repository IRepository
 }
 
 func New(q *pgstore.Queries) repositories.ServiceHandlerRs[Query, *[]Response] {
 	return &Handler{
-		OrganizationRepository: repository_handlers.OrganizationRepository{Store: q},
-		ApplicationRepository:  repository_handlers.ApplicationRepository{Store: q},
+		Repository: Repository{Store: q},
 	}
 }
 
 func (s *Handler) Handler(ctx context.Context, query Query) (*[]Response, error) {
-	organization, err := s.OrganizationRepository.GetOrganizationByID(ctx, query.OrganizationID)
+	organization, err := s.Repository.GetOrganizationByID(ctx, query.OrganizationID)
 
 	if err != nil {
 		return nil, err
@@ -33,7 +29,7 @@ func (s *Handler) Handler(ctx context.Context, query Query) (*[]Response, error)
 		return nil, &errors.ErrOrganizationNotFound
 	}
 
-	applications, err := s.ApplicationRepository.ListApplicationsFromOrganization(ctx, organization.ID)
+	applications, err := s.Repository.ListApplicationsFromOrganization(ctx, organization.ID)
 
 	if err != nil {
 		return nil, err

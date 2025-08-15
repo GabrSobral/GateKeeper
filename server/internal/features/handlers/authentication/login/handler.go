@@ -63,6 +63,7 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 
 	var changePasswordCode *entities.ChangePasswordCode = nil
 
+	// If the user should change their password, create a new change password code
 	if user.ShouldChangePass {
 		changePasswordCode = entities.NewChangePasswordCode(user.ID, user.Email)
 
@@ -71,72 +72,102 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		}
 	}
 
-	if user.Preferred2FAMethod != nil && *user.Preferred2FAMethod == entities.MFAEmail {
+	// #region mfa email method
+	if user.Preferred2FAMethod != nil && *user.Preferred2FAMethod == entities.MfaMethodEmail {
 		userProfile, err := s.repository.GetUserProfileByID(ctx, user.ID)
 
 		if err != nil {
-			panic(err)
+			return nil, err
 		}
 
-		emailMfaCode := entities.NewEmailMfaCode(user.ID, user.Email)
+		mfaMethod, err := s.repository.GetMfaMethodByUserID(ctx, user.ID, *user.Preferred2FAMethod)
 
-		if err := s.repository.AddEmailMfaCode(ctx, emailMfaCode); err != nil {
-			panic(err)
+		if err != nil {
+			return nil, err
+		}
+
+		if mfaMethod == nil {
+			return nil, &errors.ErrMfaMethodNotFound
+		}
+
+		if !mfaMethod.Enabled {
+			return nil, &errors.ErrMfaMethodNotEnabled
+		}
+
+		mfaEmailCode := entities.NewMfaEmailCode(mfaMethod.ID)
+
+		if err := s.repository.AddMfaEmailCode(ctx, mfaEmailCode); err != nil {
+			return nil, err
 		}
 
 		go func() {
-			if err := s.mailService.SendMfaEmail(ctx, user.Email, userProfile.FirstName, emailMfaCode.Token); err != nil {
+			if err := s.mailService.SendMfaEmail(ctx, user.Email, userProfile.FirstName, mfaEmailCode.Token); err != nil {
 				panic(err)
 			}
 		}()
 
-		if changePasswordCode == nil {
-			return &Response{
-				MfaType:            user.Preferred2FAMethod,
-				MfaID:              &emailMfaCode.ID,
-				ChangePasswordCode: nil,
-				Message:            "MFA is required, please enter the code from your authentication app",
-				SessionCode:        nil,
-				UserID:             user.ID,
-			}, nil
-		}
-
-		return &Response{
+		response := &Response{
 			MfaType:            user.Preferred2FAMethod,
-			MfaID:              &emailMfaCode.ID,
-			ChangePasswordCode: &changePasswordCode.Token,
-			Message:            "MFA is required, please enter the code from your authentication app",
+			ChangePasswordCode: nil,
+			Message:            "MFA is required, please enter the code that we sent yo your e-mail",
 			SessionCode:        nil,
 			UserID:             user.ID,
-		}, nil
+			MfaID:              &mfaMethod.ID,
+		}
+
+		if changePasswordCode != nil {
+			response.ChangePasswordCode = &changePasswordCode.Token
+		}
+
+		return response, nil
 	}
+	// #endregion
 
-	if user.Preferred2FAMethod != nil && *user.Preferred2FAMethod == entities.MFAApp {
-		appMfaCode := entities.NewAppMfaCode(user.ID, user.Email)
+	if user.Preferred2FAMethod != nil && *user.Preferred2FAMethod == entities.MfaMethodTotp {
+		mfaMethod, err := s.repository.GetMfaMethodByUserID(ctx, user.ID, *user.Preferred2FAMethod)
 
-		if err := s.repository.AddAppMfaCode(ctx, appMfaCode); err != nil {
-			panic(err)
+		if err != nil {
+			return nil, err
 		}
 
-		if changePasswordCode == nil {
-			return &Response{
-				MfaType:            user.Preferred2FAMethod,
-				MfaID:              &appMfaCode.ID,
-				ChangePasswordCode: nil,
-				Message:            "MFA is required, please enter the code from your authentication app",
-				SessionCode:        nil,
-				UserID:             user.ID,
-			}, nil
+		if mfaMethod == nil {
+			return nil, &errors.ErrMfaMethodNotFound
 		}
 
-		return &Response{
+		if !mfaMethod.Enabled {
+			return nil, &errors.ErrMfaMethodNotEnabled
+		}
+
+		mfaTotpSecretValidation, err := s.repository.GetMfaTotpSecretValidationByUserID(ctx, user.ID)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if mfaTotpSecretValidation == nil {
+			return nil, &errors.ErrMfaUserSecretNotFound
+		}
+
+		mfaTotpCode := entities.NewMfaTotpCode(mfaMethod.ID, mfaTotpSecretValidation.Secret)
+
+		if err := s.repository.AddMfaTotpCode(ctx, mfaTotpCode); err != nil {
+			return nil, err
+		}
+
+		response := &Response{
 			MfaType:            user.Preferred2FAMethod,
-			MfaID:              &appMfaCode.ID,
-			ChangePasswordCode: &changePasswordCode.Token,
+			ChangePasswordCode: nil,
 			Message:            "MFA is required, please enter the code from your authentication app",
 			SessionCode:        nil,
 			UserID:             user.ID,
-		}, nil
+			MfaID:              &mfaTotpCode.ID,
+		}
+
+		if changePasswordCode != nil {
+			response.ChangePasswordCode = &changePasswordCode.Token
+		}
+
+		return response, nil
 	}
 
 	sessionToken, err := entities.CreateSessionCode(
@@ -157,7 +188,6 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 	if changePasswordCode == nil {
 		return &Response{
 			MfaType:            nil,
-			MfaID:              nil,
 			Message:            "Login successful",
 			ChangePasswordCode: nil,
 			SessionCode:        &tokenString,
@@ -167,7 +197,6 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 
 	return &Response{
 		MfaType:            nil,
-		MfaID:              nil,
 		Message:            "Login successful",
 		ChangePasswordCode: &changePasswordCode.Token,
 		SessionCode:        &tokenString,

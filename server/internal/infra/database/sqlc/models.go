@@ -11,14 +11,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-type AppMfaCode struct {
-	ID        uuid.UUID        `db:"id"`
-	UserID    uuid.UUID        `db:"user_id"`
-	Email     string           `db:"email"`
-	CreatedAt pgtype.Timestamp `db:"created_at"`
-	ExpiresAt pgtype.Timestamp `db:"expires_at"`
-}
-
 type Application struct {
 	ID                 uuid.UUID        `db:"id"`
 	OrganizationID     uuid.UUID        `db:"organization_id"`
@@ -88,19 +80,26 @@ type ApplicationSecret struct {
 }
 
 type ApplicationUser struct {
-	ID                  uuid.UUID        `db:"id"`
-	ApplicationID       uuid.UUID        `db:"application_id"`
-	Email               string           `db:"email"`
-	PasswordHash        *string          `db:"password_hash"`
-	CreatedAt           pgtype.Timestamp `db:"created_at"`
-	UpdatedAt           *time.Time       `db:"updated_at"`
-	IsActive            bool             `db:"is_active"`
-	IsEmailConfirmed    bool             `db:"is_email_confirmed"`
-	IsMfaAuthAppEnabled bool             `db:"is_mfa_auth_app_enabled"`
-	ShouldChangePass    bool             `db:"should_change_pass"`
-	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
-	TwoFactorSecret     *string          `db:"two_factor_secret"`
-	Preferred2faMethod  pgtype.Int2      `db:"preferred_2fa_method"`
+	ID                 uuid.UUID        `db:"id"`
+	ApplicationID      uuid.UUID        `db:"application_id"`
+	Email              string           `db:"email"`
+	PasswordHash       *string          `db:"password_hash"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
+	IsActive           bool             `db:"is_active"`
+	IsEmailConfirmed   bool             `db:"is_email_confirmed"`
+	ShouldChangePass   bool             `db:"should_change_pass"`
+	TwoFactorSecret    *string          `db:"two_factor_secret"`
+	Preferred2faMethod *string          `db:"preferred_2fa_method"`
+}
+
+type AuthorizationSession struct {
+	ID        uuid.UUID        `db:"id"`
+	UserID    uuid.UUID        `db:"user_id"`
+	Token     string           `db:"token"`
+	CreatedAt pgtype.Timestamp `db:"created_at"`
+	ExpiresAt pgtype.Timestamp `db:"expires_at"`
+	IsUsed    bool             `db:"is_used"`
 }
 
 type ChangePasswordCode struct {
@@ -123,16 +122,6 @@ type EmailConfirmation struct {
 	IsUsed    bool             `db:"is_used"`
 }
 
-type EmailMfaCode struct {
-	ID        uuid.UUID        `db:"id"`
-	UserID    uuid.UUID        `db:"user_id"`
-	Email     string           `db:"email"`
-	Token     string           `db:"token"`
-	CreatedAt pgtype.Timestamp `db:"created_at"`
-	ExpiresAt pgtype.Timestamp `db:"expires_at"`
-	IsUsed    bool             `db:"is_used"`
-}
-
 type ExternalLogin struct {
 	UserID      uuid.UUID `db:"user_id"`
 	Email       string    `db:"email"`
@@ -140,7 +129,32 @@ type ExternalLogin struct {
 	ProviderKey string    `db:"provider_key"`
 }
 
-type MfaUserSecret struct {
+type MfaEmailCode struct {
+	ID          uuid.UUID        `db:"id"`
+	MfaMethodID uuid.UUID        `db:"mfa_method_id"`
+	Token       string           `db:"token"`
+	CreatedAt   pgtype.Timestamp `db:"created_at"`
+	ExpiresAt   pgtype.Timestamp `db:"expires_at"`
+	Verified    bool             `db:"verified"`
+}
+
+type MfaMethod struct {
+	ID         uuid.UUID        `db:"id"`
+	UserID     uuid.UUID        `db:"user_id"`
+	Type       string           `db:"type"`
+	Enabled    bool             `db:"enabled"`
+	CreatedAt  pgtype.Timestamp `db:"created_at"`
+	LastUsedAt *time.Time       `db:"last_used_at"`
+}
+
+type MfaTotpCode struct {
+	ID          uuid.UUID        `db:"id"`
+	MfaMethodID uuid.UUID        `db:"mfa_method_id"`
+	Secret      string           `db:"secret"`
+	CreatedAt   pgtype.Timestamp `db:"created_at"`
+}
+
+type MfaTotpSecretValidation struct {
 	ID          uuid.UUID        `db:"id"`
 	UserID      uuid.UUID        `db:"user_id"`
 	Secret      string           `db:"secret"`
@@ -171,15 +185,6 @@ type RefreshToken struct {
 	AvailableRefreshes int32            `db:"available_refreshes"`
 	ExpiresAt          pgtype.Timestamp `db:"expires_at"`
 	CreatedAt          pgtype.Timestamp `db:"created_at"`
-}
-
-type SessionCode struct {
-	ID        uuid.UUID        `db:"id"`
-	UserID    uuid.UUID        `db:"user_id"`
-	Token     string           `db:"token"`
-	CreatedAt pgtype.Timestamp `db:"created_at"`
-	ExpiresAt pgtype.Timestamp `db:"expires_at"`
-	IsUsed    bool             `db:"is_used"`
 }
 
 type UserProfile struct {

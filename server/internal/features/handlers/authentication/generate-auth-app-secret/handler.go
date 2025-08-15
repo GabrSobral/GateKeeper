@@ -42,7 +42,13 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		return nil, &errors.ErrUserNotFound
 	}
 
-	if !user.IsMfaAuthAppEnabled {
+	mfaMethod, err := s.repository.GetMfaMethodByUserID(ctx, user.ID, entities.MfaMethodTotp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if mfaMethod == nil {
 		return nil, &errors.ErrMfaAuthAppNotEnabled
 	}
 
@@ -65,8 +71,8 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 
 	mfaUserSecret := entities.NewMfaUserSecret(user.ID, secret)
 
-	s.repository.RevokeMfaUserSecret(ctx, user.ID)
-	s.repository.AddMfaUserSecret(ctx, mfaUserSecret)
+	// s.repository.RevokeMfaUserSecret(ctx, user.ID)
+	s.repository.AddMfaTotpSecretValidation(ctx, mfaUserSecret)
 
 	// user.TwoFactorSecret = &secret
 	// s.repository.UpdateUser(ctx, user)

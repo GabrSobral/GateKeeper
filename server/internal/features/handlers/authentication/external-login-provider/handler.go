@@ -73,18 +73,15 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		}
 
 		user = &entities.ApplicationUser{
-			ID:                  userID,
-			Email:               command.Email,
-			PasswordHash:        nil,
-			CreatedAt:           time.Now(),
-			UpdatedAt:           nil,
-			IsActive:            true,
-			IsEmailConfirmed:    true,
-			IsMfaAuthAppEnabled: false,
-			IsMfaEmailEnabled:   false,
-			ApplicationID:       command.ApplicationID,
-			ShouldChangePass:    false,
-			TwoFactorSecret:     nil,
+			ID:               userID,
+			Email:            command.Email,
+			PasswordHash:     nil,
+			CreatedAt:        time.Now(),
+			UpdatedAt:        nil,
+			IsActive:         true,
+			IsEmailConfirmed: true,
+			ApplicationID:    command.ApplicationID,
+			ShouldChangePass: false,
 		}
 
 		if err = s.repository.AddUser(ctx, user); err != nil {

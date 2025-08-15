@@ -16,6 +16,7 @@ type IRepository interface {
 	GetUserByID(ctx context.Context, userID uuid.UUID) (*entities.ApplicationUser, error)
 	GetUserProfileByID(ctx context.Context, userID uuid.UUID) (*entities.UserProfile, error)
 	GetRolesByUserID(ctx context.Context, userID uuid.UUID) ([]entities.ApplicationRole, error)
+	GetUserMfaMethods(ctx context.Context, userID uuid.UUID) ([]*entities.MfaMethod, error)
 }
 
 type Repository struct {
@@ -78,19 +79,40 @@ func (r Repository) GetUserByID(ctx context.Context, id uuid.UUID) (*entities.Ap
 	}
 
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		TwoFactorSecret:     user.TwoFactorSecret,
+		ID:                 user.ID,
+		Email:              user.Email,
+		PasswordHash:       user.PasswordHash,
+		CreatedAt:          user.CreatedAt.Time,
+		UpdatedAt:          user.UpdatedAt,
+		IsActive:           user.IsActive,
+		IsEmailConfirmed:   user.IsEmailConfirmed,
+		ApplicationID:      user.ApplicationID,
+		ShouldChangePass:   user.ShouldChangePass,
+		Preferred2FAMethod: user.Preferred2faMethod,
 	}, nil
+}
+
+func (r Repository) GetUserMfaMethods(ctx context.Context, userID uuid.UUID) ([]*entities.MfaMethod, error) {
+	mfaMethods, err := r.Store.GetUserMfaMethods(ctx, userID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*entities.MfaMethod
+
+	for _, method := range mfaMethods {
+		result = append(result, &entities.MfaMethod{
+			ID:         method.ID,
+			Type:       method.Type,
+			UserID:     method.UserID,
+			Enabled:    method.Enabled,
+			CreatedAt:  method.CreatedAt.Time,
+			LastUsedAt: method.LastUsedAt,
+		})
+	}
+
+	return result, nil
 }
 
 func (r Repository) GetRolesByUserID(ctx context.Context, userID uuid.UUID) ([]entities.ApplicationRole, error) {

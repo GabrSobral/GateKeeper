@@ -2,7 +2,6 @@ package verifyappmfa
 
 import (
 	"context"
-	"time"
 
 	"github.com/gate-keeper/internal/domain/entities"
 	"github.com/gate-keeper/internal/domain/errors"
@@ -43,49 +42,47 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		return nil, &errors.ErrEmailNotConfirmed
 	}
 
-	if !user.IsMfaEmailEnabled {
+	mfaMethod, err := s.repository.GetMfaMethodByUserIDAndMethod(ctx, user.ID, entities.MfaMethodTotp)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !mfaMethod.Enabled {
 		return nil, &errors.ErrMfaAppNotEnabled
 	}
 
-	if user.TwoFactorSecret == nil {
-		return nil, &errors.ErrMfaAppNotEnabled
-	}
-
-	appMfaCode, err := s.repository.GetAppMfaCodeByID(ctx, *command.MfaID)
+	mfaTotpCode, err := s.repository.GetMfaTotpCodeByID(ctx, *command.MfaID)
 
 	if err != nil {
 		return nil, &errors.ErrAppMfaCodeNotFound
 	}
 
-	if appMfaCode == nil {
+	if mfaTotpCode == nil {
 		return nil, &errors.ErrAppMfaCodeNotFound
 	}
 
-	if appMfaCode.ExpiresAt.Before(time.Now().UTC()) {
-		return nil, &errors.ErrAppMfaCodeExpired
-	}
-
-	if err := s.repository.DeleteAppMfaCodeByID(ctx, appMfaCode.ID); err != nil {
+	if err := s.repository.DeleteMfaTotpCode(ctx, mfaTotpCode.ID); err != nil {
 		return nil, err
 	}
 
-	isValid := totp.Validate(command.Code, *user.TwoFactorSecret)
+	isValid := totp.Validate(command.Code, mfaTotpCode.Secret)
 
 	if !isValid {
 		return nil, &errors.ErrInvalidMfaAuthAppCode
 	}
 
-	sessionCode, err := entities.CreateSessionCode(user.ID, command.ApplicationID)
+	authorizationSession, err := entities.CreateSessionCode(user.ID, command.ApplicationID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	if err := s.repository.AddSessionCode(ctx, sessionCode); err != nil {
+	if err := s.repository.AddAuthorizationSession(ctx, authorizationSession); err != nil {
 		return nil, err
 	}
 
 	return &Response{
-		SessionCode: sessionCode.Token,
+		SessionCode: authorizationSession.Token,
 	}, nil
 }

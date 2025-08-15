@@ -11,24 +11,49 @@ import (
 )
 
 type IRepository interface {
-	AddSessionCode(ctx context.Context, sessionCode *entities.SessionCode) error
-	DeleteAppMfaCodeByID(ctx context.Context, appMfaCodeID uuid.UUID) error
-	GetAppMfaCodeByID(ctx context.Context, id uuid.UUID) (*entities.AppMfaCode, error)
+	AddAuthorizationSession(ctx context.Context, sessionCode *entities.SessionCode) error
+	DeleteMfaTotpCode(ctx context.Context, appMfaCodeID uuid.UUID) error
+	GetMfaTotpCodeByID(ctx context.Context, id uuid.UUID) (*entities.MfaTotpCode, error)
 	GetUserByEmail(ctx context.Context, email string, applicationID uuid.UUID) (*entities.ApplicationUser, error)
+	GetMfaMethodByUserIDAndMethod(ctx context.Context, userID uuid.UUID, method string) (*entities.MfaMethod, error)
 }
 
 type Repository struct {
 	Store *pgstore.Queries
 }
 
-func (r Repository) DeleteAppMfaCodeByID(ctx context.Context, appMfaCodeID uuid.UUID) error {
-	err := r.Store.DeleteAppMfaCode(ctx, appMfaCodeID)
+func (r Repository) GetMfaMethodByUserIDAndMethod(ctx context.Context, userID uuid.UUID, method string) (*entities.MfaMethod, error) {
+	mfaMethod, err := r.Store.GetMfaMethodByUserIDAndMethod(ctx, pgstore.GetMfaMethodByUserIDAndMethodParams{
+		UserID: userID,
+		Type:   method,
+	})
+
+	if err == repositories.ErrNoRows {
+		return nil, nil
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &entities.MfaMethod{
+		ID:         mfaMethod.ID,
+		UserID:     mfaMethod.UserID,
+		Type:       mfaMethod.Type,
+		Enabled:    mfaMethod.Enabled,
+		CreatedAt:  mfaMethod.CreatedAt.Time,
+		LastUsedAt: mfaMethod.LastUsedAt,
+	}, nil
+}
+
+func (r Repository) DeleteMfaTotpCode(ctx context.Context, appMfaCodeID uuid.UUID) error {
+	err := r.Store.DeleteMfaTotpCode(ctx, appMfaCodeID)
 
 	return err
 }
 
-func (r Repository) AddSessionCode(ctx context.Context, sessionCode *entities.SessionCode) error {
-	err := r.Store.AddSessionCode(ctx, pgstore.AddSessionCodeParams{
+func (r Repository) AddAuthorizationSession(ctx context.Context, sessionCode *entities.SessionCode) error {
+	err := r.Store.AddAuthorizationSession(ctx, pgstore.AddAuthorizationSessionParams{
 		ID:        sessionCode.ID,
 		UserID:    sessionCode.UserID,
 		Token:     sessionCode.Token,
@@ -40,9 +65,9 @@ func (r Repository) AddSessionCode(ctx context.Context, sessionCode *entities.Se
 	return err
 }
 
-func (r Repository) GetAppMfaCodeByID(ctx context.Context, id uuid.UUID) (*entities.AppMfaCode, error) {
+func (r Repository) GetMfaTotpCodeByID(ctx context.Context, id uuid.UUID) (*entities.MfaTotpCode, error) {
 
-	emailConfirmation, err := r.Store.GetAppMfaCodeByID(ctx, id)
+	emailConfirmation, err := r.Store.GetMfaTotpCodeByID(ctx, id)
 
 	if err == repositories.ErrNoRows {
 		return nil, nil
@@ -52,12 +77,11 @@ func (r Repository) GetAppMfaCodeByID(ctx context.Context, id uuid.UUID) (*entit
 		return nil, err
 	}
 
-	return &entities.AppMfaCode{
-		ID:        emailConfirmation.ID,
-		UserID:    emailConfirmation.UserID,
-		Email:     emailConfirmation.Email,
-		CreatedAt: emailConfirmation.CreatedAt.Time,
-		ExpiresAt: emailConfirmation.ExpiresAt.Time,
+	return &entities.MfaTotpCode{
+		ID:          emailConfirmation.ID,
+		MfaMethodID: emailConfirmation.MfaMethodID,
+		Secret:      emailConfirmation.Secret,
+		CreatedAt:   emailConfirmation.CreatedAt.Time,
 	}, nil
 }
 
@@ -72,17 +96,15 @@ func (r Repository) GetUserByEmail(ctx context.Context, email string, applicatio
 	}
 
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		TwoFactorSecret:     user.TwoFactorSecret,
+		ID:                 user.ID,
+		Email:              user.Email,
+		PasswordHash:       user.PasswordHash,
+		CreatedAt:          user.CreatedAt.Time,
+		UpdatedAt:          user.UpdatedAt,
+		IsActive:           user.IsActive,
+		IsEmailConfirmed:   user.IsEmailConfirmed,
+		ApplicationID:      user.ApplicationID,
+		ShouldChangePass:   user.ShouldChangePass,
+		Preferred2FAMethod: user.Preferred2faMethod,
 	}, nil
 }

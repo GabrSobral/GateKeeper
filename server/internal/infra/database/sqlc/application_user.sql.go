@@ -24,10 +24,8 @@ INSERT INTO
         updated_at,
         is_active,
         is_email_confirmed,
-        is_mfa_auth_app_enabled,
-        is_mfa_email_enabled,
-        two_factor_secret,
-        should_change_pass
+        should_change_pass,
+        preferred_2fa_method
     )
 VALUES
     (
@@ -40,25 +38,21 @@ VALUES
         $7,
         $8,
         $9,
-        $10,
-        $11,
-        $12
+        $10
     )
 `
 
 type AddUserParams struct {
-	ID                  uuid.UUID        `db:"id"`
-	Email               string           `db:"email"`
-	PasswordHash        *string          `db:"password_hash"`
-	ApplicationID       uuid.UUID        `db:"application_id"`
-	CreatedAt           pgtype.Timestamp `db:"created_at"`
-	UpdatedAt           *time.Time       `db:"updated_at"`
-	IsActive            bool             `db:"is_active"`
-	IsEmailConfirmed    bool             `db:"is_email_confirmed"`
-	IsMfaAuthAppEnabled bool             `db:"is_mfa_auth_app_enabled"`
-	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
-	TwoFactorSecret     *string          `db:"two_factor_secret"`
-	ShouldChangePass    bool             `db:"should_change_pass"`
+	ID                 uuid.UUID        `db:"id"`
+	Email              string           `db:"email"`
+	PasswordHash       *string          `db:"password_hash"`
+	ApplicationID      uuid.UUID        `db:"application_id"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
+	IsActive           bool             `db:"is_active"`
+	IsEmailConfirmed   bool             `db:"is_email_confirmed"`
+	ShouldChangePass   bool             `db:"should_change_pass"`
+	Preferred2faMethod *string          `db:"preferred_2fa_method"`
 }
 
 // ----------------------------------COMMANDS--------------------------------------
@@ -73,10 +67,8 @@ func (q *Queries) AddUser(ctx context.Context, arg AddUserParams) error {
 		arg.UpdatedAt,
 		arg.IsActive,
 		arg.IsEmailConfirmed,
-		arg.IsMfaAuthAppEnabled,
-		arg.IsMfaEmailEnabled,
-		arg.TwoFactorSecret,
 		arg.ShouldChangePass,
+		arg.Preferred2faMethod,
 	)
 	return err
 }
@@ -109,10 +101,7 @@ SELECT
     updated_at,
     is_active,
     is_email_confirmed,
-    is_mfa_auth_app_enabled,
-    is_mfa_email_enabled,
     should_change_pass,
-    two_factor_secret,
     preferred_2fa_method
 FROM
     "application_user"
@@ -127,19 +116,16 @@ type GetUserByEmailParams struct {
 }
 
 type GetUserByEmailRow struct {
-	ID                  uuid.UUID        `db:"id"`
-	Email               string           `db:"email"`
-	ApplicationID       uuid.UUID        `db:"application_id"`
-	PasswordHash        *string          `db:"password_hash"`
-	CreatedAt           pgtype.Timestamp `db:"created_at"`
-	UpdatedAt           *time.Time       `db:"updated_at"`
-	IsActive            bool             `db:"is_active"`
-	IsEmailConfirmed    bool             `db:"is_email_confirmed"`
-	IsMfaAuthAppEnabled bool             `db:"is_mfa_auth_app_enabled"`
-	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
-	ShouldChangePass    bool             `db:"should_change_pass"`
-	TwoFactorSecret     *string          `db:"two_factor_secret"`
-	Preferred2faMethod  pgtype.Int2      `db:"preferred_2fa_method"`
+	ID                 uuid.UUID        `db:"id"`
+	Email              string           `db:"email"`
+	ApplicationID      uuid.UUID        `db:"application_id"`
+	PasswordHash       *string          `db:"password_hash"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
+	IsActive           bool             `db:"is_active"`
+	IsEmailConfirmed   bool             `db:"is_email_confirmed"`
+	ShouldChangePass   bool             `db:"should_change_pass"`
+	Preferred2faMethod *string          `db:"preferred_2fa_method"`
 }
 
 // Get user by email
@@ -155,10 +141,7 @@ func (q *Queries) GetUserByEmail(ctx context.Context, arg GetUserByEmailParams) 
 		&i.UpdatedAt,
 		&i.IsActive,
 		&i.IsEmailConfirmed,
-		&i.IsMfaAuthAppEnabled,
-		&i.IsMfaEmailEnabled,
 		&i.ShouldChangePass,
-		&i.TwoFactorSecret,
 		&i.Preferred2faMethod,
 	)
 	return i, err
@@ -174,10 +157,7 @@ SELECT
     updated_at,
     is_active,
     is_email_confirmed,
-    is_mfa_auth_app_enabled,
-    is_mfa_email_enabled,
     should_change_pass,
-    two_factor_secret,
     preferred_2fa_method
 FROM
     "application_user"
@@ -186,19 +166,16 @@ WHERE
 `
 
 type GetUserByIdRow struct {
-	ID                  uuid.UUID        `db:"id"`
-	Email               string           `db:"email"`
-	ApplicationID       uuid.UUID        `db:"application_id"`
-	PasswordHash        *string          `db:"password_hash"`
-	CreatedAt           pgtype.Timestamp `db:"created_at"`
-	UpdatedAt           *time.Time       `db:"updated_at"`
-	IsActive            bool             `db:"is_active"`
-	IsEmailConfirmed    bool             `db:"is_email_confirmed"`
-	IsMfaAuthAppEnabled bool             `db:"is_mfa_auth_app_enabled"`
-	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
-	ShouldChangePass    bool             `db:"should_change_pass"`
-	TwoFactorSecret     *string          `db:"two_factor_secret"`
-	Preferred2faMethod  pgtype.Int2      `db:"preferred_2fa_method"`
+	ID                 uuid.UUID        `db:"id"`
+	Email              string           `db:"email"`
+	ApplicationID      uuid.UUID        `db:"application_id"`
+	PasswordHash       *string          `db:"password_hash"`
+	CreatedAt          pgtype.Timestamp `db:"created_at"`
+	UpdatedAt          *time.Time       `db:"updated_at"`
+	IsActive           bool             `db:"is_active"`
+	IsEmailConfirmed   bool             `db:"is_email_confirmed"`
+	ShouldChangePass   bool             `db:"should_change_pass"`
+	Preferred2faMethod *string          `db:"preferred_2fa_method"`
 }
 
 // ----------------------------------QUERIES--------------------------------------
@@ -215,10 +192,7 @@ func (q *Queries) GetUserById(ctx context.Context, id uuid.UUID) (GetUserByIdRow
 		&i.UpdatedAt,
 		&i.IsActive,
 		&i.IsEmailConfirmed,
-		&i.IsMfaAuthAppEnabled,
-		&i.IsMfaEmailEnabled,
 		&i.ShouldChangePass,
-		&i.TwoFactorSecret,
 		&i.Preferred2faMethod,
 	)
 	return i, err
@@ -234,8 +208,6 @@ SELECT
     au.updated_at,
     au.is_active,
     au.is_email_confirmed,
-    au.is_mfa_auth_app_enabled,
-    au.is_mfa_email_enabled,
     COALESCE(r.roles, '[]' :: jsonb) AS roles,
     COUNT(*) OVER () AS total_users
 FROM
@@ -274,18 +246,16 @@ type GetUsersByApplicationIDParams struct {
 }
 
 type GetUsersByApplicationIDRow struct {
-	ID                  uuid.UUID        `db:"id"`
-	Email               string           `db:"email"`
-	ApplicationID       uuid.UUID        `db:"application_id"`
-	DisplayName         *string          `db:"display_name"`
-	CreatedAt           pgtype.Timestamp `db:"created_at"`
-	UpdatedAt           *time.Time       `db:"updated_at"`
-	IsActive            bool             `db:"is_active"`
-	IsEmailConfirmed    bool             `db:"is_email_confirmed"`
-	IsMfaAuthAppEnabled bool             `db:"is_mfa_auth_app_enabled"`
-	IsMfaEmailEnabled   bool             `db:"is_mfa_email_enabled"`
-	Roles               []byte           `db:"roles"`
-	TotalUsers          int64            `db:"total_users"`
+	ID               uuid.UUID        `db:"id"`
+	Email            string           `db:"email"`
+	ApplicationID    uuid.UUID        `db:"application_id"`
+	DisplayName      *string          `db:"display_name"`
+	CreatedAt        pgtype.Timestamp `db:"created_at"`
+	UpdatedAt        *time.Time       `db:"updated_at"`
+	IsActive         bool             `db:"is_active"`
+	IsEmailConfirmed bool             `db:"is_email_confirmed"`
+	Roles            []byte           `db:"roles"`
+	TotalUsers       int64            `db:"total_users"`
 }
 
 // Get users by application id paged, and ordered by created_at, that includes the application roles
@@ -307,8 +277,6 @@ func (q *Queries) GetUsersByApplicationID(ctx context.Context, arg GetUsersByApp
 			&i.UpdatedAt,
 			&i.IsActive,
 			&i.IsEmailConfirmed,
-			&i.IsMfaAuthAppEnabled,
-			&i.IsMfaEmailEnabled,
 			&i.Roles,
 			&i.TotalUsers,
 		); err != nil {
@@ -377,27 +345,21 @@ SET
     updated_at = $3,
     is_active = $4,
     is_email_confirmed = $5,
-    is_mfa_auth_app_enabled = $6,
-    is_mfa_email_enabled = $7,
-    two_factor_secret = $8,
-    should_change_pass = $9,
-    preferred_2fa_method = $10
+    should_change_pass = $6,
+    preferred_2fa_method = $7
 WHERE
-    id = $11
+    id = $8
 `
 
 type UpdateUserParams struct {
-	Email               string      `db:"email"`
-	PasswordHash        *string     `db:"password_hash"`
-	UpdatedAt           *time.Time  `db:"updated_at"`
-	IsActive            bool        `db:"is_active"`
-	IsEmailConfirmed    bool        `db:"is_email_confirmed"`
-	IsMfaAuthAppEnabled bool        `db:"is_mfa_auth_app_enabled"`
-	IsMfaEmailEnabled   bool        `db:"is_mfa_email_enabled"`
-	TwoFactorSecret     *string     `db:"two_factor_secret"`
-	ShouldChangePass    bool        `db:"should_change_pass"`
-	Preferred2faMethod  pgtype.Int2 `db:"preferred_2fa_method"`
-	ID                  uuid.UUID   `db:"id"`
+	Email              string     `db:"email"`
+	PasswordHash       *string    `db:"password_hash"`
+	UpdatedAt          *time.Time `db:"updated_at"`
+	IsActive           bool       `db:"is_active"`
+	IsEmailConfirmed   bool       `db:"is_email_confirmed"`
+	ShouldChangePass   bool       `db:"should_change_pass"`
+	Preferred2faMethod *string    `db:"preferred_2fa_method"`
+	ID                 uuid.UUID  `db:"id"`
 }
 
 // Update user
@@ -408,9 +370,6 @@ func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) error {
 		arg.UpdatedAt,
 		arg.IsActive,
 		arg.IsEmailConfirmed,
-		arg.IsMfaAuthAppEnabled,
-		arg.IsMfaEmailEnabled,
-		arg.TwoFactorSecret,
 		arg.ShouldChangePass,
 		arg.Preferred2faMethod,
 		arg.ID,

@@ -6,7 +6,9 @@ CREATE TABLE IF NOT EXISTS user_profile (
     last_name VARCHAR(255) NOT NULL,
     phone_number VARCHAR(255) NULL,
     address VARCHAR(255) NULL,
-    photo_url VARCHAR(255) NULL
+    photo_url VARCHAR(255) NULL,
+    /* user_profile -- user = fk_user_profile_user */
+    CONSTRAINT fk_user_profile_user FOREIGN KEY (user_id) REFERENCES "application_user" (id) ON DELETE CASCADE
 );
 
 ---- create above / drop below ----

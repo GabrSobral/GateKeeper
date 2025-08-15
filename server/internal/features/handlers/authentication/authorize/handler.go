@@ -47,7 +47,7 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		return nil, &errors.ErrUserShouldChangePassword
 	}
 
-	sessionCode, err := s.repository.GetSessionCodeByToken(ctx, user.ID, command.SessionCode)
+	sessionCode, err := s.repository.GetAuthorizationSesson(ctx, user.ID, command.SessionCode)
 
 	if err != nil {
 		return nil, err
@@ -61,27 +61,23 @@ func (s *Handler) Handler(ctx context.Context, command Command) (*Response, erro
 		return nil, &errors.ErrSessionCodeExpired
 	}
 
-	if user.Preferred2FAMethod != nil && *user.Preferred2FAMethod == entities.MFAApp {
+	if user.Preferred2FAMethod != nil && *user.Preferred2FAMethod == entities.MfaMethodTotp {
 		if command.MfaID == nil {
 			return nil, &errors.ErrMfaCodeRequired
 		}
 
-		appMfaCode, err := s.repository.GetAppMfaCodeByID(ctx, *command.MfaID)
+		mfaTotpCode, err := s.repository.GetMfaTotpCodeByID(ctx, *command.MfaID)
 
 		if err != nil {
 			return nil, err
 		}
 
-		if appMfaCode == nil {
+		if mfaTotpCode == nil {
 			return nil, &errors.ErrMfaCodeNotFound
 		}
 
-		if appMfaCode.ExpiresAt.Before(time.Now().UTC()) {
-			return nil, &errors.ErrMfaCodeExpired
-		}
-
 		// Delete the MFA app code after successful authorization
-		if err := s.repository.DeleteMfaAppCodeByID(ctx, user.ID); err != nil {
+		if err := s.repository.DeleteMfaTotpCodeByID(ctx, user.ID); err != nil {
 			return nil, err
 		}
 	}

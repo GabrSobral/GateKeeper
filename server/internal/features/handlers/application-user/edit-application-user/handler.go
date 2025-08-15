@@ -53,13 +53,19 @@ func (s *Handler) Handler(ctx context.Context, request Command) (*Response, erro
 		applicationUser.ShouldChangePass = true
 	}
 
+	if request.Preferred2FAMethod != nil &&
+		*request.Preferred2FAMethod != entities.MfaMethodEmail &&
+		*request.Preferred2FAMethod != entities.MfaMethodTotp &&
+		*request.Preferred2FAMethod != entities.MfaMethodSms {
+		return nil, &errors.ErrInvalid2FAMethod
+	}
+
 	currentTime := time.Now().UTC()
 
-	applicationUser.IsMfaAuthAppEnabled = request.IsMfaAuthAppEnabled
-	applicationUser.IsMfaEmailEnabled = request.IsMfaEmailEnabled
 	applicationUser.UpdatedAt = &currentTime
 	applicationUser.IsEmailConfirmed = request.IsEmailConfirmed
 	applicationUser.IsActive = request.IsActive
+	applicationUser.Preferred2FAMethod = request.Preferred2FAMethod
 
 	applicationUserProfile := entities.NewUserProfile(
 		applicationUser.ID,

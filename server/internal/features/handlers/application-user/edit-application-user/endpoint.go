@@ -44,8 +44,6 @@ func (c *Endpoint) Http(writter http.ResponseWriter, request *http.Request) {
 		Email:                 requestBody.Email,
 		IsEmailConfirmed:      requestBody.IsEmailConfirmed,
 		TemporaryPasswordHash: requestBody.TemporaryPasswordHash,
-		IsMfaAuthAppEnabled:   requestBody.IsMfaAuthAppEnabled,
-		IsMfaEmailEnabled:     requestBody.IsMfaEmailEnabled,
 		Roles:                 requestBody.Roles,
 		IsActive:              requestBody.IsActive,
 		Preferred2FAMethod:    requestBody.Preferred2FAMethod,

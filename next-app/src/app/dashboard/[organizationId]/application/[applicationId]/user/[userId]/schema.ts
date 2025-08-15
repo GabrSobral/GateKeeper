@@ -6,9 +6,11 @@ export const formSchema = z.object({
   lastName: z.string().min(2).max(50),
   email: z.string().email(),
   isEmailConfirmed: z.boolean(),
-  hasMfaEmailEnabled: z.boolean(),
-  hasMfaAuthAppEnabled: z.boolean(),
+  preferred2FAMethod: z.enum(["totp", "email", "sms"]).nullable(),
   roles: z.array(z.string()),
   temporaryPassword: z.string(),
   isActive: z.boolean(),
+
+  isMfaEmailConfigured: z.boolean(),
+  IsMfaAuthAppConfigured: z.boolean(),
 });

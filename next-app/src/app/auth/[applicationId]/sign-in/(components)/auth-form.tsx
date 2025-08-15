@@ -27,7 +27,7 @@ import { authorizeApi } from "@/services/auth/authorize";
 import { ApplicationAuthData } from "@/services/auth/get-application-auth-data";
 
 import { ErrorAlert } from "@/components/error-alert";
-import { loginApi } from "@/services/auth/login";
+import { EMfaType, loginApi } from "@/services/auth/login";
 
 type Props = {
   application: ApplicationAuthData | null;
@@ -117,9 +117,20 @@ export function AuthForm({ application }: Props) {
       urlParams.append("user_id", loginData.userId);
     }
 
-    if (loginData.mfaEmailRequired) {
+    if (loginData.mfaType == EMfaType.MfaEmail) {
       router.push(
-        `/auth/${applicationId}/one-time-password?${urlParams.toString()}`
+        `/auth/${applicationId}/mfa-mail?${urlParams.toString()}${
+          loginData.mfaId ? `&mfa_id=${loginData.mfaId}` : ""
+        }`
+      );
+      return;
+    }
+
+    if (loginData.mfaType == EMfaType.MfaApp) {
+      router.push(
+        `/auth/${applicationId}/mfa-app?${urlParams.toString()}${
+          loginData.mfaId ? `&mfa_id=${loginData.mfaId}` : ""
+        }`
       );
       return;
     }
@@ -128,7 +139,9 @@ export function AuthForm({ application }: Props) {
       urlParams.append("session_code", loginData.sessionCode);
 
       router.push(
-        `/auth/${applicationId}/update-password?${urlParams.toString()}`
+        `/auth/${applicationId}/update-password?${urlParams.toString()}${
+          loginData.mfaId ? `&mfa_id=${loginData.mfaId}` : ""
+        }`
       );
       return;
     }
@@ -150,6 +163,7 @@ export function AuthForm({ application }: Props) {
       codeChallengeMethod,
       codeChallenge,
       state,
+      mfaId: loginData.mfaId,
     });
 
     if (authorizeErr) {

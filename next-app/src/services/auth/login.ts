@@ -13,9 +13,14 @@ type Request = {
   codeChallenge: string;
 };
 
+export enum EMfaType {
+  MfaApp = "totp",
+  MfaEmail = "email",
+}
+
 type Response = {
-  mfaEmailRequired: boolean;
-  mfaAuthAppRequired: boolean;
+  mfaType: EMfaType;
+  mfaId?: string;
   message: string;
   sessionCode: string;
   userId: string;

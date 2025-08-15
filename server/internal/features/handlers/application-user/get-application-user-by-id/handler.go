@@ -50,18 +50,43 @@ func (s *Handler) Handler(ctx context.Context, query Query) (*Response, error) {
 		})
 	}
 
+	mfaMethods, err := s.repository.GetUserMfaMethods(ctx, user.ID)
+
+	if err != nil {
+		return nil, nil
+	}
+
+	isMfaEmailConfigured := false
+
+	for _, method := range mfaMethods {
+		if method.Type == "email" && method.Enabled {
+			isMfaEmailConfigured = true
+			break
+		}
+	}
+
+	isMfaAuthAppConfigured := false
+
+	for _, method := range mfaMethods {
+		if method.Type == "auth_app" && method.Enabled {
+			isMfaAuthAppConfigured = true
+			break
+		}
+	}
+
 	return &Response{
-		ID:                  user.ID,
-		Email:               user.Email,
-		IsActive:            user.IsActive,
-		DisplayName:         userProfile.DisplayName,
-		FirstName:           userProfile.FirstName,
-		Lastname:            userProfile.LastName,
-		Address:             userProfile.Address,
-		PhotoURL:            userProfile.PhotoURL,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		IsEmailVerified:     user.IsEmailConfirmed,
-		Badges:              badgesResponse,
+		ID:                     user.ID,
+		Email:                  user.Email,
+		IsActive:               user.IsActive,
+		DisplayName:            userProfile.DisplayName,
+		FirstName:              userProfile.FirstName,
+		Lastname:               userProfile.LastName,
+		Address:                userProfile.Address,
+		PhotoURL:               userProfile.PhotoURL,
+		IsEmailVerified:        user.IsEmailConfirmed,
+		Preferred2FAMethod:     user.Preferred2FAMethod,
+		Badges:                 badgesResponse,
+		IsMfaEmailConfigured:   isMfaEmailConfigured,
+		IsMfaAuthAppConfigured: isMfaAuthAppConfigured,
 	}, nil
 }

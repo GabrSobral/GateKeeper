@@ -12,7 +12,9 @@ CREATE TABLE IF NOT EXISTS "application" (
     created_at TIMESTAMP NOT NULL,
     updated_at TIMESTAMP NULL,
     can_self_sign_up BOOLEAN NOT NULL DEFAULT FALSE,
-    can_self_forgot_pass BOOLEAN NOT NULL DEFAULT FALSE
+    can_self_forgot_pass BOOLEAN NOT NULL DEFAULT FALSE,
+    /* application >- organization = fk_organization_application */
+    CONSTRAINT fk_organization_application FOREIGN KEY (organization_id) REFERENCES "organization" (id) ON DELETE CASCADE
 );
 
 ---- create above / drop below ----

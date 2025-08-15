@@ -100,18 +100,15 @@ func (r Repository) IsUserExistsByEmail(ctx context.Context, email string, appli
 
 func (r Repository) AddUser(ctx context.Context, newUser *entities.ApplicationUser) error {
 	err := r.Store.AddUser(ctx, pgstore.AddUserParams{
-		ID:                  newUser.ID,
-		Email:               newUser.Email,
-		ApplicationID:       newUser.ApplicationID,
-		ShouldChangePass:    newUser.ShouldChangePass,
-		PasswordHash:        newUser.PasswordHash,
-		CreatedAt:           pgtype.Timestamp{Time: newUser.CreatedAt, Valid: true},
-		UpdatedAt:           newUser.UpdatedAt,
-		IsActive:            newUser.IsActive,
-		IsEmailConfirmed:    newUser.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: newUser.IsMfaAuthAppEnabled,
-		IsMfaEmailEnabled:   newUser.IsMfaEmailEnabled,
-		TwoFactorSecret:     newUser.TwoFactorSecret,
+		ID:               newUser.ID,
+		Email:            newUser.Email,
+		ApplicationID:    newUser.ApplicationID,
+		ShouldChangePass: newUser.ShouldChangePass,
+		PasswordHash:     newUser.PasswordHash,
+		CreatedAt:        pgtype.Timestamp{Time: newUser.CreatedAt, Valid: true},
+		UpdatedAt:        newUser.UpdatedAt,
+		IsActive:         newUser.IsActive,
+		IsEmailConfirmed: newUser.IsEmailConfirmed,
 	})
 
 	return err

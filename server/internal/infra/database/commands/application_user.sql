@@ -11,10 +11,8 @@ INSERT INTO
         updated_at,
         is_active,
         is_email_confirmed,
-        is_mfa_auth_app_enabled,
-        is_mfa_email_enabled,
-        two_factor_secret,
-        should_change_pass
+        should_change_pass,
+        preferred_2fa_method
     )
 VALUES
     (
@@ -26,10 +24,8 @@ VALUES
         sqlc.narg('updated_at'),
         sqlc.arg('is_active'),
         sqlc.arg('is_email_confirmed'),
-        sqlc.arg('is_mfa_auth_app_enabled'),
-        sqlc.arg('is_mfa_email_enabled'),
-        sqlc.narg('two_factor_secret'),
-        sqlc.arg('should_change_pass')
+        sqlc.arg('should_change_pass'),
+        sqlc.arg('preferred_2fa_method')
     );
 
 -- name: UpdateUser :exec
@@ -42,9 +38,6 @@ SET
     updated_at = sqlc.arg('updated_at'),
     is_active = sqlc.arg('is_active'),
     is_email_confirmed = sqlc.arg('is_email_confirmed'),
-    is_mfa_auth_app_enabled = sqlc.arg('is_mfa_auth_app_enabled'),
-    is_mfa_email_enabled = sqlc.arg('is_mfa_email_enabled'),
-    two_factor_secret = sqlc.narg('two_factor_secret'),
     should_change_pass = sqlc.arg('should_change_pass'),
     preferred_2fa_method = sqlc.arg('preferred_2fa_method')
 WHERE
@@ -69,10 +62,7 @@ SELECT
     updated_at,
     is_active,
     is_email_confirmed,
-    is_mfa_auth_app_enabled,
-    is_mfa_email_enabled,
     should_change_pass,
-    two_factor_secret,
     preferred_2fa_method
 FROM
     "application_user"
@@ -90,10 +80,7 @@ SELECT
     updated_at,
     is_active,
     is_email_confirmed,
-    is_mfa_auth_app_enabled,
-    is_mfa_email_enabled,
     should_change_pass,
-    two_factor_secret,
     preferred_2fa_method
 FROM
     "application_user"
@@ -137,8 +124,6 @@ SELECT
     au.updated_at,
     au.is_active,
     au.is_email_confirmed,
-    au.is_mfa_auth_app_enabled,
-    au.is_mfa_email_enabled,
     COALESCE(r.roles, '[]' :: jsonb) AS roles,
     COUNT(*) OVER () AS total_users
 FROM

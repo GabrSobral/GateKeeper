@@ -13,11 +13,9 @@ type Command struct {
 	Email                 string
 	IsEmailConfirmed      bool
 	TemporaryPasswordHash *string
-	IsMfaAuthAppEnabled   bool
-	IsMfaEmailEnabled     bool
 	Roles                 []uuid.UUID
 	IsActive              bool
-	Preferred2FAMethod    *uint8
+	Preferred2FAMethod    *string
 }
 
 type RequestBody struct {
@@ -27,9 +25,7 @@ type RequestBody struct {
 	Email                 string      `json:"email" validate:"required,email"`
 	IsEmailConfirmed      bool        `json:"isEmailConfirmed" validate:"boolean"`
 	TemporaryPasswordHash *string     `json:"temporaryPasswordHash"`
-	IsMfaAuthAppEnabled   bool        `json:"isMfaAuthAppEnabled" validate:"boolean"`
-	IsMfaEmailEnabled     bool        `json:"isMfaEmailEnabled" validate:"boolean"`
 	Roles                 []uuid.UUID `json:"roles" validate:"required"`
 	IsActive              bool        `json:"isActive" validate:"boolean"`
-	Preferred2FAMethod    *uint8      `json:"preferred2FAMethod" validate:"omitempty,oneof=0 1"`
+	Preferred2FAMethod    *string     `json:"preferred2FAMethod" validate:"omitempty,oneof=0 1"`
 }

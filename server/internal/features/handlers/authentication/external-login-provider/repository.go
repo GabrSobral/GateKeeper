@@ -50,18 +50,15 @@ func (r Repository) AddUserProfile(ctx context.Context, newUserProfile *entities
 
 func (r Repository) AddUser(ctx context.Context, newUser *entities.ApplicationUser) error {
 	err := r.Store.AddUser(ctx, pgstore.AddUserParams{
-		ID:                  newUser.ID,
-		Email:               newUser.Email,
-		ApplicationID:       newUser.ApplicationID,
-		ShouldChangePass:    newUser.ShouldChangePass,
-		PasswordHash:        newUser.PasswordHash,
-		CreatedAt:           pgtype.Timestamp{Time: newUser.CreatedAt, Valid: true},
-		UpdatedAt:           newUser.UpdatedAt,
-		IsActive:            newUser.IsActive,
-		IsEmailConfirmed:    newUser.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: newUser.IsMfaAuthAppEnabled,
-		IsMfaEmailEnabled:   newUser.IsMfaEmailEnabled,
-		TwoFactorSecret:     newUser.TwoFactorSecret,
+		ID:               newUser.ID,
+		Email:            newUser.Email,
+		ApplicationID:    newUser.ApplicationID,
+		ShouldChangePass: newUser.ShouldChangePass,
+		PasswordHash:     newUser.PasswordHash,
+		CreatedAt:        pgtype.Timestamp{Time: newUser.CreatedAt, Valid: true},
+		UpdatedAt:        newUser.UpdatedAt,
+		IsActive:         newUser.IsActive,
+		IsEmailConfirmed: newUser.IsEmailConfirmed,
 	})
 
 	return err
@@ -78,18 +75,16 @@ func (r Repository) GetUserByEmail(ctx context.Context, email string, applicatio
 	}
 
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		TwoFactorSecret:     user.TwoFactorSecret,
+		ID:                 user.ID,
+		Email:              user.Email,
+		PasswordHash:       user.PasswordHash,
+		CreatedAt:          user.CreatedAt.Time,
+		UpdatedAt:          user.UpdatedAt,
+		IsActive:           user.IsActive,
+		IsEmailConfirmed:   user.IsEmailConfirmed,
+		ApplicationID:      user.ApplicationID,
+		ShouldChangePass:   user.ShouldChangePass,
+		Preferred2FAMethod: user.Preferred2faMethod,
 	}, nil
 }
 
@@ -137,17 +132,15 @@ func (r Repository) GetUserByID(ctx context.Context, id uuid.UUID) (*entities.Ap
 	}
 
 	return &entities.ApplicationUser{
-		ID:                  user.ID,
-		Email:               user.Email,
-		PasswordHash:        user.PasswordHash,
-		CreatedAt:           user.CreatedAt.Time,
-		UpdatedAt:           user.UpdatedAt,
-		IsActive:            user.IsActive,
-		IsEmailConfirmed:    user.IsEmailConfirmed,
-		IsMfaAuthAppEnabled: user.IsMfaAuthAppEnabled,
-		IsMfaEmailEnabled:   user.IsMfaEmailEnabled,
-		ApplicationID:       user.ApplicationID,
-		ShouldChangePass:    user.ShouldChangePass,
-		TwoFactorSecret:     user.TwoFactorSecret,
+		ID:                 user.ID,
+		Email:              user.Email,
+		PasswordHash:       user.PasswordHash,
+		CreatedAt:          user.CreatedAt.Time,
+		UpdatedAt:          user.UpdatedAt,
+		IsActive:           user.IsActive,
+		IsEmailConfirmed:   user.IsEmailConfirmed,
+		ApplicationID:      user.ApplicationID,
+		ShouldChangePass:   user.ShouldChangePass,
+		Preferred2FAMethod: user.Preferred2faMethod,
 	}, nil
 }
