@@ -1,4 +1,4 @@
-package removeorganization
+package editorganization
 
 import (
 	"net/http"
@@ -22,8 +22,16 @@ func (c *Endpoint) Http(writter http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 
-	var command = Command{
-		ID: organizationIdUUID,
+	var requestBody RequestBody
+
+	if err := http_router.ParseBodyToSchema(&requestBody, request); err != nil {
+		panic(err)
+	}
+
+	command := Command{
+		ID:          organizationIdUUID,
+		Name:        requestBody.Name,
+		Description: requestBody.Description,
 	}
 
 	params := repositories.Params[Command, Handler]{
@@ -32,9 +40,11 @@ func (c *Endpoint) Http(writter http.ResponseWriter, request *http.Request) {
 		Request: command,
 	}
 
-	if err := repositories.WithTransaction(request.Context(), params); err != nil {
-		panic(err)
+	errHandler := repositories.WithTransaction(request.Context(), params)
+
+	if errHandler != nil {
+		panic(errHandler)
 	}
 
-	http_router.SendJson(writter, nil, http.StatusCreated)
+	http_router.SendJson(writter, nil, http.StatusNoContent)
 }

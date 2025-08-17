@@ -9,9 +9,13 @@ export type Organization = {
   name: string;
   description: string;
   createdAt: Date;
+  updatedAt: Date | null;
 };
 
-type Response = Organization[];
+type Request = {
+  id: string;
+};
+type Response = Organization;
 
 const fetcher = (url: string, options: IServiceOptions) =>
   api
@@ -22,8 +26,15 @@ const fetcher = (url: string, options: IServiceOptions) =>
     })
     .then((res) => res.data);
 
-export function useOrganizationsSWR(options: IServiceOptions) {
-  return useSWR("/v1/organizations", (url) => fetcher(url, options), {
-    revalidateOnFocus: false,
-  });
+export function useOrganizationByIdSWR(
+  { id }: Request,
+  options: IServiceOptions
+) {
+  return useSWR(
+    id ? `/v1/organizations/${id}/` : null,
+    (url) => fetcher(url, options),
+    {
+      revalidateOnFocus: false,
+    }
+  );
 }

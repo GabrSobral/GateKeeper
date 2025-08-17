@@ -24,7 +24,9 @@ import {
 export function OrganizationList() {
   const { isMobile } = useSidebar();
   const router = useRouter();
-  const { data, isLoading } = useOrganizationsSWR({ accessToken: "asdasd" });
+  const { data, isLoading } = useOrganizationsSWR({
+    accessToken: "fake-token",
+  });
 
   useEffect(() => {
     if (data && data.length > 0) {
@@ -72,13 +74,13 @@ export function OrganizationList() {
           Organizations
         </DropdownMenuLabel>
 
-        {isLoading &&
+        {isLoading && (
           <>
             <Skeleton className="h-[28px] w-[7rem]" />
-						<Skeleton className="h-[28px] w-[5rem]" />
-						<Skeleton className="h-[28px] w-[12rem]" />
+            <Skeleton className="h-[28px] w-[5rem]" />
+            <Skeleton className="h-[28px] w-[12rem]" />
           </>
-        }
+        )}
 
         {data?.map((organization, i) => (
           <DropdownMenuItem
@@ -96,7 +98,10 @@ export function OrganizationList() {
 
         <DropdownMenuSeparator />
 
-        <DropdownMenuItem className="gap-2 p-2">
+        <DropdownMenuItem
+          className="gap-2 p-2"
+          onClick={() => router.push("/settings/organizations")}
+        >
           <div className="flex size-6 items-center justify-center rounded-md border bg-background">
             <Plus className="size-4" />
           </div>

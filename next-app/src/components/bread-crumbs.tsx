@@ -12,21 +12,26 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 type Props = {
   items: {
     name: string;
-    path: string;
+    path?: string;
   }[];
+  disableSideBar?: boolean;
 };
 
-export function Breadcrumbs({ items }: Props) {
+export function Breadcrumbs({ items, disableSideBar = false }: Props) {
   return (
     <div className="flex gap-4 items-center">
-      <SidebarTrigger />
+      {!disableSideBar && <SidebarTrigger />}
 
       <Breadcrumb>
         <BreadcrumbList>
           {items.map((item, index) => (
             <Fragment key={index}>
               <BreadcrumbItem>
-                <BreadcrumbLink href={item.path}>{item.name}</BreadcrumbLink>
+                {item?.path ? (
+                  <BreadcrumbLink href={item.path}>{item.name}</BreadcrumbLink>
+                ) : (
+                  <span>{item.name}</span>
+                )}
               </BreadcrumbItem>
 
               {index !== items.length - 1 && <BreadcrumbSeparator />}

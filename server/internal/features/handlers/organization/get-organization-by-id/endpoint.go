@@ -1,4 +1,4 @@
-package removeorganization
+package getorganizationbyid
 
 import (
 	"net/http"
@@ -22,19 +22,19 @@ func (c *Endpoint) Http(writter http.ResponseWriter, request *http.Request) {
 		panic(err)
 	}
 
-	var command = Command{
-		ID: organizationIdUUID,
-	}
+	getOrganizationByIDRequest := Query{OrganizationID: organizationIdUUID}
 
-	params := repositories.Params[Command, Handler]{
+	params := repositories.ParamsRs[Query, *Response, Handler]{
 		DbPool:  c.DbPool,
 		New:     New,
-		Request: command,
+		Request: getOrganizationByIDRequest,
 	}
 
-	if err := repositories.WithTransaction(request.Context(), params); err != nil {
+	response, err := repositories.WithTransactionRs(request.Context(), params)
+
+	if err != nil {
 		panic(err)
 	}
 
-	http_router.SendJson(writter, nil, http.StatusCreated)
+	http_router.SendJson(writter, response, 200)
 }

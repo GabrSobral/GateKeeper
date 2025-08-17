@@ -34,6 +34,8 @@ import (
 	verifyappmfa "github.com/gate-keeper/internal/features/handlers/authentication/verify-app-mfa"
 	verifyemailmfa "github.com/gate-keeper/internal/features/handlers/authentication/verify-email-mfa"
 	createorganization "github.com/gate-keeper/internal/features/handlers/organization/create-organization"
+	editorganization "github.com/gate-keeper/internal/features/handlers/organization/edit-organization"
+	getorganizationbyid "github.com/gate-keeper/internal/features/handlers/organization/get-organization-by-id"
 	listorganizations "github.com/gate-keeper/internal/features/handlers/organization/list-organizations"
 	removeorganization "github.com/gate-keeper/internal/features/handlers/organization/remove-organization"
 	http_middlewares "github.com/gate-keeper/internal/presentation/http/middlewares"
@@ -60,9 +62,11 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 	createEndpoint := createsecret.Endpoint{DbPool: pool}
 	deleteSecretEndpoint := deletesecret.Endpoint{DbPool: pool}
 
+	getOrganizationByIdEndpoint := getorganizationbyid.Endpoint{DbPool: pool}
 	createOrganizationEndpoint := createorganization.Endpoint{DbPool: pool}
 	listOrganizationsEndpoint := listorganizations.Endpoint{DbPool: pool}
 	removeOrganizationEndpoint := removeorganization.Endpoint{DbPool: pool}
+	editOrganizationEndpoint := editorganization.Endpoint{DbPool: pool}
 
 	createApplicationUserEndpoint := createapplicationuser.Endpoint{DbPool: pool}
 	updateApplicationUserEndpoint := editapplicationuser.Endpoint{DbPool: pool}
@@ -116,7 +120,6 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 		r.Route("/auth", func(r chi.Router) {
 			r.Route("/session", func(r chi.Router) {
 				r.Use(http_middlewares.JwtHandler)
-
 				r.Get("/", sessionEndpoint.Http)
 			})
 
@@ -145,7 +148,9 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 			r.Post("/", createOrganizationEndpoint.Http)
 
 			r.Route("/{organizationID}", func(r chi.Router) {
+				r.Get("/", getOrganizationByIdEndpoint.Http)
 				r.Delete("/", removeOrganizationEndpoint.Http)
+				r.Put("/", editOrganizationEndpoint.Http)
 
 				r.Route("/applications", func(r chi.Router) {
 					r.Get("/", listApplicationsEndpoint.Http)

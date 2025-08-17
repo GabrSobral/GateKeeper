@@ -2,7 +2,6 @@
 
 import { toast } from "sonner";
 import { useState } from "react";
-import { useParams } from "next/navigation";
 
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
@@ -15,53 +14,50 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-import { ApplicationUser } from ".";
-import { deleteApplicationUserApi } from "@/services/dashboard/delete-application-user";
+import { Organization } from "@/services/dashboard/use-organizations-swr";
+import { deleteOrganizationApi } from "@/services/settings/delete-organization";
 
 type Props = {
   isOpened: boolean;
   onOpenChange: (value: boolean) => void;
-  user: ApplicationUser | null;
-  removeUser: (user: ApplicationUser) => void;
+  organization: Organization | null;
+  removeOrganization: (organization: Organization) => void;
 };
 
-export function DeleteUserDialog({
+export function DeleteOrganizationDialog({
   isOpened,
   onOpenChange,
-  user,
-  removeUser,
+  organization,
+  removeOrganization,
 }: Props) {
   const [isLoading, setIsLoading] = useState(false);
-  const { organizationId, applicationId } = useParams() as {
-    organizationId: string;
-    applicationId: string;
-  };
 
   async function handler() {
-    if (!user) {
-      console.error("User is not defined");
-      toast.error("User is not defined");
+    if (!organization) {
+      console.error("Organization is not defined");
+      toast.error("Organization is not defined");
       return;
     }
 
     setIsLoading(true);
 
-    const [err] = await deleteApplicationUserApi(
-      { applicationId, organizationId, userId: user?.id },
-      { accessToken: "" }
+    const [err] = await deleteOrganizationApi(
+      { organizationId: organization.id },
+      { accessToken: "fake-token" }
     );
 
     if (err) {
       console.error(err);
-      toast.error("Failed to delete user");
+      toast.error("Failed to delete organization");
       setIsLoading(false);
       return;
     }
 
-    removeUser(user);
+    removeOrganization(organization);
 
-    // Logic here
     setIsLoading(false);
+
+    toast.success("Organization deleted successfully!");
 
     onOpenChange(false);
   }
@@ -70,11 +66,12 @@ export function DeleteUserDialog({
     <Dialog open={isOpened} onOpenChange={(value) => onOpenChange(value)}>
       <DialogContent className="sm:max-w-[450px]">
         <DialogHeader>
-          <DialogTitle>Delete User</DialogTitle>
+          <DialogTitle>Delete Organization</DialogTitle>
 
           <DialogDescription>
-            On deleting this user, it will be permanently removed from the
-            application. Are you sure?
+            On deleting this organization, it will be permanently removed and
+            all the applications created under it will also be deleted. Are you
+            sure you want to proceed?
           </DialogDescription>
         </DialogHeader>
 
