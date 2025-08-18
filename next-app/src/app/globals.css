@@ -11,6 +11,9 @@
 @theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
 }
 
 /*
@@ -30,6 +33,70 @@
     border-color: var(--color-gray-200, currentColor);
   }
 }
+
+:root[data-color="default"] {
+  --primary: hsl(0 0% 9%);
+  --primary-foreground: hsl(0 0% 98%);
+}
+:root[data-color="default"][class="dark"] {
+  --primary: hsl(0 0% 98%);
+  --primary-foreground: hsl(0 0% 9%);
+}
+
+:root[data-color="blueberry"] {
+  --primary: hsl(220 70% 65%);
+  --primary-foreground: hsl(220 20% 98%);
+}
+:root[data-color="blueberry"][class="dark"] {
+  --primary: hsl(220 70% 35%);
+  --primary-foreground: hsl(220 20% 95%);
+}
+
+:root[data-color="mint"] {
+  --primary: hsl(160 55% 60%);
+  --primary-foreground: hsl(160 30% 96%);
+}
+:root[data-color="mint"][class="dark"] {
+  --primary: hsl(160 55% 30%);
+  --primary-foreground: hsl(160 20% 96%);
+}
+
+:root[data-color="peach"] {
+  --primary: hsl(20 75% 70%);
+  --primary-foreground: hsl(20 25% 96%);
+}
+:root[data-color="peach"][class="dark"] {
+  --primary: hsl(20 75% 40%);
+  --primary-foreground: hsl(20 20% 95%);
+}
+
+:root[data-color="lavender"] {
+  --primary: hsl(265 50% 70%);
+  --primary-foreground: hsl(265 20% 98%);
+}
+:root[data-color="lavender"][class="dark"] {
+  --primary: hsl(265 50% 35%);
+  --primary-foreground: hsl(265 20% 95%);
+}
+
+:root[data-color="sunny"] {
+  --primary: hsl(45 90% 70%);
+  --primary-foreground: hsl(45 30% 15%);
+}
+:root[data-color="sunny"][class="dark"] {
+  --primary: hsl(45 90% 40%);
+  --primary-foreground: hsl(45 25% 15%);
+}
+
+:root[data-color="pink"] {
+  --primary: hsl(330 70% 75%);
+  --primary-foreground: hsl(330 25% 98%);
+}
+:root[data-color="pink"][class="dark"] {
+  --primary: hsl(330 70% 40%);
+  --primary-foreground: hsl(330 25% 95%);
+}
+
 /*
   ---break---
 */

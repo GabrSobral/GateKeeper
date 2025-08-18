@@ -1,7 +1,13 @@
+import { Metadata } from "next";
+
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumbs } from "@/components/bread-crumbs";
 
 import { OrganizationsList } from "./(components)/organizations-list";
+
+export const metadata: Metadata = {
+  title: "Organizations - GateKeeper",
+};
 
 export default function DashboardPage() {
   return (

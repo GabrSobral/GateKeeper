@@ -1,9 +1,8 @@
-import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumbs } from "@/components/bread-crumbs";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { ThemeSwitcher } from "./theme-switcher";
+import { ColorSwitcher } from "./color-switcher";
 
 export function AppearanceSection() {
   return (
@@ -38,31 +37,7 @@ export function AppearanceSection() {
           Here you can manage the theme settings of the application.
         </span>
 
-        <RadioGroup className="flex mt-3">
-          <div className="relative flex flex-col gap-4">
-            <RadioGroupItem
-              id="neutral"
-              value="neutral"
-              className="peer sr-only"
-            />
-            <Label
-              htmlFor="neutral"
-              className="relative cursor-pointer rounded-lg shadow-lg p-1 flex gap-2 transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:ring-6 peer-data-[state=checked]:ring-primary/30"
-            >
-              <div className="h-[50px] bg-gray-600 w-[50px] rounded-md" />
-            </Label>
-          </div>
-
-          <div className="relative flex flex-col gap-4">
-            <RadioGroupItem id="blue" value="blue" className="peer sr-only" />
-            <Label
-              htmlFor="blue"
-              className="relative cursor-pointer rounded-lg shadow-lg p-1 flex gap-2 transition-all peer-data-[state=checked]:border-primary peer-data-[state=checked]:ring-6 peer-data-[state=checked]:ring-primary/30"
-            >
-              <div className="h-[50px] bg-blue-600 w-[50px] rounded-md" />
-            </Label>
-          </div>
-        </RadioGroup>
+        <ColorSwitcher />
       </section>
     </main>
   );
