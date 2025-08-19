@@ -6,17 +6,24 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	OAuthProviderNameGoogle = "google"
+	OAuthProviderNameGitHub = "github"
+)
+
 type ApplicationOAuthProvider struct {
-	ID           uuid.UUID
-	AppicationID uuid.UUID
-	Name         string
-	ClientID     uuid.UUID
-	ClientSecret string
-	CreatedAt    time.Time
-	UpdatedAt    *time.Time
+	ID            uuid.UUID
+	ApplicationID uuid.UUID
+	Name          string
+	Enabled       bool
+	ClientID      string
+	ClientSecret  string
+	RedirectURI   string
+	CreatedAt     time.Time
+	UpdatedAt     *time.Time
 }
 
-func NewApplicationOAuthProvider(applicationID uuid.UUID, name string, clientID uuid.UUID, clientSecret string) *ApplicationOAuthProvider {
+func NewApplicationOAuthProvider(applicationID uuid.UUID, name string, clientID string, clientSecret string, redirectURI string, enabled bool) *ApplicationOAuthProvider {
 	newID, err := uuid.NewV7()
 
 	if err != nil {
@@ -24,12 +31,14 @@ func NewApplicationOAuthProvider(applicationID uuid.UUID, name string, clientID 
 	}
 
 	return &ApplicationOAuthProvider{
-		ID:           newID,
-		AppicationID: applicationID,
-		Name:         name,
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		CreatedAt:    time.Now(),
-		UpdatedAt:    nil,
+		ID:            newID,
+		ApplicationID: applicationID,
+		Name:          name,
+		ClientID:      clientID,
+		ClientSecret:  clientSecret,
+		RedirectURI:   redirectURI,
+		Enabled:       enabled,
+		CreatedAt:     time.Now(),
+		UpdatedAt:     nil,
 	}
 }

@@ -39,10 +39,34 @@ type IRepository interface {
 	GetUsersByApplicationID(ctx context.Context, applicationID uuid.UUID, limit, offset int) (*ApplicationUsersData, error)
 	ListSecretsFromApplication(ctx context.Context, applicationID uuid.UUID) (*[]entities.ApplicationSecret, error)
 	ListRolesFromApplication(ctx context.Context, applicationID uuid.UUID) (*[]entities.ApplicationRole, error)
+	GetApplicationOAuthProvidersByApplicationID(ctx context.Context, applicationID uuid.UUID) (*[]ApplicationProviders, error)
 }
 
 type Repository struct {
 	Store *pgstore.Queries
+}
+
+func (r Repository) GetApplicationOAuthProvidersByApplicationID(ctx context.Context, applicationID uuid.UUID) (*[]ApplicationProviders, error) {
+	providers, err := r.Store.GetApplicationOauthProvidersByApplicationID(ctx, applicationID)
+
+	if err != nil && err != repositories.ErrNoRows {
+		return nil, err
+	}
+
+	var applicationProviders []ApplicationProviders
+	for _, provider := range providers {
+		applicationProviders = append(applicationProviders, ApplicationProviders{
+			ID:           provider.ID,
+			Name:         provider.Name,
+			ClientID:     provider.ClientID,
+			ClientSecret: provider.ClientSecret,
+			RedirectURI:  provider.RedirectUri,
+			UpdatedAt:    provider.UpdatedAt,
+			IsEnabled:    provider.Enabled,
+			CreatedAt:    provider.CreatedAt.Time,
+		})
+	}
+	return &applicationProviders, nil
 }
 
 func (r Repository) GetApplicationByID(ctx context.Context, applicationID uuid.UUID) (*entities.Application, error) {

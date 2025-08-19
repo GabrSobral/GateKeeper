@@ -1,4 +1,4 @@
-package createrole
+package configureoauthprovider
 
 import (
 	"net/http"
@@ -31,20 +31,23 @@ func (c *Endpoint) Http(writter http.ResponseWriter, request *http.Request) {
 	command := Command{
 		ApplicationID: applicationIdUUID,
 		Name:          requestBody.Name,
-		Description:   requestBody.Description,
+		ClientID:      requestBody.ClientID,
+		ClientSecret:  requestBody.ClientSecret,
+		RedirectURI:   requestBody.RedirectURI,
+		Enabled:       requestBody.Enabled,
 	}
 
-	params := repositories.ParamsRs[Command, *Response, Handler]{
+	params := repositories.Params[Command, Handler]{
 		DbPool:  c.DbPool,
 		New:     New,
 		Request: command,
 	}
 
-	response, err := repositories.WithTransactionRs(request.Context(), params)
+	errHandler := repositories.WithTransaction(request.Context(), params)
 
-	if err != nil {
-		panic(err)
+	if errHandler != nil {
+		panic(errHandler)
 	}
 
-	http_router.SendJson(writter, response, http.StatusCreated)
+	http_router.SendJson(writter, nil, http.StatusCreated)
 }

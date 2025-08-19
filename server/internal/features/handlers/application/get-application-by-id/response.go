@@ -35,9 +35,10 @@ type ApplicationSecrets struct {
 type ApplicationProviders struct {
 	ID           uuid.UUID  `json:"id"`
 	Name         string     `json:"name"`
-	Description  string     `json:"description"`
+	IsEnabled    bool       `json:"isEnabled"`
 	ClientID     string     `json:"clientId"`
 	ClientSecret string     `json:"clientSecret"`
+	RedirectURI  string     `json:"redirectUri"`
 	UpdatedAt    *time.Time `json:"updatedAt"`
 	CreatedAt    time.Time  `json:"createdAt"`
 }

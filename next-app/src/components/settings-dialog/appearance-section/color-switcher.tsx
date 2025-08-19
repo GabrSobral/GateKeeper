@@ -22,7 +22,6 @@ export function ColorSwitcher() {
   useEffect(() => {
     const color = getCookieValue("color-scheme") || "default";
 
-    console.log(color);
     setValue(color);
 
     document.documentElement.setAttribute("data-color", color);

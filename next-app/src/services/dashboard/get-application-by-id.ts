@@ -44,7 +44,7 @@ export interface IApplication {
   oauthProviders: {
     id: string;
     name: string;
-    description: string;
+    redirectUri: string;
     clientId: string;
     clientSecret: string;
     isEnabled: boolean;

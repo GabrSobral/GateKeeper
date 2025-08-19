@@ -3,6 +3,7 @@ package routing
 import (
 	"net/http"
 
+	configureoauthprovider "github.com/gate-keeper/internal/features/handlers/application-oauth-provider/configure-oauth-provider"
 	createrole "github.com/gate-keeper/internal/features/handlers/application-role/create-role"
 	deleterole "github.com/gate-keeper/internal/features/handlers/application-role/delete-role"
 	listroles "github.com/gate-keeper/internal/features/handlers/application-role/list-roles"
@@ -54,6 +55,8 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 	createApplicationEndpoint := createapplication.Endpoint{DbPool: pool}
 	getApplicationByIdEndpoint := getapplicationbyid.Endpoint{DbPool: pool}
 	getApplicationAuthDataEndpoint := getapplicationauthdata.Endpoint{DbPool: pool}
+
+	configureOauthProviderEndPoint := configureoauthprovider.Endpoint{DbPool: pool}
 
 	listRolesEndpoint := listroles.Endpoint{DbPool: pool}
 	createRoleEndpoint := createrole.Endpoint{DbPool: pool}
@@ -175,6 +178,10 @@ func SetHttpRoutes(pool *pgxpool.Pool) http.Handler {
 					r.Route("/{applicationID}/secrets", func(r chi.Router) {
 						r.Post("/", createEndpoint.Http)
 						r.Delete("/{secretID}", deleteSecretEndpoint.Http)
+					})
+
+					r.Route("/{applicationID}/oauth-provider", func(r chi.Router) {
+						r.Put("/", configureOauthProviderEndPoint.Http)
 					})
 				})
 			})

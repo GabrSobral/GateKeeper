@@ -55,8 +55,10 @@ type ApplicationOauthProvider struct {
 	Name          string           `db:"name"`
 	ClientID      string           `db:"client_id"`
 	ClientSecret  string           `db:"client_secret"`
+	RedirectUri   string           `db:"redirect_uri"`
 	CreatedAt     pgtype.Timestamp `db:"created_at"`
 	UpdatedAt     *time.Time       `db:"updated_at"`
+	Enabled       bool             `db:"enabled"`
 }
 
 type ApplicationRole struct {

@@ -31,6 +31,7 @@ func (s *Handler) Handler(ctx context.Context, request Query) (*Response, error)
 
 	secrets := make([]ApplicationSecrets, 0)
 	roles := make([]ApplicationRoles, 0)
+	applicationOauthProviders := make([]ApplicationProviders, 0)
 
 	applicationRolesDb, err := s.repository.ListRolesFromApplication(ctx, application.ID)
 
@@ -66,6 +67,27 @@ func (s *Handler) Handler(ctx context.Context, request Query) (*Response, error)
 		}
 	}
 
+	applicationOauthProvidersDb, err := s.repository.GetApplicationOAuthProvidersByApplicationID(ctx, application.ID)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if applicationOauthProvidersDb != nil {
+		for _, provider := range *applicationOauthProvidersDb {
+			applicationOauthProviders = append(applicationOauthProviders, ApplicationProviders{
+				ID:           provider.ID,
+				Name:         provider.Name,
+				ClientID:     provider.ClientID,
+				ClientSecret: provider.ClientSecret,
+				RedirectURI:  provider.RedirectURI,
+				UpdatedAt:    provider.UpdatedAt,
+				CreatedAt:    provider.CreatedAt,
+				IsEnabled:    provider.IsEnabled,
+			})
+		}
+	}
+
 	applicationUsersDb, err := s.repository.GetUsersByApplicationID(ctx, application.ID, 50, 0)
 
 	if err != nil {
@@ -95,6 +117,6 @@ func (s *Handler) Handler(ctx context.Context, request Query) (*Response, error)
 			TotalCount: len(roles),
 			Data:       roles,
 		},
-		OAuthProviders: make([]ApplicationProviders, 0),
+		OAuthProviders: applicationOauthProviders,
 	}, nil
 }
